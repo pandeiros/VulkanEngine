@@ -6,8 +6,17 @@
 
 #pragma once
 
+#include <vulkan/vulkan.h>
+#include <iostream>
+#include <cassert>
+
 /*
  * @file VulkanConfig.h
  */
 
 #define VULKAN_NS vulkan
+
+namespace VULKAN_NS
+{
+	void ErrorCheck(VkResult Result);
+}

@@ -32,7 +32,7 @@ namespace VULKAN_NS
 		 */
 		~Renderer();
 
-	private:
+	//private:
 		void InitInstance();
 
 		void DestroyInstance();
@@ -47,9 +47,10 @@ namespace VULKAN_NS
 
 		void DestroyDebug();
 
-		VkInstance Instance = nullptr;
-		VkPhysicalDevice GPU = nullptr;
-		VkDevice Device = nullptr;
+		VkInstance Instance = VK_NULL_HANDLE;
+		VkPhysicalDevice GPU = VK_NULL_HANDLE;
+		VkDevice Device = VK_NULL_HANDLE;
+		VkQueue Queue = VK_NULL_HANDLE;
 		VkPhysicalDeviceProperties GPUProperties = {};
 
 		uint32_t GraphicsFamilyIndex = 0;
@@ -57,7 +58,7 @@ namespace VULKAN_NS
 		std::vector<const char*> InstanceLayers;
 		std::vector<const char*> InstaceExtensions;
 
-		VkDebugReportCallbackEXT DebugReport = nullptr;
+		VkDebugReportCallbackEXT DebugReport = VK_NULL_HANDLE;
 		VkDebugReportCallbackCreateInfoEXT DebugCallbackCreateInfo = {};
 	};
 }

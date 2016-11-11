@@ -1,6 +1,6 @@
 #include "Rendering/Renderer.h"
 #include <cstdlib>
-#include <assert.h>
+#include <cassert>
 #include <iostream>
 #include <sstream>
 
@@ -36,18 +36,13 @@ void Renderer::InitInstance()
 	VkInstanceCreateInfo InstanceCreateInfo {};
 	InstanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	InstanceCreateInfo.pApplicationInfo = &ApplicationInfo;
-	InstanceCreateInfo.enabledLayerCount = InstanceLayers.size();
+	InstanceCreateInfo.enabledLayerCount = (uint32_t)InstanceLayers.size();
 	InstanceCreateInfo.ppEnabledLayerNames = InstanceLayers.data();
-	InstanceCreateInfo.enabledExtensionCount = InstaceExtensions.size();
+	InstanceCreateInfo.enabledExtensionCount = (uint32_t)InstaceExtensions.size();
 	InstanceCreateInfo.ppEnabledExtensionNames = InstaceExtensions.data();
 	InstanceCreateInfo.pNext = &DebugCallbackCreateInfo;
 
-	auto Error = vkCreateInstance(&InstanceCreateInfo, nullptr, &Instance);
-	if (Error != VK_SUCCESS)
-	{
-		assert(0 && "Vulkan ERROR: Create instance failed.");
-		std::exit(-1);
-	}
+	ErrorCheck(vkCreateInstance(&InstanceCreateInfo, nullptr, &Instance));
 }
 
 void Renderer::DestroyInstance()
@@ -110,12 +105,9 @@ void Renderer::InitDevice()
 	DeviceCreateInfo.queueCreateInfoCount = 1;
 	DeviceCreateInfo.pQueueCreateInfos = &DeviceQueueCreateInfo;
 
-	auto Error = vkCreateDevice(GPU, &DeviceCreateInfo, nullptr, &Device);
-	if (Error != VK_SUCCESS)
-	{
-		assert(0 && "Vulkan ERROR: Device creation failed.");
-		std::exit(-1);
-	}
+	ErrorCheck(vkCreateDevice(GPU, &DeviceCreateInfo, nullptr, &Device));
+
+	vkGetDeviceQueue(Device, GraphicsFamilyIndex, 0, &Queue);
 }
 
 void Renderer::DestroyDevice()
@@ -165,11 +157,11 @@ void Renderer::SetupDebug()
 	DebugCallbackCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
 	DebugCallbackCreateInfo.pfnCallback = VulkanDebugCallback;
 	DebugCallbackCreateInfo.flags =
-		VK_DEBUG_REPORT_INFORMATION_BIT_EXT |
+		//VK_DEBUG_REPORT_INFORMATION_BIT_EXT |
 		VK_DEBUG_REPORT_WARNING_BIT_EXT |
 		VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT |
 		VK_DEBUG_REPORT_ERROR_BIT_EXT |
-		VK_DEBUG_REPORT_DEBUG_BIT_EXT |
+		//VK_DEBUG_REPORT_DEBUG_BIT_EXT |
 		0;
 
 	InstanceLayers.push_back("VK_LAYER_GOOGLE_threading");
@@ -200,5 +192,5 @@ void Renderer::InitDebug()
 void Renderer::DestroyDebug()
 {
 	fvkDestroyDebugReportCallbackEXT(Instance, DebugReport, nullptr);
-	DebugReport = nullptr;
+	DebugReport = VK_NULL_HANDLE;
 }
