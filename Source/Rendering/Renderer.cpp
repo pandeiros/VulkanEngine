@@ -1,4 +1,5 @@
 #include "Rendering/Renderer.h"
+#include "Rendering/Window.h"
 #include <cstdlib>
 #include <cassert>
 #include <iostream>
@@ -6,12 +7,9 @@
 
 using namespace VULKAN_NS;
 
-#ifdef _WIN32
-#include "Windows.h"
-#endif
-
 Renderer::Renderer()
 {
+	SetupLayerExtensions();
 	SetupDebug();
 	InitInstance();
 	InitDebug();
@@ -20,9 +18,80 @@ Renderer::Renderer()
 
 Renderer::~Renderer()
 {
+	delete MainWindow;
 	DestroyDevice();
 	DestroyDebug();
 	DestroyInstance();
+}
+
+Window * Renderer::OpenWindow(uint32_t SizeX, uint32_t SizeY, std::string Name)
+{
+	MainWindow = new Window(this, SizeX, SizeY, Name);
+
+	return MainWindow;
+}
+
+bool Renderer::Run()
+{
+	if (MainWindow)
+	{
+		return MainWindow->Update();
+	}
+	return true;
+}
+
+const VkInstance VULKAN_NS::Renderer::GetInstance() const
+{
+	return Instance;
+}
+
+const VkPhysicalDevice VULKAN_NS::Renderer::GetPhysicalDevice() const
+{
+	return GPU;
+}
+
+const VkDevice VULKAN_NS::Renderer::GetDevice() const
+{
+	return Device;
+}
+
+const VkQueue Renderer::GetQueue() const
+{
+	return Queue;
+}
+
+const uint32_t Renderer::GetGraphicsFamilyIndex() const
+{
+	return GraphicsFamilyIndex;
+}
+
+const VkPhysicalDeviceProperties & Renderer::GetPhysicalDeviceProperties() const
+{
+	return GPUProperties;
+}
+
+const VkPhysicalDeviceMemoryProperties & Renderer::GetPhysicalDeviceMemoryProperties() const
+{
+	return MemoryProperties;
+}
+
+void Renderer::SetupLayerExtensions()
+{
+	uint32_t ExtensionCount = 0;
+	vkEnumerateInstanceExtensionProperties("VK_LAYER_LUNARG_swapchain", &ExtensionCount, nullptr);
+	std::vector<VkExtensionProperties> ExtensionPropertyList(ExtensionCount);
+	vkEnumerateInstanceExtensionProperties("VK_LAYER_LUNARG_swapchain", &ExtensionCount, ExtensionPropertyList.data());
+
+	std::cout << "Extensions for VK_LAYER_LUNARG_swapchain:\n";
+	for (auto & Property : ExtensionPropertyList)
+	{
+		std::cout << "  " << Property.extensionName << "\t\t | " << Property.specVersion << "\n";
+	}
+
+	InstaceExtensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
+	InstaceExtensions.push_back(VULKAN_PLATFORM_SURFACE_EXTENSION_NAME);
+
+	DeviceExtensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 }
 
 void Renderer::InitInstance()
@@ -61,6 +130,8 @@ void Renderer::InitDevice()
 
 	vkGetPhysicalDeviceProperties(GPU, &GPUProperties);
 
+	vkGetPhysicalDeviceMemoryProperties(GPU, &MemoryProperties);
+
 	uint32_t FamilyCount = 0;
 	vkGetPhysicalDeviceQueueFamilyProperties(GPU, &FamilyCount, nullptr);
 	std::vector<VkQueueFamilyProperties> FamilyPropertyList(FamilyCount);
@@ -71,7 +142,7 @@ void Renderer::InitDevice()
 	{
 		if (FamilyPropertyList[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
 		{
-			GraphicsFamilyIndex = 1;
+			GraphicsFamilyIndex = i;
 			FamilyIndexFound = true;
 		}
 	}
@@ -103,6 +174,8 @@ void Renderer::InitDevice()
 	VkDeviceCreateInfo DeviceCreateInfo {};
 	DeviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 	DeviceCreateInfo.queueCreateInfoCount = 1;
+	DeviceCreateInfo.enabledExtensionCount = (uint32_t)DeviceExtensions.size();
+	DeviceCreateInfo.ppEnabledExtensionNames = DeviceExtensions.data();
 	DeviceCreateInfo.pQueueCreateInfos = &DeviceQueueCreateInfo;
 
 	ErrorCheck(vkCreateDevice(GPU, &DeviceCreateInfo, nullptr, &Device));
@@ -114,6 +187,8 @@ void Renderer::DestroyDevice()
 {
 	vkDestroyDevice(Device, nullptr);
 }
+
+#if VULKAN_ENABLE_DEBUG
 
 VKAPI_ATTR VkBool32 VKAPI_CALL
 VulkanDebugCallback(VkDebugReportFlagsEXT MsgFlags, VkDebugReportObjectTypeEXT ObjectType, uint64_t SourceObject,
@@ -168,6 +243,7 @@ void Renderer::SetupDebug()
 	InstanceLayers.push_back("VK_LAYER_LUNARG_image");
 	InstanceLayers.push_back("VK_LAYER_LUNARG_object_tracker");
 	InstanceLayers.push_back("VK_LAYER_LUNARG_parameter_validation");
+	InstanceLayers.push_back("VK_LAYER_LUNARG_swapchain");
 
 	InstaceExtensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
 }
@@ -194,3 +270,14 @@ void Renderer::DestroyDebug()
 	fvkDestroyDebugReportCallbackEXT(Instance, DebugReport, nullptr);
 	DebugReport = VK_NULL_HANDLE;
 }
+
+#else
+
+void Renderer::SetupDebug()
+{}
+void Renderer::InitDebug()
+{}
+void Renderer::DestroyDebug()
+{}
+
+#endif // VULKAN_ENABLE_DEBUG

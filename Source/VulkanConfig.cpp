@@ -4,6 +4,7 @@ using namespace VULKAN_NS;
 
 void VULKAN_NS::ErrorCheck(VkResult Result)
 {
+#if VULKAN_ENABLE_RUNTIME_DEBUG
 	if (Result < 0)
 	{
 		switch (Result)
@@ -71,4 +72,24 @@ void VULKAN_NS::ErrorCheck(VkResult Result)
 
 		assert(0 && "Vulkan runtime error.");
 	}
+
+#endif // VULKAN_ENABLE_RUNTIME_DEBUG
+}
+
+uint32_t VULKAN_NS::GetMemoryTypeIndex(const VkPhysicalDeviceMemoryProperties * PhysicalDeviceMemoryProperties, const VkMemoryRequirements * MemoryRequirements, const VkMemoryPropertyFlags RequiredProperties)
+{
+	for (uint32_t i = 0; i < PhysicalDeviceMemoryProperties->memoryTypeCount; ++i)
+	{
+		if (MemoryRequirements->memoryTypeBits & (1 << i))
+		{
+			if ((PhysicalDeviceMemoryProperties->memoryTypes[i].propertyFlags & RequiredProperties) == RequiredProperties)
+			{
+				return i;
+			}
+		}
+	}
+
+	assert(0 && "Could not find property memory type.");
+
+	return UINT32_MAX;
 }

@@ -19,6 +19,18 @@
     <Filter Include="Source Files\Rendering">
       <UniqueIdentifier>{e9f0e859-ac95-41e3-9acd-f237ebb984e9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Platforms">
+      <UniqueIdentifier>{ab8b7a8d-027e-4ebc-862d-9996e5f25c32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Platforms\Win32">
+      <UniqueIdentifier>{2dcbb58b-91a6-4f74-a1a1-a0c8be593420}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Platforms">
+      <UniqueIdentifier>{1abd5add-639f-4234-9e91-4a5d17b5bbfb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Platforms\Win32">
+      <UniqueIdentifier>{12e94d84-e248-424b-a167-35f44b9e40b8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Source.cpp">
@@ -30,6 +42,12 @@
     <ClCompile Include="Source\VulkanConfig.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Include\Rendering\Window.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Platforms\Win32\Window_Win32.cpp">
+      <Filter>Source Files\Platforms\Win32</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\VulkanConfig.h">
@@ -37,6 +55,18 @@
     </ClInclude>
     <ClInclude Include="Include\Rendering\Renderer.h">
       <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\BuildOptions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Platform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Rendering\Window.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Platforms\Win32\Window_Win32.h">
+      <Filter>Header Files\Platforms\Win32</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
