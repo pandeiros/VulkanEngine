@@ -5,7 +5,7 @@
 #include <cassert>
 #include <string>
 
-using namespace VULKAN_NS;
+VULKAN_NS_USING;
 
 #if VK_USE_PLATFORM_WIN32_KHR
 

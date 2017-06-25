@@ -1,9 +1,9 @@
-#include "Window.h"
-#include "Renderer.h"
+#include "Rendering/Window.h"
+#include "Rendering/Renderer.h"
 #include <cassert>
 #include <array>
 
-using namespace VULKAN_NS;
+VULKAN_NS_USING;
 
 Window::Window(Renderer * Renderer, uint32_t SizeX, uint32_t SizeY, std::string Name)
 {
@@ -77,12 +77,12 @@ VkRenderPass Window::GetRenderPass()
     return RenderPass;
 }
 
-VkFramebuffer VULKAN_NS::Window::GetActiveFramebuffer()
+VkFramebuffer Window::GetActiveFramebuffer()
 {
     return Framebuffers[ActiveSwapchainImageID];
 }
 
-VkExtent2D VULKAN_NS::Window::GetSurfaceSize()
+VkExtent2D Window::GetSurfaceSize()
 {
     return { SurfaceSizeX, SurfaceSizeY };
 }

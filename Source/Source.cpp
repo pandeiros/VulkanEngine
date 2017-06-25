@@ -4,11 +4,23 @@
 #include <array>
 #include <chrono>
 
+#include "Application.h"
+
+VULKAN_NS_USING;
+
 int main()
 {
-    vulkan::Renderer R;
+    Application application;
+    application.Create("Vulkan Engine Test", 1, VK_MAKE_VERSION(1, 0, 2));
+    application.Init();
 
-    vulkan::Window* Win = R.OpenWindow(800, 600, "Vulkan Engine");
+    application.Destroy();
+
+    return 0;
+
+    Renderer R;
+
+    Window* Win = R.OpenWindow(800, 600, "Vulkan Engine");
 
     auto Device = R.GetDevice();
     auto Queue = R.GetQueue();
@@ -38,7 +50,7 @@ int main()
     CommandBufferAllocateInfo.commandBufferCount = 1;
     CommandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 
-    vulkan::ErrorCheck(vkAllocateCommandBuffers(Device, &CommandBufferAllocateInfo, &CommandBuffer));
+    ErrorCheck(vkAllocateCommandBuffers(Device, &CommandBufferAllocateInfo, &CommandBuffer));
 
     VkSemaphore RenderCompleteSemaphore;
     VkSemaphoreCreateInfo SemaphoreCreateInfo {};

@@ -5,7 +5,7 @@
 #include <iostream>
 #include <sstream>
 
-using namespace VULKAN_NS;
+VULKAN_NS_USING;
 
 Renderer::Renderer()
 {
@@ -40,17 +40,17 @@ bool Renderer::Run()
     return true;
 }
 
-const VkInstance VULKAN_NS::Renderer::GetInstance() const
+const VkInstance Renderer::GetInstance() const
 {
     return Instance;
 }
 
-const VkPhysicalDevice VULKAN_NS::Renderer::GetPhysicalDevice() const
+const VkPhysicalDevice Renderer::GetPhysicalDevice() const
 {
     return GPU;
 }
 
-const VkDevice VULKAN_NS::Renderer::GetDevice() const
+const VkDevice Renderer::GetDevice() const
 {
     return Device;
 }
@@ -188,7 +188,7 @@ void Renderer::DestroyDevice()
     vkDestroyDevice(Device, nullptr);
 }
 
-#if VULKAN_ENABLE_DEBUG
+#ifndef VULKAN_ENABLE_DEBUG
 
 VKAPI_ATTR VkBool32 VKAPI_CALL
 VulkanDebugCallback(VkDebugReportFlagsEXT MsgFlags, VkDebugReportObjectTypeEXT ObjectType, uint64_t SourceObject,

@@ -1,4 +1,4 @@
-/*
+/**
  * Vulkan Engine
  *
  * Copyright (C) 2016-2017 Pawel Kaczynski
@@ -6,77 +6,78 @@
 
 #pragma once
 
-/*
+/**
  * @file Renderer.h
  */
 
 #include <vector>
 #include "VulkanConfig.h"
 
-namespace VULKAN_NS
+VULKAN_NS_BEGIN
+
+class Window;
+
+/*
+ * @class Renderer
+ */
+class Renderer
 {
-    class Window;
-
-    /*
-     * @class Renderer
+public:
+    /**
+     * Default constructor.
      */
-    class Renderer
-    {
-    public:
-        /**
-         * Default constructor.
-         */
-        Renderer();
+    Renderer();
 
-        /**
-         * Default destructor.
-         */
-        ~Renderer();
+    /**
+     * Default destructor.
+     */
+    ~Renderer();
 
-        Window * OpenWindow(uint32_t SizeX, uint32_t SizeY, std::string Name);
-        bool Run();
+    Window * OpenWindow(uint32_t SizeX, uint32_t SizeY, std::string Name);
+    bool Run();
 
-        const VkInstance GetInstance() const;
-        const VkPhysicalDevice GetPhysicalDevice() const;
-        const VkDevice GetDevice() const;
-        const VkQueue GetQueue() const;
-        const uint32_t GetGraphicsFamilyIndex() const;
-        const VkPhysicalDeviceProperties & GetPhysicalDeviceProperties() const;
-        const VkPhysicalDeviceMemoryProperties & GetPhysicalDeviceMemoryProperties() const;
+    const VkInstance GetInstance() const;
+    const VkPhysicalDevice GetPhysicalDevice() const;
+    const VkDevice GetDevice() const;
+    const VkQueue GetQueue() const;
+    const uint32_t GetGraphicsFamilyIndex() const;
+    const VkPhysicalDeviceProperties & GetPhysicalDeviceProperties() const;
+    const VkPhysicalDeviceMemoryProperties & GetPhysicalDeviceMemoryProperties() const;
 
-    private:
-        void SetupLayerExtensions();
+private:
+    void SetupLayerExtensions();
 
-        void InitInstance();
+    void InitInstance();
 
-        void DestroyInstance();
+    void DestroyInstance();
 
-        void InitDevice();
+    void InitDevice();
 
-        void DestroyDevice();
+    void DestroyDevice();
 
-        void SetupDebug();
+    void SetupDebug();
 
-        void InitDebug();
+    void InitDebug();
 
-        void DestroyDebug();
+    void DestroyDebug();
 
-        VkInstance Instance = VK_NULL_HANDLE;
-        VkPhysicalDevice GPU = VK_NULL_HANDLE;
-        VkDevice Device = VK_NULL_HANDLE;
-        VkQueue Queue = VK_NULL_HANDLE;
-        VkPhysicalDeviceProperties GPUProperties = {};
-        VkPhysicalDeviceMemoryProperties MemoryProperties = {};
+    VkInstance Instance = VK_NULL_HANDLE;
+    VkPhysicalDevice GPU = VK_NULL_HANDLE;
+    VkDevice Device = VK_NULL_HANDLE;
+    VkQueue Queue = VK_NULL_HANDLE;
+    VkPhysicalDeviceProperties GPUProperties = {};
+    VkPhysicalDeviceMemoryProperties MemoryProperties = {};
 
-        Window * MainWindow = nullptr;
+    Window * MainWindow = nullptr;
 
-        uint32_t GraphicsFamilyIndex = 0;
+    uint32_t GraphicsFamilyIndex = 0;
 
-        std::vector<const char*> InstanceLayers;
-        std::vector<const char*> InstaceExtensions;
-        std::vector<const char*> DeviceExtensions;
+    std::vector<const char*> InstanceLayers;
+    std::vector<const char*> InstaceExtensions;
+    std::vector<const char*> DeviceExtensions;
 
-        VkDebugReportCallbackEXT DebugReport = VK_NULL_HANDLE;
-        VkDebugReportCallbackCreateInfoEXT DebugCallbackCreateInfo = {};
-    };
-}
+    VkDebugReportCallbackEXT DebugReport = VK_NULL_HANDLE;
+    VkDebugReportCallbackCreateInfoEXT DebugCallbackCreateInfo = {};
+};
+
+VULKAN_NS_END

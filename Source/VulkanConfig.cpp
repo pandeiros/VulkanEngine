@@ -1,8 +1,8 @@
 #include "VulkanConfig.h"
 
-using namespace VULKAN_NS;
+VULKAN_NS_USING;
 
-void VULKAN_NS::ErrorCheck(VkResult Result)
+void ErrorCheck(VkResult Result)
 {
 #if VULKAN_ENABLE_RUNTIME_DEBUG
 	if (Result < 0)
@@ -70,13 +70,13 @@ void VULKAN_NS::ErrorCheck(VkResult Result)
 				break;
 		}
 
-		assert(0 && "Vulkan runtime error.");
+		//assert(0 && "Vulkan runtime error.");
 	}
 
 #endif // VULKAN_ENABLE_RUNTIME_DEBUG
 }
 
-uint32_t VULKAN_NS::GetMemoryTypeIndex(const VkPhysicalDeviceMemoryProperties * PhysicalDeviceMemoryProperties, const VkMemoryRequirements * MemoryRequirements, const VkMemoryPropertyFlags RequiredProperties)
+uint32_t GetMemoryTypeIndex(const VkPhysicalDeviceMemoryProperties * PhysicalDeviceMemoryProperties, const VkMemoryRequirements * MemoryRequirements, const VkMemoryPropertyFlags RequiredProperties)
 {
 	for (uint32_t i = 0; i < PhysicalDeviceMemoryProperties->memoryTypeCount; ++i)
 	{
@@ -89,7 +89,7 @@ uint32_t VULKAN_NS::GetMemoryTypeIndex(const VkPhysicalDeviceMemoryProperties * 
 		}
 	}
 
-	assert(0 && "Could not find property memory type.");
+	//assert(0 && "Could not find property memory type.");
 
 	return UINT32_MAX;
 }
