@@ -14,8 +14,6 @@ void Device::Create(PhysicalDevice& physicalDevice, std::vector<const char*> dev
 
     float priorityQueue[]{ 1.f };
 
-    //queue.Setup(physicalDevice.GetGraphicsFamilyIndex(), 1, priorityQueue);
-
     deviceQueueCreateInfo = {
         VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
         nullptr,
@@ -48,6 +46,21 @@ void Device::Destroy()
 {
     vkDestroyDevice(device, nullptr);
     device = VK_NULL_HANDLE;
+}
+
+VkDevice Device::GetVkDevice()
+{
+    return device;
+}
+
+Queue& Device::GetQueueRef()
+{
+    return queue;
+}
+
+PhysicalDevice* Device::GetPhysicalDevice()
+{
+    return cachedPhysicalDevice;
 }
 
 void Device::FlushMappedMemoryRanges(std::vector<VkMappedMemoryRange> memoryRanges)
@@ -114,4 +127,9 @@ void Device::BindBufferMemory(VkBuffer buffer, VkDeviceMemory memory, VkDeviceSi
 void Device::BindImageMemory(VkImage image, VkDeviceMemory memory, VkDeviceSize size)
 {
     DebugTools::Verify(vkBindImageMemory(device, image, memory, size));
+}
+
+void Device::WaitIdle()
+{
+    vkDeviceWaitIdle(device);
 }

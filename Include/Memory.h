@@ -39,11 +39,10 @@ public:
     void* MapMemory(VkDevice device, VkDeviceSize offset, VkDeviceSize size, VkMemoryMapFlags flags);
     void UnmapMemory(VkDevice device);
 
-    VkMappedMemoryRange GetMappedMemoryRange(VkDeviceSize offset, VkDeviceSize size);
-
     void FlushMappedMemoryRange(VkDevice device, VkDeviceSize offset, VkDeviceSize size);
     void InvalidateMappedMemoryRange(VkDevice device, VkDeviceSize offset, VkDeviceSize size);
 
+    // #TODO This function is useless.
     VkSparseMemoryBind GetSparseMemoryBind(VkDeviceSize resourceOffset, VkDeviceSize size, VkDeviceSize memoryOffset, VkSparseMemoryBindFlags flags);
 
 private:

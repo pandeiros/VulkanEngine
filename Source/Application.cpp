@@ -46,9 +46,16 @@ void Application::Init()
     engine.LogSystemInfo();
 
     instance.CreateDevice();
+
+    instance.CreateAppWindow();
 }
 
 void Application::Destroy()
 {
     instance.Destroy();
+}
+
+Instance& Application::GetInstanceRef()
+{
+    return instance;
 }

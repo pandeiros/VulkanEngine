@@ -35,6 +35,8 @@ public:
 
     void Destroy(VkDevice device);
 
+    VkImageView GetVkImageView();
+
 private:
     VkImageView imageView = VK_NULL_HANDLE;
 

@@ -1,5 +1,5 @@
 #include "Rendering/Renderer.h"
-#include "Rendering/Window.h"
+#include "Rendering/Windows_old.h"
 #include <cstdlib>
 #include <cassert>
 #include <iostream>
@@ -18,24 +18,24 @@ Renderer::Renderer()
 
 Renderer::~Renderer()
 {
-    delete MainWindow;
+    delete MainWindowOld;
     DestroyDevice();
     DestroyDebug();
     DestroyInstance();
 }
 
-Window * Renderer::OpenWindow(uint32_t SizeX, uint32_t SizeY, std::string Name)
+WindowOld * Renderer::OpenWindowOld(uint32_t SizeX, uint32_t SizeY, std::string Name)
 {
-    MainWindow = new Window(this, SizeX, SizeY, Name);
+    MainWindowOld = new WindowOld(this, SizeX, SizeY, Name);
 
-    return MainWindow;
+    return MainWindowOld;
 }
 
 bool Renderer::Run()
 {
-    if (MainWindow)
+    if (MainWindowOld)
     {
-        return MainWindow->Update();
+        return MainWindowOld->Update();
     }
     return true;
 }

@@ -87,9 +87,12 @@ VkResult DebugTools::Verify(VkResult result)
 
 void DebugTools::Assert(const bool value, const char* message)
 {
-    Logger::Log(message);
-    assert(value);
-
     if (!value)
+    {
+        Logger::Log(message);
+        assert(value);
+        fflush(stdout);
+
         std::exit(-1);
+    }
 }

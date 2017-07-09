@@ -29,3 +29,8 @@ void ImageView::Destroy(VkDevice device)
 {
     vkDestroyImageView(device, imageView, nullptr);
 }
+
+VkImageView ImageView::GetVkImageView()
+{
+    return imageView;
+}

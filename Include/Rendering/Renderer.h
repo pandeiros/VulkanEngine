@@ -15,7 +15,7 @@
 
 VULKAN_NS_BEGIN
 
-class Window;
+class WindowOld;
 
 /*
  * @class Renderer
@@ -33,7 +33,7 @@ public:
      */
     ~Renderer();
 
-    Window * OpenWindow(uint32_t SizeX, uint32_t SizeY, std::string Name);
+    WindowOld * OpenWindowOld(uint32_t SizeX, uint32_t SizeY, std::string Name);
     bool Run();
 
     const VkInstance GetInstance() const;
@@ -68,7 +68,7 @@ private:
     VkPhysicalDeviceProperties GPUProperties = {};
     VkPhysicalDeviceMemoryProperties MemoryProperties = {};
 
-    Window * MainWindow = nullptr;
+    WindowOld * MainWindowOld = nullptr;
 
     uint32_t GraphicsFamilyIndex = 0;
 

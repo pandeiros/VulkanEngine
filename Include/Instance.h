@@ -9,6 +9,7 @@
 #include "VulkanConfig.h"
 #include "Engine.h"
 #include "Device.h"
+#include "Window.h"
 
 /**
  * @file Instance.h
@@ -32,13 +33,15 @@ public:
      */
     ~Instance() = default;
 
-    void Create(VkApplicationInfo applicationInfo, std::vector<const char*> instanceLayers,
-        std::vector<const char*> instaceExtensions);
+    void Create(VkApplicationInfo applicationInfo, std::vector<const char*> instanceLayers, std::vector<const char*> instaceExtensions);
     void CreateDevice();
+    void CreateAppWindow();
 
     void Destroy();
 
-    inline VkInstance GetVkInstance() { return instance; }
+    VkInstance GetVkInstance();
+    Device& GetDeviceRef();
+    Window& GetWindowRef();
 
     //////////////////////////////////////////////////////////////////////////
     // Debug
@@ -51,6 +54,7 @@ private:
     VkInstance instance = VK_NULL_HANDLE;
 
     Device device;
+    Window window;
 
     VkInstanceCreateInfo instanceCreateInfo = {};
 

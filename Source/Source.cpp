@@ -1,5 +1,6 @@
-#include "Rendering\Renderer.h"
-#include "Rendering\Window.h"
+//#include "Rendering\Renderer.h"
+#include "Window.h"
+#include "CommandPool.h"
 
 #include <array>
 #include <chrono>
@@ -14,224 +15,80 @@ int main()
     application.Create("Vulkan Engine Test", 1, VK_MAKE_VERSION(1, 0, 2));
     application.Init();
 
-    application.Destroy();
+    Instance& instance = application.GetInstanceRef();
+    VkDevice device = instance.GetDeviceRef().GetVkDevice();
 
-    return 0;
+    CommandPool commandPool;
+    commandPool.Create(device, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+        instance.GetDeviceRef().GetPhysicalDevice()->GetGraphicsFamilyIndex());
 
-    Renderer R;
+    commandPool.AllocateCommandBuffer(device, VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
-    Window* Win = R.OpenWindow(800, 600, "Vulkan Engine");
-
-    auto Device = R.GetDevice();
-    auto Queue = R.GetQueue();
-
-    //VkFenceCreateInfo FenceCreateInfo {};
-    //FenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    //VkFence Fence;
-    //vkCreateFence(Device, &FenceCreateInfo, nullptr, &Fence);
-
-    //VkSemaphore Semaphore;
-    //VkSemaphoreCreateInfo SemaphoreCreateInfo {};
-    //SemaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-    //vkCreateSemaphore(Device, &SemaphoreCreateInfo, nullptr, &Semaphore);
-
-    VkCommandPool CommandPool = VK_NULL_HANDLE;
-    VkCommandPoolCreateInfo CommandPoolInfo {};
-    CommandPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    CommandPoolInfo.queueFamilyIndex = R.GetGraphicsFamilyIndex();
-    CommandPoolInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-
-    vkCreateCommandPool(Device, &CommandPoolInfo, nullptr, &CommandPool);
-
-    VkCommandBuffer CommandBuffer = VK_NULL_HANDLE;
-    VkCommandBufferAllocateInfo CommandBufferAllocateInfo {};
-    CommandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    CommandBufferAllocateInfo.commandPool = CommandPool;
-    CommandBufferAllocateInfo.commandBufferCount = 1;
-    CommandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-
-    ErrorCheck(vkAllocateCommandBuffers(Device, &CommandBufferAllocateInfo, &CommandBuffer));
-
-    VkSemaphore RenderCompleteSemaphore;
-    VkSemaphoreCreateInfo SemaphoreCreateInfo {};
-    SemaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-    vkCreateSemaphore(Device, &SemaphoreCreateInfo, nullptr, &RenderCompleteSemaphore);
+    VkSemaphore semaphoreRenderComplete;
+    {
+        VkSemaphoreCreateInfo semaphoreCreateInfo{};
+        semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+        vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &semaphoreRenderComplete);
+    }
 
     // Color fun.
-    float ColorRotator = 0.f;
-    auto Timer = std::chrono::steady_clock();
-    auto LastTime = Timer.now();
-    uint64_t FrameCounter = 0;
+    float colorRotator = 0.f;
+    auto timer = std::chrono::steady_clock();
+    auto lastTime = timer.now();
+    uint64_t frameCounter = 0;
     uint64_t FPS = 0;
 
-    while (R.Run())
+    Window& window = instance.GetWindowRef();
+    CommandBuffer& commandBuffer = commandPool.GetCommandBufferRef();
+    Queue& queue = instance.GetDeviceRef().GetQueueRef();
+
+    while (window.Update())
     {
-        ++FrameCounter;
-        if (LastTime + std::chrono::seconds(1) < Timer.now())
+        ++frameCounter;
+        if (lastTime + std::chrono::seconds(1) < timer.now())
         {
-            LastTime = Timer.now();
-            FPS = FrameCounter;
-            FrameCounter = 0;
+            lastTime = timer.now();
+            FPS = frameCounter;
+            frameCounter = 0;
             std::cout << "FPS: " << FPS << "\n";
         }
 
-        Win->BeginRender();
+        window.BeginRender();
+        commandBuffer.Begin(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT, nullptr);
 
-        VkCommandBufferBeginInfo BeginInfo {};
-        BeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        BeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        VkRect2D renderArea{};
+        renderArea.offset.x = 0;
+        renderArea.offset.y = 0;
+        renderArea.extent = window.GetSurfaceSize();
 
-        vkBeginCommandBuffer(CommandBuffer, &BeginInfo);
+        std::vector<VkClearValue> clearValues = std::vector<VkClearValue>(2);
 
-        VkRect2D RenderArea{};
-        RenderArea.offset.x = 0;
-        RenderArea.offset.y = 0;
-        RenderArea.extent = Win->GetSurfaceSize();
+        clearValues[0].depthStencil.depth = 0.f;
+        clearValues[0].depthStencil.stencil = 0;
+        clearValues[1].color.float32[0] = std::sin(colorRotator) * 0.5f + 0.5f;
+        clearValues[1].color.float32[1] = std::sin(colorRotator + (float)PI * 2.f / 3.f) * 0.5f + 0.5f;
+        clearValues[1].color.float32[2] = std::sin(colorRotator + (float)PI * 4.f / 3.f) * 0.5f + 0.5f;
+        clearValues[1].color.float32[3] = 1.f;
 
-        std::array<VkClearValue, 2> ClearValues{};
-        ClearValues[0].depthStencil.depth = 0.f;
-        ClearValues[0].depthStencil.stencil = 0;
-        ClearValues[1].color.float32[0] = std::sin(ColorRotator) * 0.5f + 0.5f;
-        ClearValues[1].color.float32[1] = std::sin(ColorRotator + PI * 2.f / 3.f) * 0.5f + 0.5f;
-        ClearValues[1].color.float32[2] = std::sin(ColorRotator + PI * 4.f / 3.f) * 0.5f + 0.5f;
-        ClearValues[1].color.float32[3] = 1.f;
+        commandBuffer.BeginRenderPass(window.GetRenderPass(), window.GetActiveFramebuffer(), renderArea, clearValues, VK_SUBPASS_CONTENTS_INLINE);
+        commandBuffer.EndRenderPass();
 
-        VkRenderPassBeginInfo RenderPassBeginInfo{};
-        RenderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        RenderPassBeginInfo.renderPass = Win->GetRenderPass();
-        RenderPassBeginInfo.framebuffer = Win->GetActiveFramebuffer();
-        RenderPassBeginInfo.renderArea = RenderArea;
-        RenderPassBeginInfo.clearValueCount = ClearValues.size();
-        RenderPassBeginInfo.pClearValues = ClearValues.data();
+        commandBuffer.End();
 
-        vkCmdBeginRenderPass(CommandBuffer, &RenderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+        queue.Submit(nullptr, {}, { commandBuffer.GetVkCommandBufferRef() }, {semaphoreRenderComplete}, VK_NULL_HANDLE);
 
-        vkCmdEndRenderPass(CommandBuffer);
+        window.EndRender({semaphoreRenderComplete});
 
-        vkEndCommandBuffer(CommandBuffer);
-
-        VkSubmitInfo SubmitInfo {};
-        SubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        SubmitInfo.waitSemaphoreCount = 0;
-        SubmitInfo.pWaitSemaphores = nullptr;
-        SubmitInfo.pWaitDstStageMask = nullptr;
-        SubmitInfo.commandBufferCount = 1;
-        SubmitInfo.pCommandBuffers = &CommandBuffer;
-        SubmitInfo.signalSemaphoreCount = 1;
-        SubmitInfo.pSignalSemaphores = &RenderCompleteSemaphore;
-
-        vkQueueSubmit(Queue, 1, &SubmitInfo, VK_NULL_HANDLE);
-
-        Win->EndRender({RenderCompleteSemaphore});
-
-        ColorRotator += 0.001f;
+        colorRotator += 0.001f;
     }
 
-    vkQueueWaitIdle(Queue);
+    queue.WaitIdle();
 
-    vkDestroySemaphore(Device, RenderCompleteSemaphore, nullptr);
+    vkDestroySemaphore(device, semaphoreRenderComplete, nullptr);
 
-    vkDestroyCommandPool(Device, CommandPool, nullptr);
+    commandPool.Destroy(device);
 
-    //auto Device = R.Device;
-    //auto Queue = R.Queue;
-
-    //VkFenceCreateInfo FenceCreateInfo {};
-    //FenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    //VkFence Fence;
-    //vkCreateFence(Device, &FenceCreateInfo, nullptr, &Fence);
-
-    //VkSemaphore Semaphore;
-    //VkSemaphoreCreateInfo SemaphoreCreateInfo {};
-    //SemaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-    //vkCreateSemaphore(Device, &SemaphoreCreateInfo, nullptr, &Semaphore);
-
-    //VkCommandPool CommandPool;
-
-    //VkCommandPoolCreateInfo CommandPoolInfo {};
-    //CommandPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    //CommandPoolInfo.queueFamilyIndex = R.GraphicsFamilyIndex;
-    //CommandPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-
-    //vkCreateCommandPool(Device, &CommandPoolInfo, nullptr, &CommandPool);
-
-    //VkCommandBuffer CommandBuffers[2];
-    //VkCommandBufferAllocateInfo CommandBufferAllocateInfo {};
-    //CommandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    //CommandBufferAllocateInfo.commandPool = CommandPool;
-    //CommandBufferAllocateInfo.commandBufferCount = 2;
-    //CommandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-
-    //vkAllocateCommandBuffers(Device, &CommandBufferAllocateInfo, CommandBuffers);
-
-    //{
-    //	VkCommandBufferBeginInfo BeginInfo {};
-    //	BeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    //	vkBeginCommandBuffer(CommandBuffers[0], &BeginInfo);
-
-    //	vkCmdPipelineBarrier(CommandBuffers[0],
-    //						 VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-    //						 VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-    //						 0,
-    //						 0, nullptr,
-    //						 0, nullptr,
-    //						 0, nullptr);
-
-    //	VkViewport Viewport {};
-    //	Viewport.maxDepth = 1.f;
-    //	Viewport.minDepth = 0.f;
-    //	Viewport.width = 512;
-    //	Viewport.height = 512;
-    //	Viewport.x = 0;
-    //	Viewport.y = 0;
-    //	vkCmdSetViewport(CommandBuffers[0], 0, 1, &Viewport);
-
-    //	vkEndCommandBuffer(CommandBuffers[0]);
-    //}
-    //{
-    //	VkCommandBufferBeginInfo BeginInfo {};
-    //	BeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    //	vkBeginCommandBuffer(CommandBuffers[1], &BeginInfo);
-
-    //	VkViewport Viewport {};
-    //	Viewport.maxDepth = 1.f;
-    //	Viewport.minDepth = 0.f;
-    //	Viewport.width = 512;
-    //	Viewport.height = 512;
-    //	Viewport.x = 0;
-    //	Viewport.y = 0;
-    //	vkCmdSetViewport(CommandBuffers[1], 0, 1, &Viewport);
-
-    //	vkEndCommandBuffer(CommandBuffers[1]);
-    //}
-    //{
-    //	VkSubmitInfo SubmitInfo {};
-    //	SubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    //	SubmitInfo.commandBufferCount = 1;
-    //	SubmitInfo.pCommandBuffers = &CommandBuffers[0];
-    //	SubmitInfo.signalSemaphoreCount = 1;
-    //	SubmitInfo.pSignalSemaphores = &Semaphore;
-    //	vkQueueSubmit(Queue, 1, &SubmitInfo, VK_NULL_HANDLE);
-    //}
-    //{
-    //	VkPipelineStageFlags Flags[] {VK_PIPELINE_STAGE_ALL_COMMANDS_BIT};
-    //	VkSubmitInfo SubmitInfo {};
-    //	SubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    //	SubmitInfo.commandBufferCount = 1;
-    //	SubmitInfo.pCommandBuffers = &CommandBuffers[1];
-    //	SubmitInfo.waitSemaphoreCount = 1;
-    //	SubmitInfo.pWaitSemaphores = &Semaphore;
-    //	SubmitInfo.pWaitDstStageMask = Flags;
-    //	vkQueueSubmit(Queue, 1, &SubmitInfo, VK_NULL_HANDLE);
-    //}
-
-    ////auto ret = vkWaitForFences(Device, 1, &Fence, VK_TRUE, UINT64_MAX);
-
-    //vkQueueWaitIdle(Queue);
-
-    //vkDestroyCommandPool(Device, CommandPool, nullptr);
-    //vkDestroyFence(Device, Fence, nullptr);
-    //vkDestroySemaphore(Device, Semaphore, nullptr);
+    application.Destroy();
 
     return 0;
 }

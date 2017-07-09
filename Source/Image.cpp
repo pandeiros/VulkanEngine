@@ -35,6 +35,21 @@ void Image::Create(VkDevice device, VkImageCreateFlags flags, VkImageType type, 
     DebugTools::Verify(vkCreateImage(device, &imageCreateInfo, nullptr, &image));
 }
 
+void Image::Destroy(VkDevice device)
+{
+    vkDestroyImage(device, image, nullptr);
+}
+
+VkImage Image::GetVkImage()
+{
+    return image;
+}
+
+VkFormat Image::GetVkFormat()
+{
+    return imageCreateInfo.format;
+}
+
 VkSubresourceLayout Image::GetImageSubresourceLayout(VkDevice device, const VkImageSubresource subresource)
 {
     VkSubresourceLayout layout;
@@ -47,11 +62,6 @@ VkSubresourceLayout Image::GetImageSubresourceLayout(VkDevice device, const VkIm
     return layout;
 }
 
-void Image::Destroy(VkDevice device)
-{
-    vkDestroyImage(device, image, nullptr);
-}
-
 VkMemoryRequirements Image::GetMemoryRequirements(VkDevice device) const
 {
     VkMemoryRequirements requirements;
@@ -62,6 +72,11 @@ VkMemoryRequirements Image::GetMemoryRequirements(VkDevice device) const
     }
 
     return requirements;
+}
+
+VkComponentMapping Image::GetIdentityComponentMapping()
+{
+    return { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
 }
 
 void Image::checkExtent(VkImageType type, VkExtent3D& outExtent)
@@ -109,11 +124,6 @@ void SparseImage::Create(VkDevice device, VkImageCreateFlags flags, VkImageType 
         vkGetImageSparseMemoryRequirements(device, image, &requirementsCount, nullptr);
         sparseMemoryRequirements.resize(requirementsCount);
         vkGetImageSparseMemoryRequirements(device, image, &requirementsCount, sparseMemoryRequirements.data());
-
-        //uint32_t sparsePropertiesCount = 0;
-        //vkGetPhysicalDeviceSparseImageFormatProperties(physicalDevice, &sparsePropertiesCount, nullptr);
-        //queueFamilyProperties.resize(sparsePropertiesCount);
-        //vkGetPhysicalDeviceSparseImageFormatProperties(physicalDevice, &sparsePropertiesCount, sparseImageFormatProperties.data());
     }
 }
 

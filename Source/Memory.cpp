@@ -54,20 +54,29 @@ void Memory::UnmapMemory(VkDevice device)
     vkUnmapMemory(device, memory);
 }
 
-VkMappedMemoryRange Memory::GetMappedMemoryRange(VkDeviceSize offset, VkDeviceSize size)
-{
-    return { VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE, nullptr, memory, offset, size };
-}
-
 void Memory::InvalidateMappedMemoryRange(VkDevice device, VkDeviceSize offset, VkDeviceSize size)
 {
-    VkMappedMemoryRange range = GetMappedMemoryRange(offset, size);
+    VkMappedMemoryRange range = {
+        VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
+        nullptr,
+        memory,
+        offset,
+        size
+    };
+
     DebugTools::Verify(vkFlushMappedMemoryRanges(device, 1, &range));
 }
 
 void Memory::FlushMappedMemoryRange(VkDevice device, VkDeviceSize offset, VkDeviceSize size)
 {
-    VkMappedMemoryRange range = GetMappedMemoryRange(offset, size);
+    VkMappedMemoryRange range = {
+        VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
+        nullptr,
+        memory,
+        offset,
+        size
+    };
+
     DebugTools::Verify(vkInvalidateMappedMemoryRanges(device, 1, &range));
 }
 

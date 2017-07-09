@@ -1,18 +1,18 @@
-#include "Rendering/Window.h"
+#include "Rendering/Windows_old.h"
 #include "Rendering/Renderer.h"
 #include <cassert>
 #include <array>
 
 VULKAN_NS_USING;
 
-Window::Window(Renderer * Renderer, uint32_t SizeX, uint32_t SizeY, std::string Name)
+WindowOld::WindowOld(Renderer * Renderer, uint32_t SizeX, uint32_t SizeY, std::string Name)
 {
     MainRenderer = Renderer;
     SurfaceSizeX = SizeX;
     SurfaceSizeY = SizeY;
     WindowName = Name;
 
-    CreateOSWindow();
+    //CreateOSWindow();
     CreateSurface();
     CreateSwapchain();
     CreateSwapchainImages();
@@ -22,7 +22,7 @@ Window::Window(Renderer * Renderer, uint32_t SizeX, uint32_t SizeY, std::string 
     CreateSynchronization();
 }
 
-Window::~Window()
+WindowOld::~WindowOld()
 {
     vkQueueWaitIdle(MainRenderer->GetQueue());
 
@@ -33,21 +33,21 @@ Window::~Window()
     DestroySwapchainImages();
     DestroySwapchain();
     DestroySurface();
-    DestroyOSWindow();
+    //DestroyOSWindow();
 }
 
-void Window::Close()
+void WindowOld::Close()
 {
     IsValid = false;
 }
 
-bool Window::Update()
+bool WindowOld::Update()
 {
-    UpdateOSWindow();
+    //UpdateOSWindow();
     return IsValid;
 }
 
-void Window::BeginRender()
+void WindowOld::BeginRender()
 {
     ErrorCheck(vkAcquireNextImageKHR(MainRenderer->GetDevice(), Swapchain, UINT64_MAX, VK_NULL_HANDLE, SwapchainImageAvailable, &ActiveSwapchainImageID));
     ErrorCheck(vkWaitForFences(MainRenderer->GetDevice(), 1, &SwapchainImageAvailable, VK_TRUE, UINT64_MAX));
@@ -55,7 +55,7 @@ void Window::BeginRender()
     ErrorCheck(vkQueueWaitIdle(MainRenderer->GetQueue()));
 }
 
-void Window::EndRender(std::vector<VkSemaphore> WaitSemaphores)
+void WindowOld::EndRender(std::vector<VkSemaphore> WaitSemaphores)
 {
     VkResult PresentResult = VkResult::VK_RESULT_MAX_ENUM;
 
@@ -72,24 +72,24 @@ void Window::EndRender(std::vector<VkSemaphore> WaitSemaphores)
     ErrorCheck(PresentResult);
 }
 
-VkRenderPass Window::GetRenderPass()
+VkRenderPass WindowOld::GetRenderPass()
 {
     return RenderPass;
 }
 
-VkFramebuffer Window::GetActiveFramebuffer()
+VkFramebuffer WindowOld::GetActiveFramebuffer()
 {
     return Framebuffers[ActiveSwapchainImageID];
 }
 
-VkExtent2D Window::GetSurfaceSize()
+VkExtent2D WindowOld::GetSurfaceSize()
 {
     return { SurfaceSizeX, SurfaceSizeY };
 }
 
-void Window::CreateSurface()
+void WindowOld::CreateSurface()
 {
-    CreateOSSurface();
+    //CreateOSSurface();
 
     auto GPU = MainRenderer->GetPhysicalDevice();
 
@@ -131,12 +131,12 @@ void Window::CreateSurface()
     }
 }
 
-void Window::DestroySurface()
+void WindowOld::DestroySurface()
 {
     vkDestroySurfaceKHR(MainRenderer->GetInstance(), Surface, nullptr);
 }
 
-void Window::CreateSwapchain()
+void WindowOld::CreateSwapchain()
 {
     if (SwapchainImageCount < SurfaceCapabilities.minImageCount + 1)
         SwapchainImageCount = SurfaceCapabilities.minImageCount + 1;
@@ -187,12 +187,12 @@ void Window::CreateSwapchain()
     ErrorCheck(vkGetSwapchainImagesKHR(MainRenderer->GetDevice(), Swapchain, &SwapchainImageCount, nullptr));
 }
 
-void Window::DestroySwapchain()
+void WindowOld::DestroySwapchain()
 {
     vkDestroySwapchainKHR(MainRenderer->GetDevice(), Swapchain, nullptr);
 }
 
-void Window::CreateSwapchainImages()
+void WindowOld::CreateSwapchainImages()
 {
     SwapchainImages.resize(SwapchainImageCount);
     SwapchainImageViews.resize(SwapchainImageCount);
@@ -220,7 +220,7 @@ void Window::CreateSwapchainImages()
     }
 }
 
-void Window::DestroySwapchainImages()
+void WindowOld::DestroySwapchainImages()
 {
     for (auto & View : SwapchainImageViews)
     {
@@ -228,7 +228,7 @@ void Window::DestroySwapchainImages()
     }
 }
 
-void Window::CreateDepthStencilImage()
+void WindowOld::CreateDepthStencilImage()
 {
     std::vector<VkFormat> DesiredFormats
     {
@@ -311,14 +311,14 @@ void Window::CreateDepthStencilImage()
     vkCreateImageView(MainRenderer->GetDevice(), &ImageViewCreateInfo, nullptr, &DepthStencilImageView);
 }
 
-void Window::DestroyDepthStencilImage()
+void WindowOld::DestroyDepthStencilImage()
 {
     vkDestroyImageView(MainRenderer->GetDevice(), DepthStencilImageView, nullptr);
     vkFreeMemory(MainRenderer->GetDevice(), DepthStencilImageMemory, nullptr);
     vkDestroyImage(MainRenderer->GetDevice(), DepthStencilImage, nullptr);
 }
 
-void Window::CreateRenderPass()
+void WindowOld::CreateRenderPass()
 {
     std::array<VkAttachmentDescription, 2> Attachments {};
 
@@ -364,12 +364,12 @@ void Window::CreateRenderPass()
     ErrorCheck(vkCreateRenderPass(MainRenderer->GetDevice(), &RenderPassCreateInfo, nullptr, &RenderPass));
 }
 
-void Window::DestroyRenderPass()
+void WindowOld::DestroyRenderPass()
 {
     vkDestroyRenderPass(MainRenderer->GetDevice(), RenderPass, nullptr);
 }
 
-void Window::CreateFramebuffer()
+void WindowOld::CreateFramebuffer()
 {
     Framebuffers.resize(SwapchainImageCount);
     for (uint32_t i = 0; i < SwapchainImageCount; ++i)
@@ -390,7 +390,7 @@ void Window::CreateFramebuffer()
     }
 }
 
-void Window::DestroyFramebuffer()
+void WindowOld::DestroyFramebuffer()
 {
     for (auto & Buffer : Framebuffers)
     {
@@ -398,7 +398,7 @@ void Window::DestroyFramebuffer()
     }
 }
 
-void Window::CreateSynchronization()
+void WindowOld::CreateSynchronization()
 {
     VkFenceCreateInfo FenceCreateInfo {};
     FenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
@@ -406,7 +406,7 @@ void Window::CreateSynchronization()
     vkCreateFence(MainRenderer->GetDevice(), &FenceCreateInfo, nullptr, &SwapchainImageAvailable);
 }
 
-void Window::DestroySynchronization()
+void WindowOld::DestroySynchronization()
 {
     vkDestroyFence(MainRenderer->GetDevice(), SwapchainImageAvailable, nullptr);
 }

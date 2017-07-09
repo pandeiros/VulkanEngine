@@ -20,18 +20,18 @@ class Renderer;
 /*
  * @class Window
  */
-class Window
+class WindowOld
 {
 public:
     /**
      * Default constructor.
      */
-    Window(Renderer * Renderer, uint32_t SizeX, uint32_t SizeY, std::string Name);
+    WindowOld(Renderer * Renderer, uint32_t SizeX, uint32_t SizeY, std::string Name);
 
     /**
      * Default destructor.
      */
-    ~Window();
+    ~WindowOld();
 
     void Close();
     bool Update();
@@ -44,10 +44,10 @@ public:
     VkExtent2D GetSurfaceSize();
 
 private:
-    void CreateOSWindow();
-    void DestroyOSWindow();
-    void UpdateOSWindow();
-    void CreateOSSurface();
+    //void CreateOSWindow();
+    //void DestroyOSWindow();
+    //void UpdateOSWindow();
+    //void CreateOSSurface();
 
     void CreateSurface();
     void DestroySurface();
@@ -70,7 +70,7 @@ private:
     void CreateSynchronization();
     void DestroySynchronization();
 
-    Renderer * MainRenderer = nullptr;
+    Renderer* MainRenderer = nullptr;
 
     VkSurfaceKHR Surface = VK_NULL_HANDLE;
     VkSwapchainKHR Swapchain = VK_NULL_HANDLE;

@@ -39,6 +39,10 @@ public:
 
     void Destroy();
 
+    VkDevice GetVkDevice();
+    Queue& GetQueueRef();
+    PhysicalDevice* GetPhysicalDevice();
+
     void FlushMappedMemoryRanges(std::vector<VkMappedMemoryRange> memoryRanges);
     void InvalidateMappedMemoryRanges(std::vector<VkMappedMemoryRange> memoryRanges);
 
@@ -46,6 +50,8 @@ public:
 
     void BindBufferMemory(VkBuffer buffer, VkDeviceMemory memory, VkDeviceSize size);
     void BindImageMemory(VkImage image, VkDeviceMemory memory, VkDeviceSize size);
+
+    void WaitIdle();
 
 private:
     VkDevice device;

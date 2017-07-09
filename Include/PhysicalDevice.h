@@ -17,7 +17,7 @@
 VULKAN_NS_BEGIN
 
 /**
- * @class VulkanEngineHeader
+ * @class PhysicalDevice
  */
 class PhysicalDevice
 {
@@ -45,7 +45,7 @@ public:
 
     uint32_t GetGraphicsFamilyIndex() const;
 
-    VkFormatProperties GetFormatProperties(VkFormat format)const;
+    VkFormatProperties GetFormatProperties(VkFormat format) const;
     VkImageFormatProperties GetImageFormatProperties(VkFormat format, VkImageType type, VkImageTiling tiling,
         VkImageUsageFlags usage, VkImageCreateFlags flags) const;
     std::vector<VkSparseImageFormatProperties> GetSparseImageFormatProperties(VkFormat format, VkImageType type,

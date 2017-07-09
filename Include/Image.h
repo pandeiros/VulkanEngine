@@ -34,11 +34,15 @@ public:
         uint32_t mipLevels, uint32_t arrayLayers, VkSampleCountFlagBits samples, VkImageTiling tiling, VkImageUsageFlags usage,
         VkSharingMode sharingMode, std::vector<uint32_t> queueFamilyIndices, VkImageLayout initialLayout);
 
-    VkSubresourceLayout GetImageSubresourceLayout(VkDevice device, const VkImageSubresource subresource);
-
     void Destroy(VkDevice device);
 
+    VkImage GetVkImage();
+    VkFormat GetVkFormat();
+
+    VkSubresourceLayout GetImageSubresourceLayout(VkDevice device, const VkImageSubresource subresource);
     VkMemoryRequirements GetMemoryRequirements(VkDevice device) const;
+
+    static VkComponentMapping GetIdentityComponentMapping();
 
 protected:
     VkImage image = VK_NULL_HANDLE;

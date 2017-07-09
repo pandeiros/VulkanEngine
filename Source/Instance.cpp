@@ -42,13 +42,34 @@ void Instance::CreateDevice()
     }
 }
 
+void Instance::CreateAppWindow()
+{
+    window.Create(this, { "Vulkan Engine", {1920, 1080} });
+}
+
 void Instance::Destroy()
 {
+    window.Destroy();
     device.Destroy();
     DestroyDebug();
 
     vkDestroyInstance(instance, nullptr);
     instance = VK_NULL_HANDLE;
+}
+
+VkInstance Instance::GetVkInstance()
+{
+    return instance;
+}
+
+Device& Instance::GetDeviceRef()
+{
+    return device;
+}
+
+Window& Instance::GetWindowRef()
+{
+    return window;
 }
 
 #if VULKAN_ENABLE_DEBUG

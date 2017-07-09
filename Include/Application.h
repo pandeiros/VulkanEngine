@@ -38,6 +38,8 @@ public:
 
     void Destroy();
 
+    Instance& GetInstanceRef();
+
 private:
     VkApplicationInfo applicationInfo = {};
 
