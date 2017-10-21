@@ -19,7 +19,6 @@ void Window::Create(Instance* instance, const WindowCreateInfo& windowCreateInfo
     CreateOSWindow();
     CreateSurface();
     CreateSwapchain();
-
     CreateSwapchainImages();
     CreateDepthStencilImage();
     CreateRenderPass();
@@ -29,7 +28,7 @@ void Window::Create(Instance* instance, const WindowCreateInfo& windowCreateInfo
 
 void Window::Destroy()
 {
-    vkQueueWaitIdle(cachedInstance->GetDeviceRef().GetQueueRef().GetVkQueueRef());
+    cachedInstance->GetDeviceRef().GetQueueRef().WaitIdle();
 
     DestroySynchronization();
     DestroyFramebuffer();
@@ -44,6 +43,7 @@ void Window::Destroy()
 bool Window::Update()
 {
     UpdateOSWindow();
+
     return bIsValid;
 }
 
@@ -278,7 +278,7 @@ void Window::CreateDepthStencilImage()
     VkMemoryRequirements imageMemoryRequirements{};
     vkGetImageMemoryRequirements(device, depthStencilImage.GetVkImage(), &imageMemoryRequirements);
 
-    uint32_t memoryIndex = GetMemoryTypeIndex(&physicalDevice->GetPhysicalDeviceMemoryProperties(), &imageMemoryRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    uint32_t memoryIndex = physicalDevice->GetMemoryTypeIndex(&imageMemoryRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
     VkMemoryAllocateInfo memoryAllocateInfo{};
     memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;

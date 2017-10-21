@@ -7,7 +7,7 @@
 #include "Tools/DebugTools.h"
 #include <cassert>
 
-#define VULKAN_NS_USING
+VULKAN_NS_USING;
 
 VkResult DebugTools::Verify(VkResult result)
 {
@@ -77,7 +77,7 @@ VkResult DebugTools::Verify(VkResult result)
             break;
         }
 
-        assert(0 && "Vulkan runtime error.");
+        VK_ASSERT(0, "Vulkan runtime error.");
     }
 
 #endif // VULKAN_ENABLE_RUNTIME_DEBUG
@@ -85,12 +85,12 @@ VkResult DebugTools::Verify(VkResult result)
     return result;
 }
 
-void DebugTools::Assert(const bool value, const char* message)
+void DebugTools::Assert(const bool condition, const char* message)
 {
-    if (!value)
+    if (!condition)
     {
         Logger::Log(message);
-        assert(value);
+        assert(condition);
         fflush(stdout);
 
         std::exit(-1);

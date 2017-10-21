@@ -111,7 +111,7 @@ void Renderer::InitInstance()
     InstanceCreateInfo.ppEnabledExtensionNames = InstaceExtensions.data();
     InstanceCreateInfo.pNext = &DebugCallbackCreateInfo;
 
-    ErrorCheck(vkCreateInstance(&InstanceCreateInfo, nullptr, &Instance));
+    (vkCreateInstance(&InstanceCreateInfo, nullptr, &Instance));
 }
 
 void Renderer::DestroyInstance()
@@ -178,7 +178,7 @@ void Renderer::InitDevice()
     DeviceCreateInfo.ppEnabledExtensionNames = DeviceExtensions.data();
     DeviceCreateInfo.pQueueCreateInfos = &DeviceQueueCreateInfo;
 
-    ErrorCheck(vkCreateDevice(GPU, &DeviceCreateInfo, nullptr, &Device));
+    (vkCreateDevice(GPU, &DeviceCreateInfo, nullptr, &Device));
 
     vkGetDeviceQueue(Device, GraphicsFamilyIndex, 0, &Queue);
 }

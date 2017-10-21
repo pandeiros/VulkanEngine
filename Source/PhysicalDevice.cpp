@@ -42,6 +42,11 @@ void PhysicalDevice::Create(const VkPhysicalDevice physicalDevice)
     vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, nullptr);
     availableDeviceExtensions.resize(extensionCount);
     vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, availableDeviceExtensions.data());
+
+    //uint32_t displayPropertiesCount = 0;
+    //vkGetPhysicalDeviceDisplayPropertiesKHR(physicalDevice, &displayPropertiesCount, nullptr);
+    //displayProperties.resize(displayPropertiesCount);
+    //vkGetPhysicalDeviceDisplayPropertiesKHR(physicalDevice, &displayPropertiesCount, displayProperties.data());
 }
 
 VkPhysicalDevice PhysicalDevice::GetVkPhysicalDevice() const
@@ -67,6 +72,11 @@ VkPhysicalDeviceFeatures PhysicalDevice::GetPhysicalDeviceFeatures() const
 const std::vector<VkExtensionProperties>& PhysicalDevice::GetAvailableDeviceExtensions() const
 {
     return availableDeviceExtensions;
+}
+
+const std::vector<VkDisplayPropertiesKHR>& PhysicalDevice::GetPhysicalDeviceDisplayProperties() const
+{
+    return displayProperties;
 }
 
 const std::vector<VkLayerProperties>& PhysicalDevice::GetAvailableDeviceLayers() const
@@ -127,9 +137,34 @@ void PhysicalDevice::LogInfo()
     }
 
     Logger::Log("Device extensions");
-
     for (VkExtensionProperties& extension : availableDeviceExtensions)
     {
         Logger::Log(extension.extensionName);
     }
+
+    Logger::Log("Device display properties");
+    for (VkDisplayPropertiesKHR& property : displayProperties)
+    {
+        Logger::Log(property.displayName);
+    }
+
+}
+
+uint32_t PhysicalDevice::GetMemoryTypeIndex(const VkMemoryRequirements* MemoryRequirements, const VkMemoryPropertyFlags RequiredProperties)
+{
+    for (uint32_t i = 0; i < memoryProperties.memoryTypeCount; ++i)
+    {
+        if (MemoryRequirements->memoryTypeBits & (1 << i))
+        {
+            if ((memoryProperties.memoryTypes[i].propertyFlags & RequiredProperties) == RequiredProperties)
+            {
+                return i;
+            }
+        }
+    }
+
+    VK_ASSERT(0, "Could not find property memory type.");
+
+    return UINT32_MAX;
+
 }

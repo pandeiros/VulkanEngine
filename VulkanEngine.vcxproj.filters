@@ -39,9 +39,6 @@
     <ClCompile Include="Source\Rendering\Renderer.cpp">
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="Source\VulkanConfig.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Platforms\Win32\Window_Win32.cpp">
       <Filter>Source Files\Platforms\Win32</Filter>
     </ClCompile>
@@ -96,11 +93,11 @@
     <ClCompile Include="Source\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\VulkanCore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Include\VulkanConfig.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Include\BuildOptions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -162,6 +159,12 @@
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="Include\Window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\VulkanCore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\VulkanMisc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

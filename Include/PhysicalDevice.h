@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "VulkanConfig.h"
+#include "VulkanCore.h"
 
 #include <vector>
 
@@ -42,6 +42,7 @@ public:
 
     const std::vector<VkLayerProperties>& GetAvailableDeviceLayers() const;
     const std::vector<VkExtensionProperties>& GetAvailableDeviceExtensions() const;
+    const std::vector<VkDisplayPropertiesKHR>& GetPhysicalDeviceDisplayProperties() const;
 
     uint32_t GetGraphicsFamilyIndex() const;
 
@@ -53,6 +54,8 @@ public:
 
     void LogInfo();
 
+    uint32_t GetMemoryTypeIndex(const VkMemoryRequirements* MemoryRequirements, const VkMemoryPropertyFlags RequiredProperties);
+
 private:
     VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
     VkPhysicalDeviceProperties physicalDeviceProperties = {};
@@ -62,6 +65,7 @@ private:
     std::vector<VkQueueFamilyProperties> queueFamilyProperties;
     std::vector<VkLayerProperties> availableDeviceLayers;
     std::vector<VkExtensionProperties> availableDeviceExtensions;
+    std::vector<VkDisplayPropertiesKHR> displayProperties;
 
     uint32_t graphicsFamilyIndex = 0;
 };

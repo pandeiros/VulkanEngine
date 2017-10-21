@@ -49,10 +49,10 @@ bool WindowOld::Update()
 
 void WindowOld::BeginRender()
 {
-    ErrorCheck(vkAcquireNextImageKHR(MainRenderer->GetDevice(), Swapchain, UINT64_MAX, VK_NULL_HANDLE, SwapchainImageAvailable, &ActiveSwapchainImageID));
-    ErrorCheck(vkWaitForFences(MainRenderer->GetDevice(), 1, &SwapchainImageAvailable, VK_TRUE, UINT64_MAX));
-    ErrorCheck(vkResetFences(MainRenderer->GetDevice(), 1, &SwapchainImageAvailable));
-    ErrorCheck(vkQueueWaitIdle(MainRenderer->GetQueue()));
+    (vkAcquireNextImageKHR(MainRenderer->GetDevice(), Swapchain, UINT64_MAX, VK_NULL_HANDLE, SwapchainImageAvailable, &ActiveSwapchainImageID));
+    (vkWaitForFences(MainRenderer->GetDevice(), 1, &SwapchainImageAvailable, VK_TRUE, UINT64_MAX));
+    (vkResetFences(MainRenderer->GetDevice(), 1, &SwapchainImageAvailable));
+    (vkQueueWaitIdle(MainRenderer->GetQueue()));
 }
 
 void WindowOld::EndRender(std::vector<VkSemaphore> WaitSemaphores)
@@ -68,8 +68,8 @@ void WindowOld::EndRender(std::vector<VkSemaphore> WaitSemaphores)
     PresentInfo.pImageIndices = &ActiveSwapchainImageID;
     PresentInfo.pResults = &PresentResult;
 
-    ErrorCheck(vkQueuePresentKHR(MainRenderer->GetQueue(), &PresentInfo));
-    ErrorCheck(PresentResult);
+    (vkQueuePresentKHR(MainRenderer->GetQueue(), &PresentInfo));
+    (PresentResult);
 }
 
 VkRenderPass WindowOld::GetRenderPass()
@@ -153,9 +153,9 @@ void WindowOld::CreateSwapchain()
     VkPresentModeKHR PresentMode = VK_PRESENT_MODE_FIFO_KHR;
 
     uint32_t PresentModeCount = 0;
-    ErrorCheck(vkGetPhysicalDeviceSurfacePresentModesKHR(MainRenderer->GetPhysicalDevice(), Surface, &PresentModeCount, nullptr));
+    (vkGetPhysicalDeviceSurfacePresentModesKHR(MainRenderer->GetPhysicalDevice(), Surface, &PresentModeCount, nullptr));
     std::vector<VkPresentModeKHR> PresentModes(PresentModeCount);
-    ErrorCheck(vkGetPhysicalDeviceSurfacePresentModesKHR(MainRenderer->GetPhysicalDevice(), Surface, &PresentModeCount, PresentModes.data()));
+    (vkGetPhysicalDeviceSurfacePresentModesKHR(MainRenderer->GetPhysicalDevice(), Surface, &PresentModeCount, PresentModes.data()));
 
     for (auto & Mode : PresentModes)
     {
@@ -182,9 +182,9 @@ void WindowOld::CreateSwapchain()
     SwapchainCreateInfo.clipped = VK_TRUE;
     SwapchainCreateInfo.oldSwapchain = VK_NULL_HANDLE;
 
-    ErrorCheck(vkCreateSwapchainKHR(MainRenderer->GetDevice(), &SwapchainCreateInfo, nullptr, &Swapchain));
+    (vkCreateSwapchainKHR(MainRenderer->GetDevice(), &SwapchainCreateInfo, nullptr, &Swapchain));
 
-    ErrorCheck(vkGetSwapchainImagesKHR(MainRenderer->GetDevice(), Swapchain, &SwapchainImageCount, nullptr));
+    (vkGetSwapchainImagesKHR(MainRenderer->GetDevice(), Swapchain, &SwapchainImageCount, nullptr));
 }
 
 void WindowOld::DestroySwapchain()
@@ -197,7 +197,7 @@ void WindowOld::CreateSwapchainImages()
     SwapchainImages.resize(SwapchainImageCount);
     SwapchainImageViews.resize(SwapchainImageCount);
 
-    ErrorCheck(vkGetSwapchainImagesKHR(MainRenderer->GetDevice(), Swapchain, &SwapchainImageCount, SwapchainImages.data()));
+    (vkGetSwapchainImagesKHR(MainRenderer->GetDevice(), Swapchain, &SwapchainImageCount, SwapchainImages.data()));
 
     for (uint32_t i = 0; i < SwapchainImageCount; ++i)
     {
@@ -216,7 +216,7 @@ void WindowOld::CreateSwapchainImages()
         ImageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
         ImageViewCreateInfo.subresourceRange.layerCount = 1;
 
-        ErrorCheck(vkCreateImageView(MainRenderer->GetDevice(), &ImageViewCreateInfo, nullptr, &SwapchainImageViews[i]));
+        (vkCreateImageView(MainRenderer->GetDevice(), &ImageViewCreateInfo, nullptr, &SwapchainImageViews[i]));
     }
 }
 
@@ -285,7 +285,7 @@ void WindowOld::CreateDepthStencilImage()
     VkMemoryRequirements ImageMemoryRequirements {};
     vkGetImageMemoryRequirements(MainRenderer->GetDevice(), DepthStencilImage, &ImageMemoryRequirements);
 
-    uint32_t MemoryIndex = GetMemoryTypeIndex(&MainRenderer->GetPhysicalDeviceMemoryProperties(), &ImageMemoryRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    uint32_t MemoryIndex = 0; // GetMemoryTypeIndex(&MainRenderer->GetPhysicalDeviceMemoryProperties(), &ImageMemoryRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
     VkMemoryAllocateInfo MemoryAllocateInfo {};
     MemoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
@@ -361,7 +361,7 @@ void WindowOld::CreateRenderPass()
     RenderPassCreateInfo.subpassCount = Subpasses.size();
     RenderPassCreateInfo.pSubpasses = Subpasses.data();
 
-    ErrorCheck(vkCreateRenderPass(MainRenderer->GetDevice(), &RenderPassCreateInfo, nullptr, &RenderPass));
+    (vkCreateRenderPass(MainRenderer->GetDevice(), &RenderPassCreateInfo, nullptr, &RenderPass));
 }
 
 void WindowOld::DestroyRenderPass()

@@ -6,7 +6,7 @@
 
 #pragma once
 
-#define VULKAN_ENGINE_VERSION VK_MAKE_VERSION(1, 0, 1)
+#define VULKAN_ENGINE_VERSION VK_MAKE_VERSION(1, 0, 2)
 #define VULKAN_ENGINE_NAME "Vulkan Engine"
 
 #include "Tools/Logger.h"

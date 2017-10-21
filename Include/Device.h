@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "VulkanConfig.h"
+#include "VulkanCore.h"
 #include "PhysicalDevice.h"
 #include "Queue.h"
 

@@ -11,7 +11,7 @@
  */
 
 #include <vector>
-#include "VulkanConfig.h"
+#include "VulkanCore.h"
 
 VULKAN_NS_BEGIN
 

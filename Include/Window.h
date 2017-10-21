@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "VulkanConfig.h"
+#include "VulkanCore.h"
 #include "PhysicalDevice.h"
 #include "Image.h"
 #include "ImageView.h"
@@ -20,9 +20,8 @@ VULKAN_NS_BEGIN
 class Instance;
 
 typedef struct WindowCreateInfo {
-    std::string             windowName;
-    VkExtent2D              surfaceSize;
-
+    std::string         windowName;
+    VkExtent2D          surfaceSize;
 } WindowCreateInfo;
 
 /**

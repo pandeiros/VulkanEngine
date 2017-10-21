@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "VulkanConfig.h"
+#include "VulkanCore.h"
 
 #include "Instance.h"
 

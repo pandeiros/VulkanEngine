@@ -256,7 +256,7 @@
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="Source\VulkanConfig.cpp">
+    <ClCompile Include="Source\VulkanCore.cpp">
       <SubType>
       </SubType>
     </ClCompile>
@@ -332,7 +332,7 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="Include\VulkanConfig.h">
+    <ClInclude Include="Include\VulkanCore.h">
       <SubType>
       </SubType>
     </ClInclude>
@@ -352,6 +352,7 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="Include\VulkanMisc.h" />
     <ClInclude Include="Include\Window.h">
       <SubType>
       </SubType>

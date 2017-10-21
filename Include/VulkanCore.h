@@ -28,14 +28,10 @@
 constexpr double PI = 3.14159265359;
 
 /**
- * @file VulkanConfig.h
+ * @file VulkanCore.h
  */
 
 VULKAN_NS_BEGIN
-
-void ErrorCheck(VkResult Result);
-
-uint32_t GetMemoryTypeIndex(const VkPhysicalDeviceMemoryProperties * PhysicalDeviceMemoryProperties, const VkMemoryRequirements * MemoryRequirements, const VkMemoryPropertyFlags MemoryProperties);
 
 template<typename T>
 bool IsOfEnum(T Value, std::vector<T> Enums)
