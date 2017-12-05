@@ -4,10 +4,11 @@
  * Copyright (C) 2016-2017 Pawel Kaczynski
  */
 
-#include "Tools/Logger.h"
+#include "Utils/Logger.h"
 
 #include <iostream>
 #include <iomanip>
+#include <string>
 
 VULKAN_NS_USING;
 
@@ -20,7 +21,8 @@ void Logger::Log(const char* message)
 
 void Logger::Log(uint32_t message)
 {
-    LogInternal(std::to_string(message));
+    // TODO Fix for Android
+    //LogInternal(std::to_string(message));
 }
 
 void Logger::Log(std::string& message)

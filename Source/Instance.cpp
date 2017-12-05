@@ -5,6 +5,7 @@
  */
 
 #include "Instance.h"
+#include "Utils/Logger.h"
 
 #include <sstream>
 
@@ -44,7 +45,11 @@ void Instance::CreateDevice()
 
 void Instance::CreateAppWindow()
 {
-    window.Create(this, { "Vulkan Engine", {1920, 1080} });
+    // #TODO ANDROID Use AndroidGetWindowSize to set window size.
+    window.Create(this, { "Vulkan Engine", { 1080, 1920 } });
+
+    // WIN
+    //window.Create(this, { "Vulkan Engine", {1920, 1080} });
 }
 
 void Instance::Destroy()
@@ -101,7 +106,8 @@ VulkanDebugCallback(VkDebugReportFlagsEXT MsgFlags, VkDebugReportObjectTypeEXT O
     }
 
     oss << "@[" << LayerPrefix << "] " << Msg << "\n";
-    Logger::Log(oss.str());
+//    Logger::Log(oss.str());
+    Logger::Log(oss.str().c_str());
 
 #ifdef _WIN32
     if (MsgFlags & VK_DEBUG_REPORT_ERROR_BIT_EXT)

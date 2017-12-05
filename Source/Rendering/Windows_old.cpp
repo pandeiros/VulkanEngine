@@ -69,7 +69,7 @@ void WindowOld::EndRender(std::vector<VkSemaphore> WaitSemaphores)
     PresentInfo.pResults = &PresentResult;
 
     (vkQueuePresentKHR(MainRenderer->GetQueue(), &PresentInfo));
-    (PresentResult);
+    //(PresentResult);
 }
 
 VkRenderPass WindowOld::GetRenderPass()
@@ -115,7 +115,7 @@ void WindowOld::CreateSurface()
     if (!FormatCount)
     {
         assert(0 && "Surface format missing.");
-        std::exit(-1);
+        //std::exit(-1);
     }
 
     std::vector<VkSurfaceFormatKHR> SurfaceFormats(FormatCount);
@@ -254,7 +254,7 @@ void WindowOld::CreateDepthStencilImage()
     if (DepthStencilFormat == VK_FORMAT_UNDEFINED)
     {
         assert(0 && "Depth stencil format not selected.");
-        std::exit(-1);
+        //std::exit(-1);
     }
 
     IsStencilAvailable = IsOfEnum<VkFormat>(DepthStencilFormat, {

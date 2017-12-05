@@ -18,8 +18,8 @@
 
 #include "Platform.h"
 #include "BuildOptions.h"
-#include "Tools/Logger.h"
-#include "Tools/DebugTools.h"
+#include "Utils/Logger.h"
+#include "Utils/DebugTools.h"
 
 #include <iostream>
 #include <vector>

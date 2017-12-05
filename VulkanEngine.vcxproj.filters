@@ -31,141 +31,168 @@
     <Filter Include="Source Files\Platforms\Win32">
       <UniqueIdentifier>{12e94d84-e248-424b-a167-35f44b9e40b8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Platforms\Android">
+      <UniqueIdentifier>{b68ab47f-0593-4598-a380-62831c2b0e79}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Platforms\Android">
+      <UniqueIdentifier>{864c85e3-b206-4c97-9a8c-c27aa8f087ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Utils">
+      <UniqueIdentifier>{c2cb5cee-6c99-4f86-962b-96b36400396e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utils">
+      <UniqueIdentifier>{057b2a84-976a-4c96-b859-e08dfd2f6c96}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Source.cpp">
+    <ClCompile Include="source\Source.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Rendering\Renderer.cpp">
+    <ClCompile Include="source\Rendering\Renderer.cpp">
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Platforms\Win32\Window_Win32.cpp">
+    <ClCompile Include="source\Platforms\Win32\Window_Win32.cpp">
       <Filter>Source Files\Platforms\Win32</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Application.cpp">
+    <ClCompile Include="source\Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Engine.cpp">
+    <ClCompile Include="source\Engine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Instance.cpp">
+    <ClCompile Include="source\Instance.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Tools\Logger.cpp">
+    <ClCompile Include="source\PhysicalDevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\PhysicalDevice.cpp">
+    <ClCompile Include="source\Device.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Device.cpp">
+    <ClCompile Include="source\Buffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Tools\DebugTools.cpp">
+    <ClCompile Include="source\Image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Buffer.cpp">
+    <ClCompile Include="source\BufferView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Image.cpp">
+    <ClCompile Include="source\ImageView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\BufferView.cpp">
+    <ClCompile Include="source\Memory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\ImageView.cpp">
+    <ClCompile Include="source\Queue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Memory.cpp">
+    <ClCompile Include="source\CommandPool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Queue.cpp">
+    <ClCompile Include="source\CommandBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\CommandPool.cpp">
+    <ClCompile Include="source\Rendering\Windows_old.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\CommandBuffer.cpp">
+    <ClCompile Include="source\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Rendering\Windows_old.cpp">
+    <ClCompile Include="source\VulkanCore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Window.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="source\Platforms\Android\Window_Android.cpp">
+      <Filter>Source Files\Platforms\Android</Filter>
     </ClCompile>
-    <ClCompile Include="Source\VulkanCore.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="source\Utils\DebugTools.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Utils\Logger.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="android\utils\AndroidUtils.cpp">
+      <Filter>Source Files\Platforms\Android</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Utils\Math.cpp">
+      <Filter>Source Files\Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Include\BuildOptions.h">
+    <ClInclude Include="include\BuildOptions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Platform.h">
+    <ClInclude Include="include\Platform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Platforms\Win32\Window_Win32.h">
+    <ClInclude Include="include\Platforms\Win32\Window_Win32.h">
       <Filter>Header Files\Platforms\Win32</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Rendering\Renderer.h">
+    <ClInclude Include="include\Rendering\Renderer.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Application.h">
+    <ClInclude Include="include\Application.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Engine.h">
+    <ClInclude Include="include\Engine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Instance.h">
+    <ClInclude Include="include\Instance.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Tools\Logger.h">
+    <ClInclude Include="include\PhysicalDevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\PhysicalDevice.h">
+    <ClInclude Include="include\Device.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Device.h">
+    <ClInclude Include="include\Buffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Tools\DebugTools.h">
+    <ClInclude Include="include\Image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Buffer.h">
+    <ClInclude Include="include\ImageView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Image.h">
+    <ClInclude Include="include\BufferView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\ImageView.h">
+    <ClInclude Include="include\Memory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\BufferView.h">
+    <ClInclude Include="include\Queue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Memory.h">
+    <ClInclude Include="include\CommandPool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Queue.h">
+    <ClInclude Include="include\CommandBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\CommandPool.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\CommandBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Rendering\Windows_old.h">
+    <ClInclude Include="include\Rendering\Windows_old.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Window.h">
+    <ClInclude Include="include\Window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\VulkanCore.h">
+    <ClInclude Include="include\VulkanCore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\VulkanMisc.h">
+    <ClInclude Include="include\VulkanMisc.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Utils\DebugTools.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Utils\Logger.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="android\utils\AndroidUtils.h">
+      <Filter>Header Files\Platforms\Android</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Utils\Math.h">
+      <Filter>Header Files\Utils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

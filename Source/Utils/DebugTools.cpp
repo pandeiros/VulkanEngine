@@ -4,7 +4,7 @@
  * Copyright (C) 2016-2017 Pawel Kaczynski
  */
 
-#include "Tools/DebugTools.h"
+#include "Utils/DebugTools.h"
 #include <cassert>
 
 VULKAN_NS_USING;
@@ -93,6 +93,7 @@ void DebugTools::Assert(const bool condition, const char* message)
         assert(condition);
         fflush(stdout);
 
-        std::exit(-1);
+        // #TODO Change this to platform dependent exit.
+        //std::exit(-1);
     }
 }

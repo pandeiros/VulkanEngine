@@ -85,7 +85,7 @@ void Image::checkExtent(VkImageType type, VkExtent3D& outExtent)
     {
         outExtent.height = outExtent.depth = 1u;
     }
-    else if (type = VK_IMAGE_TYPE_2D)
+    else if (type == VK_IMAGE_TYPE_2D)
     {
         outExtent.depth = 1u;
     }

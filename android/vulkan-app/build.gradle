@@ -1,0 +1,79 @@
+apply plugin: 'com.android.application'
+
+// Check for NDK
+def ndkDir
+if (project.rootProject.file('local.properties').exists()) {
+    Properties properties = new Properties()
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+    ndkDir = properties.getProperty('ndk.dir')
+}
+if (!ndkDir) {
+    ndkDir=System.getenv("ANDROID_NDK_HOME")
+}
+
+if(!ndkDir || ndkDir.empty) {
+    throw new GradleException('Environment Variable ANDROID_NDK_HOME for NDK path need to be setup')
+}
+
+def stlType = 'gnustl_static'
+
+android {
+    compileSdkVersion 26
+    buildToolsVersion '26.0.2'
+
+    defaultConfig {
+        applicationId "com.pandeiros.vulkanapp"
+
+        minSdkVersion 22
+        targetSdkVersion 26
+        versionCode 1
+        versionName "0.0.1"
+
+//        multiDexEnabled true
+
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86' //, 'x86_64'
+        }
+
+        externalNativeBuild {
+            cmake {
+                arguments '-DANDROID_PLATFORM=android-24', '-DANDROID_TOOLCHAIN=clang',
+                        "-DANDROID_STL=${stlType}", '-DMODULE_NAME=' + project.getName(),
+                        '-DGVR_FLAGS=-I' + file("src/main/jni").absolutePath
+                //'-DGVR_LINKER_FLAGS=-L' + file("${project.rootDir}/libraries/jni/x86").absolutePath
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "CMakeLists.txt"
+        }
+    }
+
+//    dexOptions {
+//        jumboMode = true
+////        incremental true
+//        javaMaxHeapSize "4g"
+//    }
+//    compileOptions {
+//        sourceCompatibility JavaVersion.VERSION_1_8
+//        targetCompatibility JavaVersion.VERSION_1_8
+//    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+//    compile 'com.android.support:multidex:1.0.2'
+    compile 'com.google.vr:sdk-base:1.80.0'
+    compile 'com.google.vr:sdk-controller:1.80.0'
+}
+
+build.dependsOn(':extractNdk')

@@ -1,6 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Android|Win32">
+      <Configuration>Android</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Android|x64">
+      <Configuration>Android</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
@@ -44,6 +52,12 @@
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Android|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
@@ -58,6 +72,12 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Development|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Android|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
@@ -81,6 +101,9 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Development|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Android|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
@@ -88,6 +111,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Development|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Android|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -102,6 +128,10 @@
     <IncludePath>%VULKAN_SDK%/Include;$(IncludePath)</IncludePath>
     <LibraryPath>%VULKAN_SDK%/Bin32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Android|Win32'">
+    <IncludePath>%VULKAN_SDK%/Include;$(IncludePath)</IncludePath>
+    <LibraryPath>%VULKAN_SDK%/Bin32;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>%VULKAN_SDK%/Include;$(IncludePath)</IncludePath>
     <LibraryPath>%VULKAN_SDK%/Bin32;$(LibraryPath)</LibraryPath>
@@ -111,6 +141,10 @@
     <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Development|x64'">
+    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Android|x64'">
     <IncludePath>$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
@@ -140,12 +174,23 @@
       <AdditionalDependencies>vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Android|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>%VULKAN_SDK%\Include;$(ProjectDir)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)android/utils;$(ProjectDir)third-party\glm;%VULKAN_SDK%\Include;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -157,8 +202,21 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>%VULKAN_SDK%\Include;$(ProjectDir)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)android/utils;$(ProjectDir)third-party\glm;%VULKAN_SDK%\Include;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/DVULKAN_DEV %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%VULKAN_SDK%\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Android|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(ProjectDir)android/libraries/headers/vr/gvr/capi/include;$(ProjectDir)android/libraries/headers;$(ProjectDir)android/vulkan_wrapper;$(ANDROID_NDK_HOME)/platforms/android-24/arch-x86_64/usr/include;$(ANDROID_NDK_HOME)/sources/android/native_app_glue;$(ANDROID_NDK_HOME)/sysroot/usr/include;$(ProjectDir)android/utils;$(ProjectDir)third-party\glm;%VULKAN_SDK%\Include;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/DVULKAN_DEV /D__ANDROID__ %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -187,7 +245,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>%VULKAN_SDK%\Include;$(ProjectDir)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)android/utils;$(ProjectDir)third-party\glm;%VULKAN_SDK%\Include;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -197,163 +255,156 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Buffer.cpp">
+    <ClCompile Include="android\utils\AndroidUtils.cpp" />
+    <ClCompile Include="source\Buffer.cpp">
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="Source\BufferView.cpp">
+    <ClCompile Include="source\BufferView.cpp">
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="Source\CommandBuffer.cpp">
+    <ClCompile Include="source\CommandBuffer.cpp">
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="Source\CommandPool.cpp">
+    <ClCompile Include="source\CommandPool.cpp">
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="Source\Device.cpp">
+    <ClCompile Include="source\Device.cpp">
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="Source\Engine.cpp">
+    <ClCompile Include="source\Engine.cpp">
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="Source\ImageView.cpp">
+    <ClCompile Include="source\ImageView.cpp">
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="Source\Instance.cpp">
+    <ClCompile Include="source\Instance.cpp">
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="Source\Memory.cpp">
+    <ClCompile Include="source\Memory.cpp">
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="Source\PhysicalDevice.cpp">
+    <ClCompile Include="source\PhysicalDevice.cpp">
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="Source\Platforms\Win32\Window_Win32.cpp">
+    <ClCompile Include="source\Platforms\Android\Window_Android.cpp" />
+    <ClCompile Include="source\Platforms\Win32\Window_Win32.cpp">
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="Source\Queue.cpp">
+    <ClCompile Include="source\Queue.cpp">
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="Source\Rendering\Renderer.cpp" />
-    <ClCompile Include="Source\Rendering\Windows_old.cpp" />
-    <ClCompile Include="Source\Source.cpp" />
-    <ClCompile Include="Source\Tools\DebugTools.cpp">
+    <ClCompile Include="source\Rendering\Renderer.cpp" />
+    <ClCompile Include="source\Rendering\Windows_old.cpp" />
+    <ClCompile Include="source\Source.cpp" />
+    <ClCompile Include="source\Utils\DebugTools.cpp" />
+    <ClCompile Include="source\Utils\Logger.cpp" />
+    <ClCompile Include="source\Utils\Math.cpp" />
+    <ClCompile Include="source\VulkanCore.cpp">
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="Source\Tools\Logger.cpp">
+    <ClCompile Include="source\Application.cpp">
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="Source\VulkanCore.cpp">
+    <ClCompile Include="source\Image.cpp">
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="Source\Application.cpp">
-      <SubType>
-      </SubType>
-    </ClCompile>
-    <ClCompile Include="Source\Image.cpp">
-      <SubType>
-      </SubType>
-    </ClCompile>
-    <ClCompile Include="Source\Window.cpp">
+    <ClCompile Include="source\Window.cpp">
       <SubType>
       </SubType>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Include\Buffer.h">
+    <ClInclude Include="android\utils\AndroidUtils.h" />
+    <ClInclude Include="include\Buffer.h">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="Include\BufferView.h">
+    <ClInclude Include="include\BufferView.h">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="Include\BuildOptions.h">
+    <ClInclude Include="include\BuildOptions.h">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="Include\CommandBuffer.h">
+    <ClInclude Include="include\CommandBuffer.h">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="Include\CommandPool.h">
+    <ClInclude Include="include\CommandPool.h">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="Include\Device.h">
+    <ClInclude Include="include\Device.h">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="Include\Image.h">
+    <ClInclude Include="include\Image.h">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="Include\ImageView.h">
+    <ClInclude Include="include\ImageView.h">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="Include\Instance.h">
+    <ClInclude Include="include\Instance.h">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="Include\Platform.h">
+    <ClInclude Include="include\Platform.h">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="Include\Platforms\Win32\Window_Win32.h" />
-    <ClInclude Include="Include\Queue.h">
+    <ClInclude Include="include\Platforms\Win32\Window_Win32.h" />
+    <ClInclude Include="include\Queue.h">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="Include\Rendering\Renderer.h" />
-    <ClInclude Include="Include\Rendering\Windows_old.h">
+    <ClInclude Include="include\Rendering\Renderer.h" />
+    <ClInclude Include="include\Rendering\Windows_old.h">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="Include\Tools\DebugTools.h">
+    <ClInclude Include="include\Utils\DebugTools.h" />
+    <ClInclude Include="include\Utils\Logger.h" />
+    <ClInclude Include="include\Utils\Math.h" />
+    <ClInclude Include="include\VulkanCore.h">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="Include\Tools\Logger.h">
+    <ClInclude Include="include\Application.h">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="Include\VulkanCore.h">
+    <ClInclude Include="include\Engine.h">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="Include\Application.h">
+    <ClInclude Include="include\PhysicalDevice.h">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="Include\Engine.h">
+    <ClInclude Include="include\Memory.h">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="Include\PhysicalDevice.h">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="Include\Memory.h">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="Include\VulkanMisc.h" />
-    <ClInclude Include="Include\Window.h">
+    <ClInclude Include="include\VulkanMisc.h" />
+    <ClInclude Include="include\Window.h">
       <SubType>
       </SubType>
     </ClInclude>

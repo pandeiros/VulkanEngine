@@ -238,6 +238,12 @@ void Window::DestroySwapchainImages()
 
 void Window::CreateDepthStencilImage()
 {
+#ifdef __ANDROID__
+    std::vector<VkFormat> desiredFormats
+    {
+        VK_FORMAT_D24_UNORM_S8_UINT,
+    };
+#else
     std::vector<VkFormat> desiredFormats
     {
         VK_FORMAT_D32_SFLOAT_S8_UINT,
@@ -246,6 +252,7 @@ void Window::CreateDepthStencilImage()
         VK_FORMAT_D32_SFLOAT,
         VK_FORMAT_D16_UNORM
     };
+#endif
 
     VkDevice device = cachedInstance->GetDeviceRef().GetVkDevice();
     PhysicalDevice* physicalDevice = cachedInstance->GetDeviceRef().GetPhysicalDevice();

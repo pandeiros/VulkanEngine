@@ -9,6 +9,8 @@
 
 VULKAN_NS_USING;
 
+#ifndef __ANDROID__
+
 int main()
 {
     Application application;
@@ -92,3 +94,5 @@ int main()
 
     return 0;
 }
+
+#endif
