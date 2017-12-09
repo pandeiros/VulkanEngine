@@ -1,10 +1,13 @@
 /**
- * Vulkan Engine
- *
- * Copyright (C) 2016-2017 Pawel Kaczynski
- */
+* Vulkan Engine
+*
+* Copyright (C) 2016-2017 Pawel Kaczynski
+*/
 
 #include "Engine.h"
+
+#include <cstdlib>
+#include <algorithm>
 
 VULKAN_NS_USING;
 
@@ -22,41 +25,77 @@ Engine* Engine::GetEngine()
 
 void Engine::LogSystemInfo()
 {
-    if (instanceLayers.size() == 0 && instanceExtensions.size() == 0)
+    if (instanceProperties.size())
     {
-        EnumerateInstanceProperties();
+        InitInstanceProperties();
     }
 
-    Logger::Log("Instance layers");
-    for (VkLayerProperties& layer : instanceLayers)
+    Logger::Log("Instance properties:");
+    for (LayerProperties& instanceProperty : instanceProperties)
     {
-        Logger::Log(layer.layerName);
+        Logger::Log(instanceProperty.properties.layerName);
+        for (VkExtensionProperties& extensionProperty : instanceProperty.extensions)
+        {
+            Logger::Log(extensionProperty.extensionName);
+        }
     }
 
-    Logger::Log("\nInstance extensions");
-    for (VkExtensionProperties& extension : instanceExtensions)
-    {
-        Logger::Log(extension.extensionName);
-    }
-
-    Logger::Log("\nPhysical devices");
+    Logger::Log("\nPhysical devices:");
     for (PhysicalDevice& physicalDevice : physicalDevices)
     {
         physicalDevice.LogInfo();
     }
 }
 
-void Engine::EnumerateInstanceProperties()
+void Engine::InitInstanceProperties()
 {
-    uint32_t layerCount = 0;
-    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-    instanceLayers.resize(layerCount);
-    vkEnumerateInstanceLayerProperties(&layerCount, instanceLayers.data());
+    DebugTools::Verify(EnumerateInstanceLayers());
 
-    uint32_t extensionCount = 0;
-    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
-    instanceExtensions.resize(extensionCount);
-    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, instanceExtensions.data());
+    // #TODO init global extensions!!!
+    uint32_t globalExtensionCount;
+}
+
+void Engine::ValidateInstanceProperties(std::vector<const char*> instanceLayers, std::vector<const char*> instaceExtensions)
+{
+    if (instanceProperties.size() == 0)
+    {
+        instanceLayers.clear();
+        instaceExtensions.clear();
+    }
+    else
+    {
+        for (unsigned int layerIndex = instanceLayers.size() - 1; layerIndex >= 0; --layerIndex) // const char* layer : instanceLayers)
+        {
+            const char* layer = instanceLayers[layerIndex];
+
+            std::vector<LayerProperties>::iterator layerIterator = std::find_if(instanceProperties.begin(), instanceProperties.end(), [&layer](const LayerProperties& layerProperties)
+            {
+                return layerProperties.properties.layerName == layer;
+            });
+
+            if (layerIterator != instanceProperties.end())
+            {
+                for (unsigned int extensionIndex = instaceExtensions.size() - 1; extensionIndex >= 0; --extensionIndex)
+                {
+                    const char* extension = instaceExtensions[extensionIndex];
+
+                    std::vector<VkExtensionProperties>::iterator extensionIterator = std::find_if(layerIterator->extensions.begin(), layerIterator->extensions.end(), [&extension](const VkExtensionProperties& extensionProperties)
+                    {
+                        return extensionProperties.extensionName == extension;
+                    });
+
+                    if (extensionIterator == layerIterator->extensions.end())
+                    {
+                        instaceExtensions.pop_back();
+                    }
+                }
+            }
+            else
+            {
+                instanceLayers.pop_back();
+            }
+        }
+    }
 }
 
 void Engine::EnumeratePhysicalDevices(VkInstance instance)
@@ -79,4 +118,91 @@ void Engine::EnumeratePhysicalDevices(VkInstance instance)
 std::vector<PhysicalDevice>& Engine::GetPhysicalDevices()
 {
     return physicalDevices;
+}
+
+VkResult Engine::EnumerateInstanceLayers()
+{
+    VkLayerProperties* properties = nullptr;
+    VkResult result;
+    uint32_t layerCount = 0;
+
+    // #TODO Edit.
+    /*
+    * It's possible, though very rare, that the number of
+    * instance layers could change. For example, installing something
+    * could include new layers that the loader would pick up
+    * between the initial query for the count and the
+    * request for VkLayerProperties. The loader indicates that
+    * by returning a VK_INCOMPLETE status and will update the
+    * the count parameter.
+    * The count parameter will be updated with the number of
+    * entries loaded into the data pointer - in case the number
+    * of layers went down or is smaller than the size given.
+    */
+    do
+    {
+        result = vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+        if (result)
+        {
+            return result;
+        }
+
+        if (layerCount == 0)
+        {
+            return VK_SUCCESS;
+        }
+
+        properties = (VkLayerProperties*)realloc(properties, layerCount * sizeof(VkLayerProperties));
+        result = vkEnumerateInstanceLayerProperties(&layerCount, properties);
+    } while (result == VK_INCOMPLETE);
+
+    /*
+    * Now gather the extension list for each instance layer.
+    */
+    for (uint32_t i = 0; i < layerCount; i++)
+    {
+        LayerProperties layerProperties;
+        layerProperties.properties = properties[i];
+
+        result = EnumerateInstanceExtensions(layerProperties);
+        if (result)
+        {
+            return result;
+        }
+
+        instanceProperties.push_back(layerProperties);
+    }
+
+    free(properties);
+
+    return result;
+}
+
+VkResult Engine::EnumerateInstanceExtensions(LayerProperties& layerProperties)
+{
+    //VkExtensionProperties* extensions;
+    uint32_t extensionCount;
+    VkResult result;
+    char* layerName = nullptr;
+
+    layerName = layerProperties.properties.layerName;
+
+    do
+    {
+        result = vkEnumerateInstanceExtensionProperties(layerName, &extensionCount, NULL);
+        if (result)
+        {
+            return result;
+        }
+
+        if (extensionCount == 0)
+        {
+            return VK_SUCCESS;
+        }
+
+        layerProperties.extensions.resize(extensionCount);
+        result = vkEnumerateInstanceExtensionProperties(layerName, &extensionCount, layerProperties.extensions.data());
+    } while (result == VK_INCOMPLETE);
+
+    return result;
 }

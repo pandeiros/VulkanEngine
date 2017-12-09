@@ -54,7 +54,7 @@ public:
     void WaitIdle();
 
 private:
-    VkDevice device;
+    VkDevice device = VK_NULL_HANDLE;
 
     Queue queue;
 

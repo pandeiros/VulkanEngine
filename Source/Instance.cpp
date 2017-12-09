@@ -13,6 +13,10 @@ VULKAN_NS_USING;
 
 void Instance::Create(VkApplicationInfo applicationInfo, std::vector<const char*> instanceLayers, std::vector<const char*> instaceExtensions)
 {
+    // #TODO Add validation if specified layers are present.
+
+    //Engine::
+
     instanceCreateInfo = {
         VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
         nullptr,
@@ -116,7 +120,7 @@ VulkanDebugCallback(VkDebugReportFlagsEXT MsgFlags, VkDebugReportObjectTypeEXT O
     }
 #endif
 
-    return false;
+    return VK_FALSE;
 }
 
 void Instance::SetupDebug()
@@ -144,7 +148,11 @@ void Instance::SetupDebug()
 
 void Instance::DestroyDebug()
 {
-    fvkDestroyDebugReportCallbackEXT(instance, debugReport, nullptr);
+    if (instance && debugReport)
+    {
+        fvkDestroyDebugReportCallbackEXT(instance, debugReport, nullptr);
+    }
+
     debugReport = VK_NULL_HANDLE;
 }
 

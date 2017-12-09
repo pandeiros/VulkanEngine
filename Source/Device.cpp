@@ -44,7 +44,11 @@ void Device::Create(PhysicalDevice& physicalDevice, std::vector<const char*> dev
 
 void Device::Destroy()
 {
-    vkDestroyDevice(device, nullptr);
+    if (device)
+    {
+        vkDestroyDevice(device, nullptr);
+    }
+
     device = VK_NULL_HANDLE;
 }
 

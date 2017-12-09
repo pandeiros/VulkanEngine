@@ -17,31 +17,47 @@
 /**
  * @file Engine.h
  */
+
 VULKAN_NS_BEGIN
 
-    /**
-     * @class Engine
-     */
-    class Engine
-    {
-    public:
-        static void RegisterGlobalEngine(Engine* engine);
-        static Engine* GetEngine();
+/**
+ * @struct LayerProperties
+ */
+struct LayerProperties
+{
+    VkLayerProperties properties;
+    std::vector<VkExtensionProperties> extensions;
+};
 
-        void LogSystemInfo();
+/**
+ * @class Engine
+ */
+class Engine
+{
+public:
+    static void RegisterGlobalEngine(Engine* engine);
+    static Engine* GetEngine();
 
-        void EnumerateInstanceProperties();
-        void EnumeratePhysicalDevices(VkInstance instance);
+    void LogSystemInfo();
 
-        std::vector<PhysicalDevice>& GetPhysicalDevices();
+    void InitInstanceProperties();
+    void ValidateInstanceProperties(std::vector<const char*> instanceLayers, std::vector<const char*> instaceExtensions);
 
-    private:
-        std::vector<VkLayerProperties> instanceLayers;
-        std::vector<VkExtensionProperties> instanceExtensions;
+    void EnumeratePhysicalDevices(VkInstance instance);
+    std::vector<PhysicalDevice>& GetPhysicalDevices();
 
-        std::vector<PhysicalDevice> physicalDevices;
+private:
+    VkResult EnumerateInstanceLayers();
+    VkResult EnumerateInstanceExtensions(LayerProperties& layerProperties);
 
-        static Engine* engine;
-    };
+    std::vector<LayerProperties> instanceProperties;
+    std::vector<VkExtensionProperties> globalInstanceExtensions;
+
+    //std::vector<VkLayerProperties,
+
+    std::vector<PhysicalDevice> physicalDevices;
+
+    static Engine* engine;
+};
 
 VULKAN_NS_END

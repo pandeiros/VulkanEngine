@@ -28,16 +28,21 @@ void Window::Create(Instance* instance, const WindowCreateInfo& windowCreateInfo
 
 void Window::Destroy()
 {
-    cachedInstance->GetDeviceRef().GetQueueRef().WaitIdle();
+    if (cachedInstance)
+    {
+        cachedInstance->GetDeviceRef().GetQueueRef().WaitIdle();
 
-    DestroySynchronization();
-    DestroyFramebuffer();
-    DestroyRenderPass();
-    DestroyDepthStencilImage();
-    DestroySwapchainImages();
-    DestroySwapchain();
-    DestroySurface();
-    DestroyOSWindow();
+        DestroySynchronization();
+        DestroyFramebuffer();
+        DestroyRenderPass();
+        DestroyDepthStencilImage();
+        DestroySwapchainImages();
+        DestroySwapchain();
+        DestroySurface();
+        DestroyOSWindow();
+    }
+
+    cachedInstance = VK_NULL_HANDLE;
 }
 
 bool Window::Update()

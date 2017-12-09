@@ -91,7 +91,7 @@ void DebugTools::Assert(const bool condition, const char* message)
     {
         Logger::Log(message);
         assert(condition);
-        fflush(stdout);
+        //fflush(stdout);
 
         // #TODO Change this to platform dependent exit.
         //std::exit(-1);

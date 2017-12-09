@@ -24,17 +24,22 @@ void Application::Create(const char* applicationName, uint32_t applicationVersio
 
 void Application::Init()
 {
+#ifdef __ANDROID__
+    DebugTools::Assert(InitVulkan() != 0, "Initialization of Vulkan APIs failed!");
+#endif
+
     Engine::RegisterGlobalEngine(&engine);
 
     // Some debug stuff.
-    engine.EnumerateInstanceProperties();
+    engine.InitInstanceProperties();
+    engine.LogSystemInfo();
 
     instance.Create(applicationInfo,
     {
         "VK_LAYER_GOOGLE_threading",
         "VK_LAYER_LUNARG_object_tracker",
         "VK_LAYER_LUNARG_parameter_validation",
-        "VK_LAYER_LUNARG_swapchain"
+        "VK_LAYER_LUNARG_standard_validation"
     },
     {
         VK_KHR_SURFACE_EXTENSION_NAME,

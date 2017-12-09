@@ -77,10 +77,10 @@ int vulkan_android_main(int argc, char *argv[]) {
 
     Application application;
     application.Create("Vulkan Engine Test", 1, VK_MAKE_VERSION(1, 0, 2));
-//    application.Init();
+    application.Init();
 
-//    Instance& instance = application.GetInstanceRef();
-//    VkDevice device = instance.GetDeviceRef().GetVkDevice();
+    Instance& instance = application.GetInstanceRef();
+    VkDevice device = instance.GetDeviceRef().GetVkDevice();
 //
 //    CommandPool commandPool;
 //    commandPool.Create(device, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
