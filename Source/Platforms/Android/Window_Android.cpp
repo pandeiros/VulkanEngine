@@ -1,8 +1,10 @@
 #include "Platforms/Win32/Window_Win32.h"
-#include "Rendering/Windows_old.h"  // #TODO Delete
+//#include "Rendering/Windows_old.h"  // #TODO Delete
 #include "Window.h"
 #include "Instance.h"
 #include "Rendering/Renderer.h"
+#include "AndroidUtils.h"
+
 #include <cassert>
 #include <string>
 
@@ -16,17 +18,15 @@ void Window::CreateOSWindow()
 
 void Window::CreateOSSurface()
 {
-    // #TODO FIX THIS
-    //GET_INSTANCE_PROC_ADDR(cachedInstance->GetVkInstance(), CreateAndroidSurfaceKHR);
+    VULKAN_GET_INSTANCE_PROC_ADDR(cachedInstance->GetVkInstance(), CreateAndroidSurfaceKHR);
 
-    //VkAndroidSurfaceCreateInfoKHR surfaceCreateInfo;
-    //surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
-    //surfaceCreateInfo.pNext = nullptr;
-    //surfaceCreateInfo.flags = 0;
-    //surfaceCreateInfo.window = AndroidGetApplicationWindow();
-    ////res = fpCreateAndroidSurfaceKHR(info.inst, &surfaceCreateInfo, nullptr, &info.surface);
+    VkAndroidSurfaceCreateInfoKHR surfaceCreateInfo;
+    surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
+    surfaceCreateInfo.pNext = nullptr;
+    surfaceCreateInfo.flags = 0;
+    surfaceCreateInfo.window = AndroidGetApplicationWindow();
 
-    //DebugTools::Verify(fpCreateAndroidSurfaceKHR(info.inst, &surfaceCreateInfo, nullptr, &info.surface));
+    DebugTools::Verify(fvkCreateAndroidSurfaceKHR(cachedInstance->GetVkInstance(), &surfaceCreateInfo, nullptr, &surface));
 }
 
 void Window::UpdateOSWindow()

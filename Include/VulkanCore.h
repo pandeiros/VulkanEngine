@@ -33,6 +33,7 @@ constexpr double PI = 3.14159265359;
 
 VULKAN_NS_BEGIN
 
+// #TODO Move this function somewhere else.
 template<typename T>
 bool IsOfEnum(T Value, std::vector<T> Enums)
 {
@@ -44,5 +45,18 @@ bool IsOfEnum(T Value, std::vector<T> Enums)
 
     return false;
 }
+
+/**
+* @class VulkanObject
+*/
+class VulkanObject
+{
+public:
+    bool IsDirty() const;
+    void SetDirty(bool bDirtyFlag);
+
+private:
+    bool bIsDirty = false;
+};
 
 VULKAN_NS_END

@@ -953,7 +953,7 @@ void android_main(struct android_app *app) {
             //                controller_state.Update(*controller);
             //            }
 
-            LOGE("::: %f", controller_state.GetTouchPos().x);
+            //LOGE("::: %f", controller_state.GetTouchPos().x);
 
             //            sample_main(0, nullptr);
         }
@@ -1032,11 +1032,12 @@ bool AndroidLoadFile(const char *filePath, std::string *data) {
     return true;
 }
 
-void AndroidGetWindowSize(int32_t *width, int32_t *height) {
+void AndroidGetWindowSize(int32_t& width, int32_t& height) {
     // On Android, retrieve the window size from the native window.
     assert(Android_application != nullptr);
-    *width = ANativeWindow_getWidth(Android_application->window);
-    *height = ANativeWindow_getHeight(Android_application->window);
+
+    width = ANativeWindow_getWidth(Android_application->window);
+    height = ANativeWindow_getHeight(Android_application->window);
 }
 
 // Android fopen stub described at

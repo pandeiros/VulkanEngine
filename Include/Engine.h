@@ -41,7 +41,7 @@ public:
     void LogSystemInfo();
 
     void InitInstanceProperties();
-    void ValidateInstanceProperties(std::vector<const char*> instanceLayers, std::vector<const char*> instaceExtensions);
+    void ValidateInstanceProperties(std::vector<const char*>& instanceLayers, std::vector<const char*>& instaceExtensions);
 
     void EnumeratePhysicalDevices(VkInstance instance);
     std::vector<PhysicalDevice>& GetPhysicalDevices();

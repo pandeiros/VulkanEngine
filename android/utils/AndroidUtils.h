@@ -86,11 +86,11 @@ extern "C" {
  /* Amount of time, in nanoseconds, to wait for a command buffer to complete */
 #define FENCE_TIMEOUT 100000000
 
-#define GET_INSTANCE_PROC_ADDR(inst, entrypoint)                               \
+#define GET_INSTANCE_PROC_ADDR(INSTANCE, entrypoint)                               \
     {                                                                          \
-        info.fp##entrypoint =                                                  \
-            (PFN_vk##entrypoint)vkGetInstanceProcAddr(inst, "vk" #entrypoint); \
-        if (info.fp##entrypoint == NULL) {                                     \
+        fp##entrypoint =                                                  \
+            (PFN_vk##entrypoint)vkGetInstanceProcAddr(INSTANCE, "vk" #entrypoint); \
+        if (fp##entrypoint == NULL) {                                     \
             std::cout << "vkGetDeviceProcAddr failed to find vk" #entrypoint;  \
             exit(-1);                                                          \
         }                                                                      \
@@ -122,7 +122,7 @@ extern "C" {
 bool Android_process_command();
 ANativeWindow* AndroidGetApplicationWindow();
 FILE* AndroidFopen(const char* fname, const char* mode);
-void AndroidGetWindowSize(int32_t *width, int32_t *height);
+void AndroidGetWindowSize(int32_t& width, int32_t& height);
 bool AndroidLoadFile(const char* filePath, std::string *data);
 
 //

@@ -9,6 +9,8 @@
 #include <cstdlib>
 #include <algorithm>
 
+#include "Utils/Math.h"
+
 VULKAN_NS_USING;
 
 Engine* Engine::engine = nullptr;
@@ -40,6 +42,12 @@ void Engine::LogSystemInfo()
         }
     }
 
+    Logger::Log("\nGlobal extensions:");
+    for (VkExtensionProperties extension : globalInstanceExtensions)
+    {
+        Logger::Log(extension.extensionName);
+    }
+
     Logger::Log("\nPhysical devices:");
     for (PhysicalDevice& physicalDevice : physicalDevices)
     {
@@ -51,56 +59,79 @@ void Engine::InitInstanceProperties()
 {
     DebugTools::Verify(EnumerateInstanceLayers());
 
-    // #TODO init global extensions!!!
-    uint32_t globalExtensionCount;
+    uint32_t globalExtensionCount = 0;
+    VkResult result;
+    do
+    {
+        DebugTools::Verify(vkEnumerateInstanceExtensionProperties(nullptr, &globalExtensionCount, nullptr));
+
+        if (globalExtensionCount == 0)
+        {
+            return ;
+        }
+
+        globalInstanceExtensions.resize(globalExtensionCount);
+        result = vkEnumerateInstanceExtensionProperties(nullptr, &globalExtensionCount, globalInstanceExtensions.data());
+    } while (result == VK_INCOMPLETE);
+
 }
 
-void Engine::ValidateInstanceProperties(std::vector<const char*> instanceLayers, std::vector<const char*> instaceExtensions)
+void Engine::ValidateInstanceProperties(std::vector<const char*>& instanceLayers, std::vector<const char*>& instanceExtensions)
 {
     if (instanceProperties.size() == 0)
     {
         instanceLayers.clear();
-        instaceExtensions.clear();
     }
     else
     {
-        for (unsigned int layerIndex = instanceLayers.size() - 1; layerIndex >= 0; --layerIndex) // const char* layer : instanceLayers)
-        {
-            const char* layer = instanceLayers[layerIndex];
+        std::vector<const char*> instanceLayersCopy = instanceLayers;
 
-            std::vector<LayerProperties>::iterator layerIterator = std::find_if(instanceProperties.begin(), instanceProperties.end(), [&layer](const LayerProperties& layerProperties)
+        // First we check if specified layers are valid.
+        std::vector<LayerProperties> instancePropertiesCopy = instanceProperties;
+        instanceLayers.erase(std::remove_if(instanceLayers.begin(), instanceLayers.end(), [&instancePropertiesCopy](const char* layer)
+        {
+            Logger::Log((std::string(" >>> ") + std::string(layer)).c_str());
+            return std::find_if(instancePropertiesCopy.begin(), instancePropertiesCopy.end(), [&layer](const LayerProperties& layerProperties)
             {
                 return layerProperties.properties.layerName == layer;
-            });
+            }) != instancePropertiesCopy.end();
+        }), instanceLayers.end());
 
-            if (layerIterator != instanceProperties.end())
+        // #TODO Make this as a verbose log.
+        //std::vector<const char*> instanceLayersDiff = Math::Diff<const char*>(instanceLayersCopy, instanceLayers);
+        //Logger::Log("  Instance layers diff:");
+        //Math::Print(instanceLayersDiff);
+    }
+
+    if (globalInstanceExtensions.size() == 0)
+    {
+        instanceExtensions.clear();
+    }
+    else
+    {
+        std::vector<const char*> instanceExtensionsCopy = instanceExtensions;
+
+        // We assume, that all layer-specific extensions are present in global extensions container.
+        std::vector<VkExtensionProperties> globalInstanceExtensionsCopy = globalInstanceExtensions;
+        instanceExtensions.erase(std::remove_if(instanceExtensions.begin(), instanceExtensions.end(), [&globalInstanceExtensionsCopy](const char* extension)
+        {
+            return (std::find_if(globalInstanceExtensionsCopy.begin(), globalInstanceExtensionsCopy.end(), [&extension](const VkExtensionProperties& extensionProperties)
             {
-                for (unsigned int extensionIndex = instaceExtensions.size() - 1; extensionIndex >= 0; --extensionIndex)
-                {
-                    const char* extension = instaceExtensions[extensionIndex];
+                return extensionProperties.extensionName == extension;
+            }) != globalInstanceExtensionsCopy.end());
+        }), instanceExtensions.end());
 
-                    std::vector<VkExtensionProperties>::iterator extensionIterator = std::find_if(layerIterator->extensions.begin(), layerIterator->extensions.end(), [&extension](const VkExtensionProperties& extensionProperties)
-                    {
-                        return extensionProperties.extensionName == extension;
-                    });
-
-                    if (extensionIterator == layerIterator->extensions.end())
-                    {
-                        instaceExtensions.pop_back();
-                    }
-                }
-            }
-            else
-            {
-                instanceLayers.pop_back();
-            }
-        }
+        // #TODO Make this as a verbose log.
+        //std::vector<const char*> instanceExtensionsDiff = Math::Diff<const char*>(instanceExtensionsCopy, instanceExtensions);
+        //Logger::Log("  Instance extensions diff:");
+        //Math::Print(instanceExtensionsDiff);
     }
 }
 
 void Engine::EnumeratePhysicalDevices(VkInstance instance)
 {
     std::vector<VkPhysicalDevice> vkPhysicalDevices;
+
     uint32_t physicalDevicesCount = 0;
     vkEnumeratePhysicalDevices(instance, &physicalDevicesCount, nullptr);
     vkPhysicalDevices.resize(physicalDevicesCount);
@@ -156,9 +187,7 @@ VkResult Engine::EnumerateInstanceLayers()
         result = vkEnumerateInstanceLayerProperties(&layerCount, properties);
     } while (result == VK_INCOMPLETE);
 
-    /*
-    * Now gather the extension list for each instance layer.
-    */
+    /** Now gather the extension list for each instance layer. */
     for (uint32_t i = 0; i < layerCount; i++)
     {
         LayerProperties layerProperties;
@@ -180,7 +209,6 @@ VkResult Engine::EnumerateInstanceLayers()
 
 VkResult Engine::EnumerateInstanceExtensions(LayerProperties& layerProperties)
 {
-    //VkExtensionProperties* extensions;
     uint32_t extensionCount;
     VkResult result;
     char* layerName = nullptr;

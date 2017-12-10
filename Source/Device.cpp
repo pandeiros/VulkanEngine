@@ -11,35 +11,18 @@ VULKAN_NS_USING;
 void Device::Create(PhysicalDevice& physicalDevice, std::vector<const char*> deviceExtensions, VkPhysicalDeviceFeatures requiredFeatures)
 {
     cachedPhysicalDevice = &physicalDevice;
+    cachedDeviceExtensions = deviceExtensions;
+    cachedRequiredFeatures = requiredFeatures;
 
-    float priorityQueue[]{ 1.f };
+    CreateInternal();
+}
 
-    deviceQueueCreateInfo = {
-        VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
-        nullptr,
-        0,
-        physicalDevice.GetGraphicsFamilyIndex(),
-        1,
-        priorityQueue
-    };
+void Device::Reset()
+{
+    Destroy();
+    CreateInternal();
 
-    deviceCreateInfo = {
-        VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
-        nullptr,
-        0,
-        1,
-        &deviceQueueCreateInfo,
-        0,
-        nullptr,
-        (uint32_t)deviceExtensions.size(),
-        deviceExtensions.data(),
-        &requiredFeatures
-    };
-
-    if (DebugTools::Verify(vkCreateDevice(physicalDevice.GetVkPhysicalDevice(), &deviceCreateInfo, nullptr, &device)) == VK_SUCCESS)
-    {
-        vkGetDeviceQueue(device, physicalDevice.GetGraphicsFamilyIndex(), 0, &queue.GetVkQueueRef());
-    }
+    cachedPhysicalDevice->SetDirty(false);
 }
 
 void Device::Destroy()
@@ -50,6 +33,14 @@ void Device::Destroy()
     }
 
     device = VK_NULL_HANDLE;
+}
+
+void Device::CheckPhysicalDeviceDirty()
+{
+    if (cachedPhysicalDevice && cachedPhysicalDevice->IsDirty())
+    {
+        Reset();
+    }
 }
 
 VkDevice Device::GetVkDevice()
@@ -136,4 +127,37 @@ void Device::BindImageMemory(VkImage image, VkDeviceMemory memory, VkDeviceSize 
 void Device::WaitIdle()
 {
     vkDeviceWaitIdle(device);
+}
+
+void Device::CreateInternal()
+{
+    float priorityQueue[]{ 1.f };
+
+    deviceQueueCreateInfo = {
+        VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+        nullptr,
+        0,
+        cachedPhysicalDevice->GetGraphicsFamilyIndex(),
+        1,
+        priorityQueue
+    };
+
+    deviceCreateInfo = {
+        VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+        nullptr,
+        0,
+        1,
+        &deviceQueueCreateInfo,
+        0,
+        nullptr,
+        (uint32_t)cachedDeviceExtensions.size(),
+        cachedDeviceExtensions.data(),
+        &cachedRequiredFeatures
+    };
+
+    if (DebugTools::Verify(vkCreateDevice(cachedPhysicalDevice->GetVkPhysicalDevice(), &deviceCreateInfo, nullptr, &device)) == VK_SUCCESS)
+    {
+        vkGetDeviceQueue(device, cachedPhysicalDevice->GetGraphicsFamilyIndex(), 0, &queue.GetVkQueueRef());
+    }
+
 }

@@ -17,14 +17,15 @@ VULKAN_NS_BEGIN
 #define GET_3RD_ARG(A, B, C, ...)                   C
 #define GET_4TH_ARG(A, B, C, D, ...)                D
 
-#define GET_INSTANCE_PROC_ADDR(inst, entrypoint)                               \
-    {                                                                          \
-        info.fp##entrypoint =                                                  \
-            (PFN_vk##entrypoint)vkGetInstanceProcAddr(inst, "vk" #entrypoint); \
-        if (info.fp##entrypoint == NULL) {                                     \
-            std::cout << "vkGetDeviceProcAddr failed to find vk" #entrypoint;  \
-            exit(-1);                                                          \
-        }                                                                      \
+// #TODO Change log to assert.
+#define VULKAN_GET_INSTANCE_PROC_ADDR(INSTANCE, ENTRY_POINT)                                                   \
+    {                                                                                                   \
+        fvk##ENTRY_POINT = (PFN_vk##ENTRY_POINT)vkGetInstanceProcAddr(INSTANCE, "vk" #ENTRY_POINT);     \
+        if (fvk##ENTRY_POINT == NULL)                                                                   \
+        {                                                                                               \
+            Logger::Log("vkGetDeviceProcAddr failed to find vk" #ENTRY_POINT);                          \
+            /* Exit? */                                                                                 \
+        }                                                                                               \
     }
 
 VULKAN_NS_END

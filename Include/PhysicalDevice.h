@@ -19,7 +19,7 @@ VULKAN_NS_BEGIN
 /**
  * @class PhysicalDevice
  */
-class PhysicalDevice
+class PhysicalDevice : public VulkanObject
 {
 public:
     /**
@@ -45,6 +45,7 @@ public:
     const std::vector<VkDisplayPropertiesKHR>& GetPhysicalDeviceDisplayProperties() const;
 
     uint32_t GetGraphicsFamilyIndex() const;
+    uint32_t GetPresentQueueFamilyIndex(VkSurfaceKHR surface);
 
     VkFormatProperties GetFormatProperties(VkFormat format) const;
     VkImageFormatProperties GetImageFormatProperties(VkFormat format, VkImageType type, VkImageTiling tiling,
@@ -67,7 +68,8 @@ private:
     std::vector<VkExtensionProperties> availableDeviceExtensions;
     std::vector<VkDisplayPropertiesKHR> displayProperties;
 
-    uint32_t graphicsFamilyIndex = 0;
+    uint32_t graphicsQueueFamilyIndex = UINT32_MAX;
+    uint32_t presentQueueFamilyIndex = UINT32_MAX;
 };
 
 VULKAN_NS_END

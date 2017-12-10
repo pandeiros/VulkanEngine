@@ -6,6 +6,7 @@
 
 #include "Instance.h"
 #include "Utils/Logger.h"
+#include "AndroidUtils.h"
 
 #include <sstream>
 
@@ -13,9 +14,12 @@ VULKAN_NS_USING;
 
 void Instance::Create(VkApplicationInfo applicationInfo, std::vector<const char*> instanceLayers, std::vector<const char*> instaceExtensions)
 {
-    // #TODO Add validation if specified layers are present.
+    Engine* engine = Engine::GetEngine();
 
-    //Engine::
+    if (engine)
+    {
+        engine->ValidateInstanceProperties(instanceLayers, instaceExtensions);
+    }
 
     instanceCreateInfo = {
         VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
@@ -49,11 +53,17 @@ void Instance::CreateDevice()
 
 void Instance::CreateAppWindow()
 {
-    // #TODO ANDROID Use AndroidGetWindowSize to set window size.
-    window.Create(this, { "Vulkan Engine", { 1080, 1920 } });
+    int32_t height = 0, width = 0;
 
-    // WIN
-    //window.Create(this, { "Vulkan Engine", {1920, 1080} });
+#ifdef __ANDROID__
+    AndroidGetWindowSize(width, height);
+    DebugTools::Assert(width > 0 && height > 0, "Invalid window size.");
+#elif _WIN32
+    height = 1080;
+    width = 1920;
+#endif
+
+    window.Create(this, { "Vulkan Engine", { (uint32_t)width, (uint32_t)height } });
 }
 
 void Instance::Destroy()
@@ -138,12 +148,13 @@ void Instance::SetupDebug()
         nullptr
     };
 
-    fvkCreateDebugReportCallbackEXT = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugReportCallbackEXT");
-    fvkDestroyDebugReportCallbackEXT = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugReportCallbackEXT");
+    VULKAN_GET_INSTANCE_PROC_ADDR(instance, CreateDebugReportCallbackEXT);
+    VULKAN_GET_INSTANCE_PROC_ADDR(instance, DestroyDebugReportCallbackEXT);
 
+    // #TODO Remove after fixing VULKAN_GET_INSTANCE_PROC_ADDR in VulkanMisc)
     DebugTools::Assert(fvkCreateDebugReportCallbackEXT && fvkDestroyDebugReportCallbackEXT, "Cannot fetch debug function pointers.");
 
-    fvkCreateDebugReportCallbackEXT(instance, &debugCallbackCreateInfo, nullptr, &debugReport);
+    DebugTools::Verify(fvkCreateDebugReportCallbackEXT(instance, &debugCallbackCreateInfo, nullptr, &debugReport));
 }
 
 void Instance::DestroyDebug()

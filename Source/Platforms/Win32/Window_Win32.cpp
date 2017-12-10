@@ -8,7 +8,7 @@
 
 VULKAN_NS_USING;
 
-#if VK_USE_PLATFORM_WIN32_KHR
+#if _WIN32
 
 // MS Windows event handling function:
 LRESULT CALLBACK WindowsEventHandler(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)

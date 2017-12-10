@@ -106,16 +106,10 @@ void Window::CreateSurface()
     CreateOSSurface();
 
     VkPhysicalDevice physicalDevice = cachedInstance->GetDeviceRef().GetPhysicalDevice()->GetVkPhysicalDevice();
-    uint32_t queueFamilyIndex = cachedInstance->GetDeviceRef().GetPhysicalDevice()->GetGraphicsFamilyIndex();
+    uint32_t presentQueueFamilyIndex = cachedInstance->GetDeviceRef().GetPhysicalDevice()->GetPresentQueueFamilyIndex(surface);
 
-    VkBool32 bWSISupported = false;
-    vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, queueFamilyIndex, surface, &bWSISupported);
-
-    /*if (!bWSISupported)
-    {
-    assert(0 && "WSI not supported.");
-    std::exit(-1);
-    }*/
+    // Graphics family index may be changed to one supporting presenting and thus device should be reset.
+    cachedInstance->GetDeviceRef().CheckPhysicalDeviceDirty();
 
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &surfaceCapabilities);
 
@@ -138,6 +132,8 @@ void Window::CreateSurface()
     }
     else
     {
+        DebugTools::Assert(surfaceFormats.size() > 0, "Could not find any formats.");
+
         surfaceFormat = surfaceFormats[0];
     }
 }

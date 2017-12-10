@@ -32,7 +32,6 @@ void Application::Init()
 
     // Some debug stuff.
     engine.InitInstanceProperties();
-    engine.LogSystemInfo();
 
     instance.Create(applicationInfo,
     {

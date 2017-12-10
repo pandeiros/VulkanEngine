@@ -1,3 +1,6 @@
+## Temporary ignores
+utils/*
+
 ## Third-party libraries
 third-party/*
 

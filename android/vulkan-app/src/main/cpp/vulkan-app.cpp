@@ -81,10 +81,10 @@ int vulkan_android_main(int argc, char *argv[]) {
 
     Instance& instance = application.GetInstanceRef();
     VkDevice device = instance.GetDeviceRef().GetVkDevice();
-//
-//    CommandPool commandPool;
-//    commandPool.Create(device, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-//                       instance.GetDeviceRef().GetPhysicalDevice()->GetGraphicsFamilyIndex());
+
+    CommandPool commandPool;
+    commandPool.Create(device, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+                       instance.GetDeviceRef().GetPhysicalDevice()->GetGraphicsFamilyIndex());
 //
 //    commandPool.AllocateCommandBuffer(device, VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 //
@@ -150,7 +150,7 @@ int vulkan_android_main(int argc, char *argv[]) {
 //
 //    vkDestroySemaphore(device, semaphoreRenderComplete, nullptr);
 //
-//    commandPool.Destroy(device);
+    commandPool.Destroy(device);
 
     application.Destroy();
 

@@ -19,10 +19,11 @@ VULKAN_NS_BEGIN
 
 class Instance;
 
-typedef struct WindowCreateInfo {
-    std::string         windowName;
-    VkExtent2D          surfaceSize;
-} WindowCreateInfo;
+struct WindowCreateInfo
+{
+    std::string windowName;
+    VkExtent2D surfaceSize;
+};
 
 /**
  * @class Window
@@ -69,6 +70,7 @@ private:
     VkSurfaceKHR surface = VK_NULL_HANDLE;
     VkSurfaceCapabilitiesKHR surfaceCapabilities = {};
     VkSurfaceFormatKHR surfaceFormat = {};
+    uint32_t presentQueueFamilyIndex = UINT32_MAX;
 
     //////////////////////////////////////////////////////////////////////////
     // Swapchain
@@ -145,11 +147,13 @@ private:
     // Win32 members
     //////////////////////////////////////////////////////////////////////////
 
-#if VK_USE_PLATFORM_WIN32_KHR
+#if _WIN32
     HINSTANCE win32Instance = NULL;
     HWND win32Window = NULL;
     std::string win32ClassName;
     static uint64_t win32ClassIdCounter;
+#elif __ANDROID__
+    PFN_vkCreateAndroidSurfaceKHR fvkCreateAndroidSurfaceKHR;
 #endif
 };
 

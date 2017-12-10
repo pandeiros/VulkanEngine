@@ -37,7 +37,9 @@ public:
     void Create(PhysicalDevice& physicalDevice, std::vector<const char*> deviceExtensions = {},
         VkPhysicalDeviceFeatures requiredFeatures = {});
 
+    void Reset();
     void Destroy();
+    void CheckPhysicalDeviceDirty();
 
     VkDevice GetVkDevice();
     Queue& GetQueueRef();
@@ -54,6 +56,8 @@ public:
     void WaitIdle();
 
 private:
+    void CreateInternal();
+
     VkDevice device = VK_NULL_HANDLE;
 
     Queue queue;
@@ -62,6 +66,10 @@ private:
 
     VkDeviceCreateInfo deviceCreateInfo = {};
     VkDeviceQueueCreateInfo deviceQueueCreateInfo = {};
+
+    // Properties used to initialize VkDevice.
+    std::vector<const char*> cachedDeviceExtensions;
+    VkPhysicalDeviceFeatures cachedRequiredFeatures;
 };
 
 VULKAN_NS_END

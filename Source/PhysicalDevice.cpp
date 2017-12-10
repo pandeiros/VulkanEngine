@@ -21,17 +21,20 @@ void PhysicalDevice::Create(const VkPhysicalDevice physicalDevice)
     queueFamilyProperties.resize(familyCount);
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &familyCount, queueFamilyProperties.data());
 
-    bool bFamilyIndexFound = false;
     for (uint32_t i = 0; i < familyCount; ++i)
     {
         if (queueFamilyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
         {
-            graphicsFamilyIndex = i;
-            bFamilyIndexFound = true;
+            if (graphicsQueueFamilyIndex == UINT32_MAX)
+            {
+                graphicsQueueFamilyIndex = i;
+            }
+
+            break;
         }
     }
 
-    DebugTools::Assert(bFamilyIndexFound, "Queue family supporting graphics not found.");
+    DebugTools::Assert(graphicsQueueFamilyIndex != UINT32_MAX, "Queue family supporting graphics not found.");
 
     uint32_t layerCount = 0;
     vkEnumerateDeviceLayerProperties(physicalDevice, &layerCount, nullptr);
@@ -86,7 +89,39 @@ const std::vector<VkLayerProperties>& PhysicalDevice::GetAvailableDeviceLayers()
 
 uint32_t PhysicalDevice::GetGraphicsFamilyIndex() const
 {
-    return graphicsFamilyIndex;
+    return graphicsQueueFamilyIndex;
+}
+
+uint32_t PhysicalDevice::GetPresentQueueFamilyIndex(VkSurfaceKHR surface)
+{
+    VkBool32 bPresentSupported = false;
+    uint32_t tempGraphicsIndex = UINT32_MAX;
+
+    for (uint32_t index = 0; index < queueFamilyProperties.size(); ++index)
+    {
+        if (queueFamilyProperties[index].queueFlags & VK_QUEUE_GRAPHICS_BIT)
+        {
+            vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, index, surface, &bPresentSupported);
+
+            if (bPresentSupported == VK_TRUE)
+            {
+                tempGraphicsIndex = index;
+                presentQueueFamilyIndex = index;
+
+                break;
+            }
+        }
+    }
+
+    DebugTools::Assert(presentQueueFamilyIndex != UINT32_MAX, "Present queue family index not found!");
+
+    if (tempGraphicsIndex != graphicsQueueFamilyIndex)
+    {
+        graphicsQueueFamilyIndex = tempGraphicsIndex;
+        SetDirty(true);
+    }
+
+    return presentQueueFamilyIndex;
 }
 
 VkFormatProperties PhysicalDevice::GetFormatProperties(VkFormat format) const
