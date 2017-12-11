@@ -20,12 +20,6 @@
 
 #include <AndroidUtils.h>
 #include "AndroidApplication.h"
-//#include "cube_data.h"
-//#include "gvr.h"
-//
-//#include <assert.h>
-//#include <string.h>
-//#include <cstdlib>
 
 /* For this sample, we'll start with GLSL so the shader function is plain */
 /* and then use the glslang GLSLtoSPV utility to convert it to SPIR-V for */
@@ -57,19 +51,7 @@ static const char *fragShaderText =
     "   outColor = color;\n"
     "}\n";
 
-//#include "Window.h"
-//#include "CommandPool.h"
-
-//#include <array>
-//#include <chrono>
-//#include <cmath>
-
-//using namespace vulkan;
-
-int vulkan_android_main_old();
-
 int vulkan_android_main(int argc, char *argv[], vulkan_android_app* androidApp)
-//int vulkan_android_main_old()
 {
     if (!AndroidUtils::androidApplication.nativeApplication)
     {

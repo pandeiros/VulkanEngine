@@ -35,14 +35,14 @@ public:
     void Create(const char* applicationName, uint32_t applicationVersion, uint32_t apiVersion);
 
     virtual void Init() override;
-    virtual void Destroy();
-
-    virtual void Update() override
-    {};
+    virtual void Destroy() override;
 
     Instance& GetInstanceRef();
 
 protected:
+    //virtual void Tick() override
+    //{};
+
     Instance instance;
     Engine engine;
 

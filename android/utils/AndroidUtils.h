@@ -65,6 +65,16 @@ extern "C" {
 class AndroidUtils
 {
 public:
+    static void Clean()
+    {
+        if (androidApplication.vulkanApplication)
+        {
+            androidApplication.vulkanApplication->Destroy();
+        }
+
+        delete androidApplication.vulkanApplication;
+    }
+
     static vulkan_android_app androidApplication;
 };
 

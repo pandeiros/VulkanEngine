@@ -769,7 +769,7 @@ using namespace std;
 //    return "";
 //#else
 //    assert(nativeApplication.androidApplication != nullptr);
-//    return nativeApplication.androidApplication.activity->externalDataPath;
+//    return nativeApplication.AndroidUtils::androidApplication.activity->externalDataPath;
 //#endif
 //}
 //
@@ -817,10 +817,12 @@ private:
 static bool bReady = false;
 
 void Android_handle_cmd(android_app *app, int32_t cmd) {
-    switch (cmd) {
+    switch (cmd)
+    {
     case APP_CMD_INIT_WINDOW:
+
         // The window is being shown, get it ready.
-        androidApplication.vulkanApplication->Init();
+        AndroidUtils::androidApplication.vulkanApplication->Init();
 
         LOGI("\n");
         LOGI("=================================================");
@@ -830,6 +832,7 @@ void Android_handle_cmd(android_app *app, int32_t cmd) {
         break;
     case APP_CMD_TERM_WINDOW:
         // The window is being hidden or closed, clean it up.
+        AndroidUtils::Clean();
         break;
     default:
         LOGI("event not handled: %d", cmd);
@@ -837,15 +840,15 @@ void Android_handle_cmd(android_app *app, int32_t cmd) {
 }
 
 bool Android_process_command() {
-    assert(androidApplication.nativeApplication != nullptr);
+    assert(AndroidUtils::androidApplication.nativeApplication != nullptr);
     int events;
     android_poll_source *source;
     // Poll all pending events.
     if (ALooper_pollAll(0, NULL, &events, (void **)&source) >= 0) {
         // Process each polled events
-        if (source != NULL) source->process(androidApplication.nativeApplication, source);
+        if (source != NULL) source->process(AndroidUtils::androidApplication.nativeApplication, source);
     }
-    return androidApplication.nativeApplication->destroyRequested;
+    return AndroidUtils::androidApplication.nativeApplication->destroyRequested;
 }
 
 NATIVE_METHOD(void, nativeOnCreate)
@@ -868,7 +871,7 @@ NATIVE_METHOD(void, nativeOnCreate)
     gvr::ControllerApi *controller_api = new gvr::ControllerApi;
 
 //    if (nativeApplication.androidApplication)
-//        nativeApplication.androidApplication.userData = controller_api;
+//        nativeApplication.AndroidUtils::androidApplication.userData = controller_api;
 
     // Initialize it. Notice that we pass the gvr_context pointer.
     if (!controller_api->Init(options, context)) {
@@ -905,11 +908,6 @@ static gvr::ControllerState controller_state;
 
 void android_main(struct android_app *app)
 {
-    if (!app)
-    {
-        return;
-    }
-
     LOGI("============ ANDROID_MAIN ============");
 
     // Set static variables.
@@ -944,51 +942,49 @@ void android_main(struct android_app *app)
     std::cout.rdbuf(new AndroidBuffer(ANDROID_LOG_INFO));
     std::cerr.rdbuf(new AndroidBuffer(ANDROID_LOG_ERROR));
 
-//        gvr::ControllerState controller_state;
+//   gvr::ControllerState controller_state;
 
     vulkan_android_main(0, nullptr, nullptr);
 
-//    AndroidApplication *application = new AndroidApplication();
-//    application->Create("Vulkan Engine App Test", 1, VK_MAKE_VERSION(1, 0, 2));
-//
-//    androidApp->vulkanApplication = application;
+    vulkan::VulkanObject* vkApplication = AndroidUtils::androidApplication.vulkanApplication;
 
     // Main loop
     do {
         Android_process_command();
 
-//        vulkan::VulkanObject* application = static_cast<vulkan::VulkanObject*>(nativeApplication.androidApplication.userData);
-
-        if (androidApplication.vulkanApplication)
+        if (vkApplication)
         {
-            androidApplication.vulkanApplication->Update();
-//            gvr::ControllerApi* api = static_cast<gvr::ControllerApi*>(nativeApplication.androidApplication.userData);
-//            if (api)
-//            {
-//                controller_state.Update(*api);
-//            }
+            vkApplication->Update();
+
+//          gvr::ControllerApi* api = static_cast<gvr::ControllerApi*>(nativeApplication.AndroidUtils::androidApplication.userData);
+//          if (api)
+//          {
+//              controller_state.Update(*api);
+//          }
 
             //LOGE("::: %f", controller_state.GetTouchPos().x);
-        }
-        else
-        {
-//            vulkan_android_main(0, nullptr);
-            LOGE("Not ready...");
+
+            if (vkApplication->IsPendingKill())
+            {
+                break;
+            }
         }
     }  // Check if system requested to quit the application
     while (app->destroyRequested == 0);
+
+    AndroidUtils::Clean();
 
     return;
 }
 
 ANativeWindow *AndroidGetApplicationWindow() {
-    assert(androidApplication.nativeApplication);
-    return androidApplication.nativeApplication->window;
+    assert(AndroidUtils::androidApplication.nativeApplication);
+    return AndroidUtils::androidApplication.nativeApplication->window;
 }
 
 //bool AndroidFillShaderMap(const char *path, std::unordered_map<std::string, std::string> *map_shaders) {
 //    assert(nativeApplication.androidApplication != nullptr);
-//    auto directory = AAssetManager_openDir(nativeApplication.androidApplication.activity->assetManager, path);
+//    auto directory = AAssetManager_openDir(nativeApplication.AndroidUtils::androidApplication.activity->assetManager, path);
 //
 //    const char *name = nullptr;
 //    while (1) {
@@ -1034,8 +1030,8 @@ ANativeWindow *AndroidGetApplicationWindow() {
 //}
 
 bool AndroidLoadFile(const char *filePath, std::string *data) {
-    assert(androidApplication.nativeApplication);
-    AAsset *file = AAssetManager_open(androidApplication.nativeApplication->activity->assetManager, filePath, AASSET_MODE_BUFFER);
+    assert(AndroidUtils::androidApplication.nativeApplication);
+    AAsset *file = AAssetManager_open(AndroidUtils::androidApplication.nativeApplication->activity->assetManager, filePath, AASSET_MODE_BUFFER);
     size_t fileLength = AAsset_getLength(file);
     LOGI("Loaded file:%s size:%zu", filePath, fileLength);
     if (fileLength == 0) {
@@ -1048,10 +1044,10 @@ bool AndroidLoadFile(const char *filePath, std::string *data) {
 
 void AndroidGetWindowSize(int32_t& width, int32_t& height) {
     // On Android, retrieve the window size from the native window.
-    assert(androidApplication.nativeApplication);
+    assert(AndroidUtils::androidApplication.nativeApplication);
 
-    width = ANativeWindow_getWidth(androidApplication.nativeApplication->window);
-    height = ANativeWindow_getHeight(androidApplication.nativeApplication->window);
+    width = ANativeWindow_getWidth(AndroidUtils::androidApplication.nativeApplication->window);
+    height = ANativeWindow_getHeight(AndroidUtils::androidApplication.nativeApplication->window);
 }
 
 // Android fopen stub described at
@@ -1074,8 +1070,8 @@ FILE *AndroidFopen(const char *fname, const char *mode) {
         return NULL;
     }
 
-    assert(androidApplication.nativeApplication);
-    AAsset *asset = AAssetManager_open(androidApplication.nativeApplication->activity->assetManager, fname, 0);
+    assert(AndroidUtils::androidApplication.nativeApplication);
+    AAsset *asset = AAssetManager_open(AndroidUtils::androidApplication.nativeApplication->activity->assetManager, fname, 0);
     if (!asset) {
         return NULL;
     }
@@ -1083,25 +1079,9 @@ FILE *AndroidFopen(const char *fname, const char *mode) {
     return funopen(asset, android_read, android_write, android_seek, android_close);
 }
 
-//int vulkan_android_main_old(int argc, char *argv[]) //, vulkan_android_app* androidApp)
-////int vulkan_android_main_old()
-//{
-//    if (!androidApplication.nativeApplication)
-//    {
-//        return VK_NOT_READY;
-//    }
-//
-//    AndroidApplication *application = new AndroidApplication();
-//    application->Create("Vulkan Engine App Test", 1, VK_MAKE_VERSION(1, 0, 2));
-//
-//    androidApp->vulkanApplication = application;
-//
-//    return 0;
-//}
-
 float GetControllerXPos()
 {
-    if (androidApplication.nativeApplication && androidApplication.nativeApplication->userData)
+    if (AndroidUtils::androidApplication.nativeApplication && AndroidUtils::androidApplication.nativeApplication->userData)
     {
         return controller_state.GetTouchPos().x;
     }

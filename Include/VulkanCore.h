@@ -52,14 +52,25 @@ bool IsOfEnum(T Value, std::vector<T> Enums)
 class VulkanObject
 {
 public:
-    virtual void Update() {};
     virtual void Init() {};
+    virtual void Destroy() {};
+    void Update();
 
     bool IsDirty() const;
-    void SetDirty(bool bDirtyFlag);
+    void SetDirty(bool isDirty);
+
+    void SetUpdateEnabled(bool isUpdateEnabled);
+
+    bool IsPendingKill() const;
+    void SetPendingKill(bool pendingKill);
+
+protected:
+    virtual void Tick() {};
 
 private:
     bool bIsDirty = false;
+    bool bIsUpdateEnabled = false;
+    bool bPendingKill = false;
 };
 
 VULKAN_NS_END
