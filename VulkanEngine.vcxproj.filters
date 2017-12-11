@@ -194,5 +194,8 @@
     <ClInclude Include="include\Utils\Math.h">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="android\utils\AndroidCore.h">
+      <Filter>Header Files\Platforms\Android</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

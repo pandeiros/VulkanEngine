@@ -52,6 +52,9 @@ bool IsOfEnum(T Value, std::vector<T> Enums)
 class VulkanObject
 {
 public:
+    virtual void Update() {};
+    virtual void Init() {};
+
     bool IsDirty() const;
     void SetDirty(bool bDirtyFlag);
 

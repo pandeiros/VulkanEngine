@@ -329,6 +329,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="android\utils\AndroidCore.h" />
     <ClInclude Include="android\utils\AndroidUtils.h" />
     <ClInclude Include="include\Buffer.h">
       <SubType>

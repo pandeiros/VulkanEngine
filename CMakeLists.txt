@@ -8,7 +8,7 @@ set(INCLUDE_DATA_DIR ${INCLUDE_DATA_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/include") 
 
 if (ANDROID)
     set(ANDROID_INCLUDE_DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android/utils")
-endif()      
+endif()
 
 set(SAMPLES_DATA_DIR ${SAMPLES_DATA_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/data")
 set(GLSLANG_SPIRV_INCLUDE_DIR ${SHADERC_SRC}/third_party/glslang)
@@ -29,7 +29,7 @@ set_target_properties(shaderc_lib PROPERTIES IMPORTED_LOCATION
                       ${SHADERC_SRC}/libs/${ANDROID_STL}/${ANDROID_ABI}/libshaderc.a)
 
 add_library(lib_gvr SHARED IMPORTED)
-set_target_properties(lib_gvr PROPERTIES IMPORTED_LOCATION 
+set_target_properties(lib_gvr PROPERTIES IMPORTED_LOCATION
                       ${CMAKE_CURRENT_SOURCE_DIR}/android/libraries/jni/${ANDROID_ABI}/libgvr.so)
 
 if (ANDROID)
@@ -49,7 +49,7 @@ else()
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-sign-compare")
 endif()
 
-add_library(${VULKAN_ENGINE_NAME} STATIC ${VULKAN_ENGINE_SOURCE1} ${VULKAN_ENGINE_SOURCE2} ${VULKAN_ENGINE_SOURCE3} 
+add_library(${VULKAN_ENGINE_NAME} STATIC ${VULKAN_ENGINE_SOURCE1} ${VULKAN_ENGINE_SOURCE2} ${VULKAN_ENGINE_SOURCE3}
                                         ${VULKAN_ENGINE_SOURCE4} ${VULKAN_ENGINE_ANDROID_SOURCE})
 
 if (ANDROID)
@@ -58,7 +58,7 @@ if (ANDROID)
 
     target_include_directories(${VULKAN_ENGINE_NAME} PRIVATE
                                 ${INCLUDE_DATA_DIR}
-                                ${ANDROID_INCLUDE_DATA_DIR} 
+                                ${ANDROID_INCLUDE_DATA_DIR}
                                 ${ANDROID_NDK}/sources/android/native_app_glue
                                 ${CMAKE_CURRENT_SOURCE_DIR}/android/vulkan_wrapper
                                 ${CMAKE_CURRENT_SOURCE_DIR}/data
@@ -79,4 +79,3 @@ if (ANDROID)
     )
 
 endif()
-

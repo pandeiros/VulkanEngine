@@ -7,7 +7,7 @@
 #pragma once
 
  /**
-  * @file Utils.h
+  * @file AndroidUtils.h
   */
 
 #include <iostream>
@@ -16,11 +16,11 @@
 #include <vector>
 
 #include "VulkanCore.h"
+#include "AndroidCore.h"
 
 #include "Utils/Math.h"
 
 #ifdef _WIN32
-
 #pragma comment(linker, "/subsystem:console")
 
 #ifndef WIN32_LEAN_AND_MEAN
@@ -38,14 +38,20 @@
 #define APP_NAME_STR_LEN 80
 
 #elif defined(__ANDROID__)
-
-// Include files for Android
 #include <unistd.h>
-#include <android/log.h>
 #include <jni.h>
-//#include <android/native_window.h>
+#include <android_native_app_glue.h>
+
+struct vulkan_android_app
+{
+    android_app* nativeApplication = nullptr;
+    vulkan::VulkanObject* vulkanApplication = nullptr;
+};
 
 //#include "vulkan_wrapper.h" // Include Vulkan_wrapper and dynamically load symbols.
+
+// Static variable that keeps ANativeWindow and asset manager instances.
+static vulkan_android_app androidApplication;
 
 #define NATIVE_METHOD(return_type, method_name) \
   JNIEXPORT return_type JNICALL                 \
@@ -55,6 +61,12 @@ extern "C" {
     NATIVE_METHOD(void, nativeOnCreate)
         (JNIEnv *env, jobject obj, jobject asset_mgr, jlong gvrContextPtr);
 }
+
+class AndroidUtils
+{
+public:
+    static vulkan_android_app androidApplication;
+};
 
 //#elif defined(__IPHONE_OS_VERSION_MAX_ALLOWED) || defined(__MAC_OS_X_VERSION_MAX_ALLOWED)
 //#include <MoltenVK/mvk_vulkan.h>
@@ -86,25 +98,25 @@ extern "C" {
  /* Amount of time, in nanoseconds, to wait for a command buffer to complete */
 #define FENCE_TIMEOUT 100000000
 
-#define GET_INSTANCE_PROC_ADDR(INSTANCE, entrypoint)                               \
-    {                                                                          \
-        fp##entrypoint =                                                  \
-            (PFN_vk##entrypoint)vkGetInstanceProcAddr(INSTANCE, "vk" #entrypoint); \
-        if (fp##entrypoint == NULL) {                                     \
-            std::cout << "vkGetDeviceProcAddr failed to find vk" #entrypoint;  \
-            exit(-1);                                                          \
-        }                                                                      \
-    }
+//#define GET_INSTANCE_PROC_ADDR(INSTANCE, entrypoint)                               \
+//    {                                                                          \
+//        fp##entrypoint =                                                  \
+//            (PFN_vk##entrypoint)vkGetInstanceProcAddr(INSTANCE, "vk" #entrypoint); \
+//        if (fp##entrypoint == NULL) {                                     \
+//            std::cout << "vkGetDeviceProcAddr failed to find vk" #entrypoint;  \
+//            exit(-1);                                                          \
+//        }                                                                      \
+//    }
 
-#define GET_DEVICE_PROC_ADDR(dev, entrypoint)                                  \
-    {                                                                          \
-        info.fp##entrypoint =                                                  \
-            (PFN_vk##entrypoint)vkGetDeviceProcAddr(dev, "vk" #entrypoint);    \
-        if (info.fp##entrypoint == NULL) {                                     \
-            std::cout << "vkGetDeviceProcAddr failed to find vk" #entrypoint;  \
-            exit(-1);                                                          \
-        }                                                                      \
-    }
+//#define GET_DEVICE_PROC_ADDR(dev, entrypoint)                                  \
+//    {                                                                          \
+//        info.fp##entrypoint =                                                  \
+//            (PFN_vk##entrypoint)vkGetDeviceProcAddr(dev, "vk" #entrypoint);    \
+//        if (info.fp##entrypoint == NULL) {                                     \
+//            std::cout << "vkGetDeviceProcAddr failed to find vk" #entrypoint;  \
+//            exit(-1);                                                          \
+//        }                                                                      \
+//    }
 
 #if defined(NDEBUG) && defined(__GNUC__)
 #define U_ASSERT_ONLY __attribute__((unused))
@@ -112,12 +124,7 @@ extern "C" {
 #define U_ASSERT_ONLY
 #endif
 
-#ifdef __ANDROID__  // #TODO Change this logging macros.
- // Android specific definitions & helpers.
-#define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "VK-SAMPLE", __VA_ARGS__))
-#define LOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, "VK-SAMPLE", __VA_ARGS__))
- // Replace printf to logcat output.
-#define printf(...) __android_log_print(ANDROID_LOG_DEBUG, "VK-SAMPLE", __VA_ARGS__);
+#ifdef __ANDROID__
 
 bool Android_process_command();
 ANativeWindow* AndroidGetApplicationWindow();
@@ -129,8 +136,9 @@ bool AndroidLoadFile(const char* filePath, std::string *data);
 float GetControllerXPos();
 //
 
+// #TODO Delete this (probably...)
 // Main entry point of samples
-int vulkan_android_main(int argc, char *argv[]);
+int vulkan_android_main(int argc, char *argv[], vulkan_android_app* androidApp);
 
 #ifndef VK_API_VERSION_1_0
 // On Android, NDK would include slightly older version of headers that is missing the definition.

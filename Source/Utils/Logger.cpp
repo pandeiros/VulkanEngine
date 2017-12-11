@@ -10,7 +10,7 @@
 #include <iomanip>
 #include <string>
 
-#include "AndroidUtils.h"
+#include "AndroidCore.h"
 
 VULKAN_NS_USING;
 

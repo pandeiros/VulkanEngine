@@ -17,20 +17,15 @@
  * limitations under the License.
  */
 
-/*
-VULKAN_SAMPLE_SHORT_DESCRIPTION
-Draw Cube
-*/
-
-/* This is part of the draw cube progression */
 
 #include <AndroidUtils.h>
-
-#include <assert.h>
-#include <string.h>
-#include <cstdlib>
-#include "cube_data.h"
-#include "gvr.h"
+#include "AndroidApplication.h"
+//#include "cube_data.h"
+//#include "gvr.h"
+//
+//#include <assert.h>
+//#include <string.h>
+//#include <cstdlib>
 
 /* For this sample, we'll start with GLSL so the shader function is plain */
 /* and then use the glslang GLSLtoSPV utility to convert it to SPIR-V for */
@@ -62,30 +57,42 @@ static const char *fragShaderText =
     "   outColor = color;\n"
     "}\n";
 
-#include "Window.h"
-#include "CommandPool.h"
+//#include "Window.h"
+//#include "CommandPool.h"
 
-#include <array>
-#include <chrono>
-#include <cmath>
+//#include <array>
+//#include <chrono>
+//#include <cmath>
 
-#include "Application.h"
+//using namespace vulkan;
 
-using namespace vulkan;
+int vulkan_android_main_old();
 
-int vulkan_android_main(int argc, char *argv[]) {
+int vulkan_android_main(int argc, char *argv[], vulkan_android_app* androidApp)
+//int vulkan_android_main_old()
+{
+    if (!AndroidUtils::androidApplication.nativeApplication)
+    {
+        return VK_NOT_READY;
+    }
 
-    Application application;
-    application.Create("Vulkan Engine Test", 1, VK_MAKE_VERSION(1, 0, 2));
-    application.Init();
+    AndroidApplication *application = new AndroidApplication();
+    application->Create("Vulkan Engine App Test", 1, VK_MAKE_VERSION(1, 0, 2));
 
-    Instance& instance = application.GetInstanceRef();
-    VkDevice device = instance.GetDeviceRef().GetVkDevice();
+    AndroidUtils::androidApplication.vulkanApplication = application;
 
-    CommandPool commandPool;
-    commandPool.Create(device, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-                       instance.GetDeviceRef().GetPhysicalDevice()->GetGraphicsFamilyIndex());
+    return 0;
+
+//    Application application;
+//    application.Create("Vulkan Engine Test", 1, VK_MAKE_VERSION(1, 0, 2));
+//    application.Init();
+
+//    Instance& instance = application.GetInstanceRef();
+//    VkDevice device = instance.GetDeviceRef().GetVkDevice();
 //
+//    CommandPool commandPool;
+//    commandPool.Create(device, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+//                       instance.GetDeviceRef().GetPhysicalDevice()->GetGraphicsFamilyIndex());
 //    commandPool.AllocateCommandBuffer(device, VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 //
 //    VkSemaphore semaphoreRenderComplete;
@@ -150,11 +157,11 @@ int vulkan_android_main(int argc, char *argv[]) {
 //
 //    vkDestroySemaphore(device, semaphoreRenderComplete, nullptr);
 //
-    commandPool.Destroy(device);
-
-    application.Destroy();
-
-    return 0;
+//    commandPool.Destroy(device);
+//
+//    application.Destroy();
+//
+//    return 0;
 
     //////////////////////////////////////////
 

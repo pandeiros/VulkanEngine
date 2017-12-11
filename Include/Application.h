@@ -19,7 +19,7 @@ VULKAN_NS_BEGIN
 /**
  * @class Application
  */
-class Application
+class Application : public VulkanObject
 {
 public:
     /**
@@ -34,17 +34,20 @@ public:
 
     void Create(const char* applicationName, uint32_t applicationVersion, uint32_t apiVersion);
 
-    void Init();
+    virtual void Init() override;
+    virtual void Destroy();
 
-    void Destroy();
+    virtual void Update() override
+    {};
 
     Instance& GetInstanceRef();
 
-private:
-    VkApplicationInfo applicationInfo = {};
-
+protected:
     Instance instance;
     Engine engine;
+
+private:
+    VkApplicationInfo applicationInfo = {};
 };
 
 VULKAN_NS_END

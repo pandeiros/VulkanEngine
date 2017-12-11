@@ -1,18 +1,17 @@
-# For more information about using CMake with Android Studio, read the
-# documentation: https://d.android.com/studio/projects/add-native-code.html
-
 # Sets the minimum version of CMake required to build the native library.
-
 cmake_minimum_required(VERSION 3.4.1)
 
-# Build all necesarry libraties.
-get_filename_component(SHADERC_SRC
-                        ${ANDROID_NDK}/sources/third_party/shaderc
-                        ABSOLUTE)
+# Configure project source.
+file(GLOB MODULE_SOURCE src/main/cpp/classes/*.cpp)
+
+# Configure all necesarry libraties and includes.
+get_filename_component(SHADERC_SRC ${ANDROID_NDK}/sources/third_party/shaderc ABSOLUTE)
 
 set(UTILS_NAME utils_lib)
 set(VULKAN_ENGINE_NAME VulkanEngine)
 set(GLSLANG_SPIRV_INCLUDE_DIR ${SHADERC_SRC}/third_party/glslang)
+
+set(INCLUDE_DATA_DIR ${INCLUDE_DATA_DIR} "${CMAKE_SOURCE_DIR}/src/main/cpp/classes")
 
 # get_filename_component(PROJECT_SOURCE_DIR
 #                         "${CMAKE_SOURCE_DIR}/../.."
@@ -31,7 +30,7 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/../../ ${CMAKE_BINARY_DIR}/vulkan-engine)
 #                       ${SHADERC_SRC}/libs/${ANDROID_STL}/${ANDROID_ABI}/libshaderc.a)
 
 # add_library(lib_gvr SHARED IMPORTED)
-# set_target_properties(lib_gvr PROPERTIES IMPORTED_LOCATION 
+# set_target_properties(lib_gvr PROPERTIES IMPORTED_LOCATION
 #                       ${CMAKE_CURRENT_SOURCE_DIR}/../libraries/jni/${ANDROID_ABI}/libgvr.so)
 
 # Build application's shared library
@@ -44,8 +43,10 @@ set(CMAKE_SHARED_LINKER_FLAGS
 
 add_library(VulkanAppActivity SHARED
             ${CMAKE_SOURCE_DIR}/src/main/cpp/${MODULE_NAME}.cpp
+            ${MODULE_SOURCE}
             ${CMAKE_SOURCE_DIR}/../vulkan_wrapper/vulkan_wrapper.cpp
-            ${CMAKE_SOURCE_DIR}/../utils/AndroidUtils.cpp)
+            # ${CMAKE_SOURCE_DIR}/../utils/AndroidUtils.cpp
+)
 
 # add_custom_command(TARGET native-lib POST_BUILD
 # COMMAND ${CMAKE_COMMAND} -E copy
@@ -56,6 +57,7 @@ add_library(VulkanAppActivity SHARED
 # include_directories( ${CMAKE_SOURCE_DIR}/../utils ${CMAKE_SOURCE_DIR}/../../include ${CMAKE_SOURCE_DIR}/../vulkan_wrapper)
 
 target_include_directories(VulkanAppActivity PRIVATE
+                            ${INCLUDE_DATA_DIR}
                             ${CMAKE_SOURCE_DIR}/../../include
                             ${CMAKE_SOURCE_DIR}/../../data
                             ${GLMINC_PREFIX}
@@ -73,7 +75,6 @@ target_link_libraries(VulkanAppActivity
                         ${VULKAN_ENGINE_NAME}
                         log
                         # ${UTILS_NAME}
-                        
                         # shaderc_lib
                         # lib_gvr
 )
