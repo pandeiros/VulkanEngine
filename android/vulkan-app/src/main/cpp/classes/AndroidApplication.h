@@ -2,6 +2,8 @@
 
 #include <CommandPool.h>
 #include <Application.h>
+#include "gvr.h"
+#include "gvr_controller.h"
 
 #include <chrono>
 
@@ -24,4 +26,7 @@ private:
     std::chrono::steady_clock::time_point lastTime;
     uint64_t frameCounter = 0;
     uint64_t FPS = 0;
+
+    // GVR Controller
+    gvr::ControllerState controller_state;
 };

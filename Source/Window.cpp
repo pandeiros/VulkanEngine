@@ -43,6 +43,7 @@ void Window::Destroy()
     }
 
     cachedInstance = VK_NULL_HANDLE;
+    bIsValid = false;
 }
 
 bool Window::Update()

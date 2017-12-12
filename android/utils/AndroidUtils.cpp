@@ -8,7 +8,11 @@
 
 #include "AndroidUtils.h"
 
-vulkan_android_app AndroidUtils::androidApplication = vulkan_android_app();
+//vulkan_android_app AndroidUtils::vulkanApplication = vulkan_android_app();
+
+vulkan::VulkanObject* AndroidUtils::vulkanApplication = nullptr;
+android_app* AndroidUtils::nativeApplication = nullptr;
+gvr::ControllerApi* AndroidUtils::controllerApi = nullptr;
 
 #include <stdio.h>
 #include <assert.h>
@@ -22,8 +26,6 @@ vulkan_android_app AndroidUtils::androidApplication = vulkan_android_app();
 #include <unordered_map>
 
 #include "shaderc/shaderc.hpp"
-#include "gvr.h"
-#include "gvr_controller.h"
 
 #elif (defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK))
 #include <MoltenGLSLToSPIRVConverter/GLSLToSPIRVConverter.h>
@@ -822,7 +824,7 @@ void Android_handle_cmd(android_app *app, int32_t cmd) {
     case APP_CMD_INIT_WINDOW:
 
         // The window is being shown, get it ready.
-        AndroidUtils::androidApplication.vulkanApplication->Init();
+        AndroidUtils::vulkanApplication->Init();
 
         LOGI("\n");
         LOGI("=================================================");
@@ -840,15 +842,15 @@ void Android_handle_cmd(android_app *app, int32_t cmd) {
 }
 
 bool Android_process_command() {
-    assert(AndroidUtils::androidApplication.nativeApplication != nullptr);
+    assert(AndroidUtils::nativeApplication != nullptr);
     int events;
     android_poll_source *source;
     // Poll all pending events.
     if (ALooper_pollAll(0, NULL, &events, (void **)&source) >= 0) {
         // Process each polled events
-        if (source != NULL) source->process(AndroidUtils::androidApplication.nativeApplication, source);
+        if (source != NULL) source->process(AndroidUtils::nativeApplication, source);
     }
-    return AndroidUtils::androidApplication.nativeApplication->destroyRequested;
+    return AndroidUtils::nativeApplication->destroyRequested;
 }
 
 NATIVE_METHOD(void, nativeOnCreate)
@@ -870,8 +872,7 @@ NATIVE_METHOD(void, nativeOnCreate)
     // controller_api = std::unique_ptr<gvr::ControllerApi>(new gvr::ControllerApi);
     gvr::ControllerApi *controller_api = new gvr::ControllerApi;
 
-//    if (nativeApplication.androidApplication)
-//        nativeApplication.AndroidUtils::androidApplication.userData = controller_api;
+    AndroidUtils::controllerApi = controller_api;
 
     // Initialize it. Notice that we pass the gvr_context pointer.
     if (!controller_api->Init(options, context)) {
@@ -904,14 +905,14 @@ NATIVE_METHOD(void, nativeOnCreate)
     //    } while (true);
 }
 
-static gvr::ControllerState controller_state;
+//static gvr::ControllerState controller_state;
 
 void android_main(struct android_app *app)
 {
     LOGI("============ ANDROID_MAIN ============");
 
     // Set static variables.
-    AndroidUtils::androidApplication.nativeApplication = app;
+    AndroidUtils::nativeApplication = app;
 
     // Set the callback to process system events
     app->onAppCmd = Android_handle_cmd;
@@ -944,17 +945,17 @@ void android_main(struct android_app *app)
 
 //   gvr::ControllerState controller_state;
 
-    vulkan_android_main(0, nullptr, nullptr);
+    vulkan_android_main(0, nullptr);
 
-    vulkan::VulkanObject* vkApplication = AndroidUtils::androidApplication.vulkanApplication;
+//    vulkan::VulkanObject* vkApplication = AndroidUtils::vulkanApplication;
 
     // Main loop
     do {
         Android_process_command();
 
-        if (vkApplication)
+        if (AndroidUtils::vulkanApplication)
         {
-            vkApplication->Update();
+            AndroidUtils::vulkanApplication->Update();
 
 //          gvr::ControllerApi* api = static_cast<gvr::ControllerApi*>(nativeApplication.AndroidUtils::androidApplication.userData);
 //          if (api)
@@ -964,7 +965,7 @@ void android_main(struct android_app *app)
 
             //LOGE("::: %f", controller_state.GetTouchPos().x);
 
-            if (vkApplication->IsPendingKill())
+            if (AndroidUtils::vulkanApplication->IsPendingKill())
             {
                 break;
             }
@@ -978,8 +979,8 @@ void android_main(struct android_app *app)
 }
 
 ANativeWindow *AndroidGetApplicationWindow() {
-    assert(AndroidUtils::androidApplication.nativeApplication);
-    return AndroidUtils::androidApplication.nativeApplication->window;
+    assert(AndroidUtils::nativeApplication);
+    return AndroidUtils::nativeApplication->window;
 }
 
 //bool AndroidFillShaderMap(const char *path, std::unordered_map<std::string, std::string> *map_shaders) {
@@ -1030,8 +1031,8 @@ ANativeWindow *AndroidGetApplicationWindow() {
 //}
 
 bool AndroidLoadFile(const char *filePath, std::string *data) {
-    assert(AndroidUtils::androidApplication.nativeApplication);
-    AAsset *file = AAssetManager_open(AndroidUtils::androidApplication.nativeApplication->activity->assetManager, filePath, AASSET_MODE_BUFFER);
+    assert(AndroidUtils::nativeApplication);
+    AAsset *file = AAssetManager_open(AndroidUtils::nativeApplication->activity->assetManager, filePath, AASSET_MODE_BUFFER);
     size_t fileLength = AAsset_getLength(file);
     LOGI("Loaded file:%s size:%zu", filePath, fileLength);
     if (fileLength == 0) {
@@ -1044,10 +1045,10 @@ bool AndroidLoadFile(const char *filePath, std::string *data) {
 
 void AndroidGetWindowSize(int32_t& width, int32_t& height) {
     // On Android, retrieve the window size from the native window.
-    assert(AndroidUtils::androidApplication.nativeApplication);
+    assert(AndroidUtils::nativeApplication);
 
-    width = ANativeWindow_getWidth(AndroidUtils::androidApplication.nativeApplication->window);
-    height = ANativeWindow_getHeight(AndroidUtils::androidApplication.nativeApplication->window);
+    width = ANativeWindow_getWidth(AndroidUtils::nativeApplication->window);
+    height = ANativeWindow_getHeight(AndroidUtils::nativeApplication->window);
 }
 
 // Android fopen stub described at
@@ -1070,8 +1071,8 @@ FILE *AndroidFopen(const char *fname, const char *mode) {
         return NULL;
     }
 
-    assert(AndroidUtils::androidApplication.nativeApplication);
-    AAsset *asset = AAssetManager_open(AndroidUtils::androidApplication.nativeApplication->activity->assetManager, fname, 0);
+    assert(AndroidUtils::nativeApplication);
+    AAsset *asset = AAssetManager_open(AndroidUtils::nativeApplication->activity->assetManager, fname, 0);
     if (!asset) {
         return NULL;
     }
@@ -1079,14 +1080,14 @@ FILE *AndroidFopen(const char *fname, const char *mode) {
     return funopen(asset, android_read, android_write, android_seek, android_close);
 }
 
-float GetControllerXPos()
-{
-    if (AndroidUtils::androidApplication.nativeApplication && AndroidUtils::androidApplication.nativeApplication->userData)
-    {
-        return controller_state.GetTouchPos().x;
-    }
-
-    return 0.f;
-}
+//float GetControllerXPos()
+//{
+//    if (AndroidUtils::nativeApplication && AndroidUtils::nativeApplication->userData)
+//    {
+//        return controller_state.GetTouchPos().x;
+//    }
+//
+//    return 0.f;
+//}
 
 #endif

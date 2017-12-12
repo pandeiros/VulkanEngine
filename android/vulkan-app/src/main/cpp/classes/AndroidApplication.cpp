@@ -1,6 +1,7 @@
 #include "AndroidApplication.h"
 
 #include <cmath>
+#include <AndroidUtils.h>
 
 void AndroidApplication::Init()
 {
@@ -34,6 +35,11 @@ void AndroidApplication::Tick()
 
     if (window.Update())
     {
+        if (AndroidUtils::controllerApi)
+        {
+            controller_state.Update(*AndroidUtils::controllerApi);
+        }
+
         ++frameCounter;
         std::chrono::duration<double> diff = std::chrono::duration_cast<std::chrono::duration<double>>(timer.now() - lastTime);
         if (diff.count() >= 1.0)
@@ -41,7 +47,7 @@ void AndroidApplication::Tick()
             lastTime = timer.now();
             FPS = frameCounter;
             frameCounter = 0;
-            std::cout << "FPS: " << FPS << "\n";
+//            std::cout << "FPS: " << FPS << "\n";
         }
 
         window.BeginRender();
@@ -56,8 +62,10 @@ void AndroidApplication::Tick()
 
         clearValues[0].depthStencil.depth = 0.f;
         clearValues[0].depthStencil.stencil = 0;
-        clearValues[1].color.float32[0] = std::sin(colorRotator) * 0.5f + 0.5f;
-        clearValues[1].color.float32[1] = std::sin(colorRotator + (float)PI * 2.f / 3.f) * 0.5f + 0.5f;
+//        clearValues[1].color.float32[0] = std::sin(colorRotator) * 0.5f + 0.5f;
+//        clearValues[1].color.float32[1] = std::sin(colorRotator + (float)PI * 2.f / 3.f) * 0.5f + 0.5f;
+        clearValues[1].color.float32[0] = controller_state.GetTouchPos().x;
+        clearValues[1].color.float32[1] = controller_state.GetTouchPos().y;
         clearValues[1].color.float32[2] = std::sin(colorRotator + (float)PI * 4.f / 3.f) * 0.5f + 0.5f;
         clearValues[1].color.float32[3] = 1.f;
 

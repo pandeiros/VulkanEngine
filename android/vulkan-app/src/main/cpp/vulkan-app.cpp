@@ -51,9 +51,9 @@ static const char *fragShaderText =
     "   outColor = color;\n"
     "}\n";
 
-int vulkan_android_main(int argc, char *argv[], vulkan_android_app* androidApp)
+int vulkan_android_main(int argc, char *argv[]) //, vulkan_android_app* androidApp)
 {
-    if (!AndroidUtils::androidApplication.nativeApplication)
+    if (!AndroidUtils::nativeApplication)
     {
         return VK_NOT_READY;
     }
@@ -61,7 +61,7 @@ int vulkan_android_main(int argc, char *argv[], vulkan_android_app* androidApp)
     AndroidApplication *application = new AndroidApplication();
     application->Create("Vulkan Engine App Test", 1, VK_MAKE_VERSION(1, 0, 2));
 
-    AndroidUtils::androidApplication.vulkanApplication = application;
+    AndroidUtils::vulkanApplication = application;
 
     return 0;
 

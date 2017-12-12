@@ -41,17 +41,19 @@
 #include <unistd.h>
 #include <jni.h>
 #include <android_native_app_glue.h>
+#include "gvr.h"
+#include "gvr_controller.h"
 
-struct vulkan_android_app
-{
-    android_app* nativeApplication = nullptr;
-    vulkan::VulkanObject* vulkanApplication = nullptr;
-};
+//struct vulkan_android_app
+//{
+//    android_app* nativeApplication = nullptr;
+//    vulkan::VulkanObject* vulkanApplication = nullptr;
+//};
 
 //#include "vulkan_wrapper.h" // Include Vulkan_wrapper and dynamically load symbols.
 
 // Static variable that keeps ANativeWindow and asset manager instances.
-static vulkan_android_app androidApplication;
+//static vulkan_android_app androidApplication;
 
 #define NATIVE_METHOD(return_type, method_name) \
   JNIEXPORT return_type JNICALL                 \
@@ -67,15 +69,19 @@ class AndroidUtils
 public:
     static void Clean()
     {
-        if (androidApplication.vulkanApplication)
+        if (vulkanApplication)
         {
-            androidApplication.vulkanApplication->Destroy();
+            vulkanApplication->Destroy();
         }
 
-        delete androidApplication.vulkanApplication;
+        delete vulkanApplication;
     }
 
-    static vulkan_android_app androidApplication;
+//    static vulkan_android_app androidApplication;
+
+    static vulkan::VulkanObject* vulkanApplication;
+    static android_app* nativeApplication;
+    static gvr::ControllerApi* controllerApi;
 };
 
 //#elif defined(__IPHONE_OS_VERSION_MAX_ALLOWED) || defined(__MAC_OS_X_VERSION_MAX_ALLOWED)
@@ -143,12 +149,12 @@ void AndroidGetWindowSize(int32_t& width, int32_t& height);
 bool AndroidLoadFile(const char* filePath, std::string *data);
 
 //
-float GetControllerXPos();
+//float GetControllerXPos();
 //
 
 // #TODO Delete this (probably...)
 // Main entry point of samples
-int vulkan_android_main(int argc, char *argv[], vulkan_android_app* androidApp);
+int vulkan_android_main(int argc, char *argv[]); //, vulkan_android_app* androidApp);
 
 #ifndef VK_API_VERSION_1_0
 // On Android, NDK would include slightly older version of headers that is missing the definition.
