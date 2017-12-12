@@ -55,6 +55,9 @@ public:
 
     void WaitIdle();
 
+    void CreateSemaphore(VkSemaphore* semaphorePointer);
+    void DestroySemaphore(VkSemaphore semaphore);
+
 private:
     void CreateInternal();
 

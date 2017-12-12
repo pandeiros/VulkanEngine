@@ -63,5 +63,8 @@ void Queue::BindSparse(const std::vector<VkSemaphore> waitSemaphores, const std:
 
 void Queue::WaitIdle()
 {
-    vkQueueWaitIdle(queue);
+    if (queue)
+    {
+        vkQueueWaitIdle(queue);
+    }
 }

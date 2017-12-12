@@ -72,7 +72,11 @@ void Instance::Destroy()
     device.Destroy();
     DestroyDebug();
 
-    vkDestroyInstance(instance, nullptr);
+    if (instance)
+    {
+        vkDestroyInstance(instance, nullptr);
+    }
+
     instance = VK_NULL_HANDLE;
 }
 

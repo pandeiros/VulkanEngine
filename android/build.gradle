@@ -7,9 +7,9 @@ buildscript {
     }
     dependencies {
         // The Google VR NDK requires experimental version 0.9.3 or higher.
-        classpath 'com.android.tools.build:gradle-experimental:0.11.0'
+        classpath 'com.android.tools.build:gradle-experimental:0.11.1'
 
-        classpath 'com.android.tools.build:gradle:3.0.0'
+        classpath 'com.android.tools.build:gradle:3.0.1'
 //        classpath 'com.android.tools.build:gradle:3.0.0'
 
         // NOTE: Do not place your application dependencies here; they belong

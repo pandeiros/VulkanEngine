@@ -6,17 +6,19 @@ void AndroidApplication::Init()
 {
     vulkan::Application::Init();
 
-    VkDevice device = instance.GetDeviceRef().GetVkDevice();
+    vulkan::Device& device = instance.GetDeviceRef();
+//    VkDevice device = instance.GetDeviceRef().GetVkDevice();
 
-    commandPool.Create(device, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+    commandPool.Create(device.GetVkDevice(), VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
                        instance.GetDeviceRef().GetPhysicalDevice()->GetGraphicsFamilyIndex());
-    commandPool.AllocateCommandBuffer(device, VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+    commandPool.AllocateCommandBuffer(device.GetVkDevice(), VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
-    {
-        VkSemaphoreCreateInfo semaphoreCreateInfo{};
-        semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-        vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &semaphoreRenderComplete);
-    }
+    device.CreateSemaphore(&semaphoreRenderComplete);
+//    {
+//        VkSemaphoreCreateInfo semaphoreCreateInfo{};
+//        semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+//        vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &semaphoreRenderComplete);
+//    }
 
     timer = std::chrono::steady_clock();
     lastTime = timer.now();
@@ -84,10 +86,10 @@ void AndroidApplication::Destroy()
     vulkan::Queue& queue = instance.GetDeviceRef().GetQueueRef();
     queue.WaitIdle();
 
-    VkDevice device = instance.GetDeviceRef().GetVkDevice();
-    vkDestroySemaphore(device, semaphoreRenderComplete, nullptr);
+    vulkan::Device& device = instance.GetDeviceRef();
+    device.DestroySemaphore(semaphoreRenderComplete);
 
-    commandPool.Destroy(instance.GetDeviceRef().GetVkDevice());
+    commandPool.Destroy(device.GetVkDevice());
 
     vulkan::Application::Destroy();
 }

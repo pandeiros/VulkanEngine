@@ -129,6 +129,29 @@ void Device::WaitIdle()
     vkDeviceWaitIdle(device);
 }
 
+void Device::CreateSemaphore(VkSemaphore* semaphorePtr)
+{
+    if (device)
+    {
+        VkSemaphoreCreateInfo semaphoreCreateInfo =
+        {
+            VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+            nullptr,
+            0
+        };
+
+        vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, semaphorePtr);
+    }
+}
+
+void Device::DestroySemaphore(VkSemaphore semaphore)
+{
+    if (device && semaphore)
+    {
+        vkDestroySemaphore(device, semaphore, nullptr);
+    }
+}
+
 void Device::CreateInternal()
 {
     float priorityQueue[]{ 1.f };

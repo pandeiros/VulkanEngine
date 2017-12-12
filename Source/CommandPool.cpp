@@ -23,7 +23,10 @@ void CommandPool::Create(VkDevice device, VkCommandPoolCreateFlags flags, uint32
 void CommandPool::Destroy(VkDevice device)
 {
     // #TODO Check if buffers finished work.
-    vkDestroyCommandPool(device, commandPool, nullptr);
+    if (device && commandPool)
+    {
+        vkDestroyCommandPool(device, commandPool, nullptr);
+    }
 }
 
 void CommandPool::Reset(VkDevice device, VkCommandPoolResetFlags flags)
