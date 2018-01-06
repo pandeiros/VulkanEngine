@@ -34,6 +34,8 @@ public:
 
     void Free(VkDevice device);
 
+    VkDeviceMemory GetVkMemory() const;
+
     VkDeviceSize GetMemoryCommitment(VkDevice device);
 
     void* MapMemory(VkDevice device, VkDeviceSize offset, VkDeviceSize size, VkMemoryMapFlags flags);
@@ -42,8 +44,9 @@ public:
     void FlushMappedMemoryRange(VkDevice device, VkDeviceSize offset, VkDeviceSize size);
     void InvalidateMappedMemoryRange(VkDevice device, VkDeviceSize offset, VkDeviceSize size);
 
+    void BindImageMemory(VkDevice device, VkImage image, VkDeviceSize memoryOffset);
     // #TODO This function is useless.
-    VkSparseMemoryBind GetSparseMemoryBind(VkDeviceSize resourceOffset, VkDeviceSize size, VkDeviceSize memoryOffset, VkSparseMemoryBindFlags flags);
+    //VkSparseMemoryBind GetSparseMemoryBind(VkDeviceSize resourceOffset, VkDeviceSize size, VkDeviceSize memoryOffset, VkSparseMemoryBindFlags flags);
 
 private:
     VkDeviceMemory memory = VK_NULL_HANDLE;

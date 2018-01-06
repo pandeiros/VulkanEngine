@@ -10,9 +10,9 @@
   * @file AndroidCore.h
   */
 
-#include <android/log.h>
-
 #ifdef __ANDROID__  // #TODO Change this logging macros.
+
+#include <android/log.h>
 
  // Android specific definitions & helpers.
 #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "VK-SAMPLE", __VA_ARGS__))

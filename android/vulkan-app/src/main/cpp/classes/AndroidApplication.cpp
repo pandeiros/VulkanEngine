@@ -69,7 +69,7 @@ void AndroidApplication::Tick()
         clearValues[1].color.float32[2] = std::sin(colorRotator + (float)PI * 4.f / 3.f) * 0.5f + 0.5f;
         clearValues[1].color.float32[3] = 1.f;
 
-        commandBuffer.BeginRenderPass(window.GetRenderPass(), window.GetActiveFramebuffer(), renderArea, clearValues, VK_SUBPASS_CONTENTS_INLINE);
+        commandBuffer.BeginRenderPass(window.GetRenderPass(), window.GetActiveFramebuffer().GetVkFramebuffer(), renderArea, clearValues, VK_SUBPASS_CONTENTS_INLINE);
         commandBuffer.EndRenderPass();
 
         commandBuffer.End();

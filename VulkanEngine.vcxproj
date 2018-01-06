@@ -280,6 +280,10 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="source\Framebuffer.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="source\ImageView.cpp">
       <SubType>
       </SubType>
@@ -307,7 +311,15 @@
     </ClCompile>
     <ClCompile Include="source\Rendering\Renderer.cpp" />
     <ClCompile Include="source\Rendering\Windows_old.cpp" />
+    <ClCompile Include="source\RenderPass.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="source\Source.cpp" />
+    <ClCompile Include="source\Swapchain.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="source\Utils\DebugTools.cpp" />
     <ClCompile Include="source\Utils\Logger.cpp" />
     <ClCompile Include="source\Utils\Math.cpp" />
@@ -355,6 +367,10 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="include\Framebuffer.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="include\Image.h">
       <SubType>
       </SubType>
@@ -378,6 +394,14 @@
     </ClInclude>
     <ClInclude Include="include\Rendering\Renderer.h" />
     <ClInclude Include="include\Rendering\Windows_old.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\RenderPass.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Swapchain.h">
       <SubType>
       </SubType>
     </ClInclude>

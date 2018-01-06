@@ -10,6 +10,10 @@
 #include "PhysicalDevice.h"
 #include "Image.h"
 #include "ImageView.h"
+#include "Memory.h"
+#include "RenderPass.h"
+#include "Framebuffer.h"
+#include "Swapchain.h"
 
 /**
  * @file Window.h
@@ -52,7 +56,7 @@ public:
 
     VkExtent2D GetSurfaceSize();
     VkRenderPass GetRenderPass();
-    VkFramebuffer GetActiveFramebuffer();
+    Framebuffer& GetActiveFramebuffer();
 
 private:
     WindowCreateInfo windowCreateInfo = {};
@@ -84,8 +88,7 @@ private:
     void CreateSwapchainImages();
     void DestroySwapchainImages();
 
-    VkSwapchainKHR swapchain = VK_NULL_HANDLE;
-    VkSwapchainCreateInfoKHR swapchainCreateInfo = {};
+    Swapchain swapchain;
     uint32_t swapchainImageCount = 2;
     uint32_t activeSwapchainImageID = UINT32_MAX;
 
@@ -101,7 +104,8 @@ private:
 
     Image depthStencilImage;
     ImageView depthStencilImageView;
-    VkDeviceMemory depthStencilImageMemory = VK_NULL_HANDLE;
+    Memory depthStencilImageMemory;
+    //VkDeviceMemory depthStencilImageMemory = VK_NULL_HANDLE;
     //VkFormat depthStencilFormat = VK_FORMAT_UNDEFINED;
     bool bStencilAvailable = false;
 
@@ -109,12 +113,10 @@ private:
     // Render pass
     //////////////////////////////////////////////////////////////////////////
 
-    // #TODO Create RenderPass class.
-
     void CreateRenderPass();
     void DestroyRenderPass();
 
-    VkRenderPass renderPass = VK_NULL_HANDLE;
+    RenderPass renderPass;
 
     //////////////////////////////////////////////////////////////////////////
     // Framebuffer
@@ -123,7 +125,7 @@ private:
     void CreateFramebuffer();
     void DestroyFramebuffer();
 
-    std::vector<VkFramebuffer> framebuffers;
+    std::vector<Framebuffer> framebuffers;
 
     //////////////////////////////////////////////////////////////////////////
     // Synchronization

@@ -12,7 +12,7 @@ void Image::Create(VkDevice device, VkImageCreateFlags flags, VkImageType type, 
     uint32_t mipLevels, uint32_t arrayLayers, VkSampleCountFlagBits samples, VkImageTiling tiling, VkImageUsageFlags usage,
     VkSharingMode sharingMode, std::vector<uint32_t> queueFamilyIndices, VkImageLayout initialLayout)
 {
-    checkExtent(type, extent);
+    CheckExtent(type, extent);
 
     imageCreateInfo = {
         VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
@@ -37,7 +37,12 @@ void Image::Create(VkDevice device, VkImageCreateFlags flags, VkImageType type, 
 
 void Image::Destroy(VkDevice device)
 {
-    vkDestroyImage(device, image, nullptr);
+    if (device)
+    {
+        vkDestroyImage(device, image, nullptr);
+    }
+
+    image = VK_NULL_HANDLE;
 }
 
 VkImage Image::GetVkImage()
@@ -79,7 +84,7 @@ VkComponentMapping Image::GetIdentityComponentMapping()
     return { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
 }
 
-void Image::checkExtent(VkImageType type, VkExtent3D& outExtent)
+void Image::CheckExtent(VkImageType type, VkExtent3D& outExtent)
 {
     if (type == VK_IMAGE_TYPE_1D)
     {
@@ -97,7 +102,7 @@ void SparseImage::Create(VkDevice device, VkImageCreateFlags flags, VkImageType 
 {
     //Image::Create(device, flags, type, format, extent, mipLevels, arrayLayers, samples, tiling, usage, sharingMode, queueFamilyIndices, initialLayout);
 
-    checkExtent(type, extent);
+    CheckExtent(type, extent);
 
     imageCreateInfo = {
         VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,

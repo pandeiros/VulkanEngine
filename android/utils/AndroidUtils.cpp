@@ -8,12 +8,6 @@
 
 #include "AndroidUtils.h"
 
-//vulkan_android_app AndroidUtils::vulkanApplication = vulkan_android_app();
-
-vulkan::VulkanObject* AndroidUtils::vulkanApplication = nullptr;
-android_app* AndroidUtils::nativeApplication = nullptr;
-gvr::ControllerApi* AndroidUtils::controllerApi = nullptr;
-
 #include <stdio.h>
 #include <assert.h>
 #include <cstdlib>
@@ -22,13 +16,13 @@ gvr::ControllerApi* AndroidUtils::controllerApi = nullptr;
 #include <iostream>
 
 #ifdef __ANDROID__
-// Android specific include files.
-#include <unordered_map>
+vulkan::VulkanObject* AndroidUtils::vulkanApplication = nullptr;
+android_app* AndroidUtils::nativeApplication = nullptr;
+gvr::ControllerApi* AndroidUtils::controllerApi = nullptr;
 
+#include <unordered_map>
 #include "shaderc/shaderc.hpp"
 
-#elif (defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK))
-#include <MoltenGLSLToSPIRVConverter/GLSLToSPIRVConverter.h>
 #else
 //#include "SPIRV/GlslangToSpv.h"
 #endif

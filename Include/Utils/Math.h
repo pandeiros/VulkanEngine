@@ -12,11 +12,17 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
+/**
+ * @file Math.h
+ */
+
+constexpr double PI = 3.14159265359;
+
 VULKAN_NS_BEGIN
 
 /**
-* @class Math
-*/
+ * @class Math
+ */
 class Math
 {
 public:

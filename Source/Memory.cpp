@@ -22,7 +22,15 @@ void Memory::Allocate(VkDevice device, VkDeviceSize allocationSize, uint32_t mem
 
 void Memory::Free(VkDevice device)
 {
-    vkFreeMemory(device, memory, nullptr);
+    if (device)
+    {
+        vkFreeMemory(device, memory, nullptr);
+    }
+}
+
+VkDeviceMemory Memory::GetVkMemory() const
+{
+    return memory;
 }
 
 VkDeviceSize Memory::GetMemoryCommitment(VkDevice device)
@@ -67,6 +75,11 @@ void Memory::InvalidateMappedMemoryRange(VkDevice device, VkDeviceSize offset, V
     DebugTools::Verify(vkFlushMappedMemoryRanges(device, 1, &range));
 }
 
+void Memory::BindImageMemory(VkDevice device, VkImage image, VkDeviceSize memoryOffset)
+{
+    DebugTools::Verify(vkBindImageMemory(device, image, memory, memoryOffset));
+}
+
 void Memory::FlushMappedMemoryRange(VkDevice device, VkDeviceSize offset, VkDeviceSize size)
 {
     VkMappedMemoryRange range = {
@@ -80,7 +93,7 @@ void Memory::FlushMappedMemoryRange(VkDevice device, VkDeviceSize offset, VkDevi
     DebugTools::Verify(vkInvalidateMappedMemoryRanges(device, 1, &range));
 }
 
-VkSparseMemoryBind Memory::GetSparseMemoryBind(VkDeviceSize resourceOffset, VkDeviceSize size, VkDeviceSize memoryOffset, VkSparseMemoryBindFlags flags)
-{
-    return { resourceOffset, size, memory, memoryOffset, flags };
-}
+//VkSparseMemoryBind Memory::GetSparseMemoryBind(VkDeviceSize resourceOffset, VkDeviceSize size, VkDeviceSize memoryOffset, VkSparseMemoryBindFlags flags)
+//{
+//    return { resourceOffset, size, memory, memoryOffset, flags };
+//}

@@ -24,12 +24,13 @@
 #include <iostream>
 #include <vector>
 
-// #TODO MOVE TO MATH FILE OR STH
-constexpr double PI = 3.14159265359;
-
 /**
  * @file VulkanCore.h
  */
+
+/* Number of samples needs to be the same at image creation,
+ * renderpass creation and pipeline creation. */
+#define VULKAN_SAMPLE_COUNT VK_SAMPLE_COUNT_1_BIT
 
 VULKAN_NS_BEGIN
 
@@ -47,8 +48,8 @@ bool IsOfEnum(T Value, std::vector<T> Enums)
 }
 
 /**
-* @class VulkanObject
-*/
+ * @class VulkanObject
+ */
 class VulkanObject
 {
 public:

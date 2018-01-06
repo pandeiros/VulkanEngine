@@ -27,7 +27,10 @@ void ImageView::Create(VkDevice device, VkImageViewCreateFlags flags, VkImage im
 
 void ImageView::Destroy(VkDevice device)
 {
-    vkDestroyImageView(device, imageView, nullptr);
+    if (device)
+    {
+        vkDestroyImageView(device, imageView, nullptr);
+    }
 }
 
 VkImageView ImageView::GetVkImageView()

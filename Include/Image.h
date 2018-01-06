@@ -50,7 +50,7 @@ protected:
     VkImageCreateInfo imageCreateInfo = {};
 
     /** Forces proper extent values for 1D and 2D images. */
-    void checkExtent(VkImageType type, VkExtent3D& outExtent);
+    void CheckExtent(VkImageType type, VkExtent3D& outExtent);
 };
 
 /**
@@ -76,7 +76,6 @@ public:
     std::vector<VkSparseImageMemoryRequirements>& GetSparseMemoryRequirements(VkDevice device);
 
 private:
-
     std::vector<VkSparseImageMemoryRequirements> sparseMemoryRequirements;
 };
 

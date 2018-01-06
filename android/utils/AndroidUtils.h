@@ -17,43 +17,14 @@
 
 #include "VulkanCore.h"
 #include "AndroidCore.h"
-
 #include "Utils/Math.h"
 
-#ifdef _WIN32
-#pragma comment(linker, "/subsystem:console")
-
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-
-#ifndef VK_USE_PLATFORM_WIN32_KHR
-#define VK_USE_PLATFORM_WIN32_KHR
-#endif
-
-#ifndef NOMINMAX
-#define NOMINMAX /* Don't let Windows define min() or max() */
-#endif
-
-#define APP_NAME_STR_LEN 80
-
-#elif defined(__ANDROID__)
+#ifdef __ANDROID__
 #include <unistd.h>
 #include <jni.h>
 #include <android_native_app_glue.h>
 #include "gvr.h"
 #include "gvr_controller.h"
-
-//struct vulkan_android_app
-//{
-//    android_app* nativeApplication = nullptr;
-//    vulkan::VulkanObject* vulkanApplication = nullptr;
-//};
-
-//#include "vulkan_wrapper.h" // Include Vulkan_wrapper and dynamically load symbols.
-
-// Static variable that keeps ANativeWindow and asset manager instances.
-//static vulkan_android_app androidApplication;
 
 #define NATIVE_METHOD(return_type, method_name) \
   JNIEXPORT return_type JNICALL                 \
@@ -77,33 +48,18 @@ public:
         delete vulkanApplication;
     }
 
-//    static vulkan_android_app androidApplication;
-
     static vulkan::VulkanObject* vulkanApplication;
     static android_app* nativeApplication;
     static gvr::ControllerApi* controllerApi;
 };
 
-//#elif defined(__IPHONE_OS_VERSION_MAX_ALLOWED) || defined(__MAC_OS_X_VERSION_MAX_ALLOWED)
-//#include <MoltenVK/mvk_vulkan.h>
-//#include <unistd.h>
-//#else
-//#include <unistd.h>
-//#include "vulkan/vk_sdk_platform.h"
-
-#endif
-
-//#include <vulkan/vulkan.h>
+#endif //__ANDROID__
 
 // #TODO Check out this defines (if really needed).
 
   /* Number of descriptor sets needs to be the same at alloc,       */
   /* pipeline layout creation, and descriptor set layout creation   */
 #define NUM_DESCRIPTOR_SETS 1
-
- /* Number of samples needs to be the same at image creation,      */
- /* renderpass creation and pipeline creation.                     */
-#define NUM_SAMPLES VK_SAMPLE_COUNT_1_BIT
 
  /* Number of viewports and number of scissors have to be the same */
  /* at pipeline creation and in any call to set them dynamically   */
@@ -204,9 +160,9 @@ int vulkan_android_main(int argc, char *argv[]); //, vulkan_android_app* android
 //*/
 //struct sample_info {
 //#ifdef _WIN32
-//#define APP_NAME_STR_LEN 80
+//#define VULKAN_APP_NAME_LENGTH 80
 //    HINSTANCE connection;        // hInstance - Windows Instance
-//    char name[APP_NAME_STR_LEN]; // Name to put on the window/icon
+//    char name[VULKAN_APP_NAME_LENGTH]; // Name to put on the window/icon
 //    HWND window;                 // hWnd - window handle
 //#elif (defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK))
 //    void* window;

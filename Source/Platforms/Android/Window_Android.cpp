@@ -1,5 +1,4 @@
 #include "Platforms/Win32/Window_Win32.h"
-//#include "Rendering/Windows_old.h"  // #TODO Delete
 #include "Window.h"
 #include "Instance.h"
 #include "Rendering/Renderer.h"
@@ -46,4 +45,4 @@ void Window::DestroyOSWindow()
     //win32Window = nullptr;
 }
 
-#endif // ANDROID
+#endif // __ANDROID__

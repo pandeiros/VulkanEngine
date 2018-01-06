@@ -62,7 +62,7 @@ void Window::BeginRender()
 {
     VkDevice device = cachedInstance->GetDeviceRef().GetVkDevice();
 
-    DebugTools::Verify(vkAcquireNextImageKHR(device, swapchain, UINT64_MAX, VK_NULL_HANDLE, fenceSwapchainImageAvailable, &activeSwapchainImageID));
+    DebugTools::Verify(vkAcquireNextImageKHR(device, swapchain.GetVkSwapchain(), UINT64_MAX, VK_NULL_HANDLE, fenceSwapchainImageAvailable, &activeSwapchainImageID));
     DebugTools::Verify(vkWaitForFences(device, 1, &fenceSwapchainImageAvailable, VK_TRUE, UINT64_MAX));
     DebugTools::Verify(vkResetFences(device, 1, &fenceSwapchainImageAvailable));
     DebugTools::Verify(vkQueueWaitIdle(cachedInstance->GetDeviceRef().GetQueueRef().GetVkQueueRef()));
@@ -78,7 +78,7 @@ void Window::EndRender(std::vector<VkSemaphore> waitSemaphores)
         (uint32_t)waitSemaphores.size(),
         waitSemaphores.data(),
         1,
-        &swapchain,
+        &swapchain.GetVkSwapchain(),
         &activeSwapchainImageID,
         &presentResult
     };
@@ -94,10 +94,10 @@ VkExtent2D Window::GetSurfaceSize()
 
 VkRenderPass Window::GetRenderPass()
 {
-    return renderPass;
+    return renderPass.GetVkRenderPass();
 }
 
-VkFramebuffer Window::GetActiveFramebuffer()
+Framebuffer& Window::GetActiveFramebuffer()
 {
     return framebuffers[activeSwapchainImageID];
 }
@@ -147,7 +147,9 @@ void Window::DestroySurface()
 void Window::CreateSwapchain()
 {
     if (swapchainImageCount < surfaceCapabilities.minImageCount + 1)
+    {
         swapchainImageCount = surfaceCapabilities.minImageCount + 1;
+    }
 
     if (surfaceCapabilities.maxImageCount > 0)
     {
@@ -175,36 +177,36 @@ void Window::CreateSwapchain()
 
     uint32_t imageArrayLayers = 1;
 
-    swapchainCreateInfo = {
-        VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
-        nullptr,
+    VkDevice device = cachedInstance->GetDeviceRef().GetVkDevice();
+
+    swapchain.Create(device,
         0,
         surface,
         swapchainImageCount,
-        surfaceFormat.format,
-        surfaceFormat.colorSpace,
-        windowCreateInfo.surfaceSize,
-        imageArrayLayers,
-        VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-        VK_SHARING_MODE_EXCLUSIVE,
-        0,
-        nullptr,
+        {
+            surfaceFormat.format,
+            surfaceFormat.colorSpace,
+            windowCreateInfo.surfaceSize,
+            imageArrayLayers,
+            VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+            VK_SHARING_MODE_EXCLUSIVE
+        },
+        {},
         VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR,
         VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
         presentMode,
         VK_TRUE,
-        VK_NULL_HANDLE
-    };
-
-    VkDevice device = cachedInstance->GetDeviceRef().GetVkDevice();
-
-    DebugTools::Verify(vkCreateSwapchainKHR(device, &swapchainCreateInfo, nullptr, &swapchain));
-    DebugTools::Verify(vkGetSwapchainImagesKHR(device, swapchain, &swapchainImageCount, nullptr));
+        VK_NULL_HANDLE);
 }
 
 void Window::DestroySwapchain()
 {
-    vkDestroySwapchainKHR(cachedInstance->GetDeviceRef().GetVkDevice(), swapchain, nullptr);
+    if (cachedInstance)
+    {
+        VkDevice device = cachedInstance->GetDeviceRef().GetVkDevice();
+
+        swapchain.Destroy(device);
+    }
 }
 
 void Window::CreateSwapchainImages()
@@ -214,7 +216,7 @@ void Window::CreateSwapchainImages()
     swapchainImages.resize(swapchainImageCount);
     swapchainImageViews.resize(swapchainImageCount);
 
-    DebugTools::Verify(vkGetSwapchainImagesKHR(device, swapchain, &swapchainImageCount, swapchainImages.data()));
+    DebugTools::Verify(vkGetSwapchainImagesKHR(device, swapchain.GetVkSwapchain(), &swapchainImageCount, swapchainImages.data()));
 
     for (uint32_t i = 0; i < swapchainImageCount; ++i)
     {
@@ -281,20 +283,14 @@ void Window::CreateDepthStencilImage()
 
     depthStencilImage.Create(device, 0, VK_IMAGE_TYPE_2D, depthStencilFormat,
         { windowCreateInfo.surfaceSize.width, windowCreateInfo.surfaceSize.height, 1 },
-        1, 1, VK_SAMPLE_COUNT_1_BIT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+        1, 1, VULKAN_SAMPLE_COUNT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
         VK_SHARING_MODE_EXCLUSIVE, {}, VK_IMAGE_LAYOUT_UNDEFINED);
 
-    VkMemoryRequirements imageMemoryRequirements{};
-    vkGetImageMemoryRequirements(device, depthStencilImage.GetVkImage(), &imageMemoryRequirements);
+    VkMemoryRequirements imageMemoryRequirements = depthStencilImage.GetMemoryRequirements(device);
 
     uint32_t memoryIndex = physicalDevice->GetMemoryTypeIndex(&imageMemoryRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-    VkMemoryAllocateInfo memoryAllocateInfo{};
-    memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    memoryAllocateInfo.allocationSize = imageMemoryRequirements.size;
-    memoryAllocateInfo.memoryTypeIndex = memoryIndex;
-    vkAllocateMemory(device, &memoryAllocateInfo, nullptr, &depthStencilImageMemory);
-    vkBindImageMemory(device, depthStencilImage.GetVkImage(), depthStencilImageMemory, 0);
+    depthStencilImageMemory.Allocate(device, imageMemoryRequirements.size, memoryIndex);
+    depthStencilImageMemory.BindImageMemory(device, depthStencilImage.GetVkImage(), 0);
 
     depthStencilImageView.Create(device, 0, depthStencilImage.GetVkImage(), VK_IMAGE_VIEW_TYPE_2D, depthStencilFormat, Image::GetIdentityComponentMapping(),
         { VK_IMAGE_ASPECT_DEPTH_BIT | (bStencilAvailable ? VK_IMAGE_ASPECT_STENCIL_BIT : 0u), 0, 1, 0, 1 });
@@ -302,34 +298,44 @@ void Window::CreateDepthStencilImage()
 
 void Window::DestroyDepthStencilImage()
 {
-    VkDevice device = cachedInstance->GetDeviceRef().GetVkDevice();
+    if (cachedInstance)
+    {
+        VkDevice device = cachedInstance->GetDeviceRef().GetVkDevice();
 
-    vkDestroyImageView(device, depthStencilImageView.GetVkImageView(), nullptr);
-    vkFreeMemory(device, depthStencilImageMemory, nullptr);
-    vkDestroyImage(device, depthStencilImage.GetVkImage(), nullptr);
+        depthStencilImageView.Destroy(device);
+        depthStencilImageMemory.Free(device);
+        depthStencilImage.Destroy(device);
+    }
 }
 
 void Window::CreateRenderPass()
 {
-    std::array<VkAttachmentDescription, 2> attachments{};
+    std::vector<VkAttachmentDescription> attachments;
+    attachments.push_back(
+    {
+        0,
+        depthStencilImage.GetVkFormat(),
+        VK_SAMPLE_COUNT_1_BIT,
+        VK_ATTACHMENT_LOAD_OP_CLEAR,
+        VK_ATTACHMENT_STORE_OP_DONT_CARE,
+        VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+        VK_ATTACHMENT_STORE_OP_STORE,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+    });
 
-    attachments[0].flags = 0;
-    attachments[0].format = depthStencilImage.GetVkFormat();
-    attachments[0].samples = VK_SAMPLE_COUNT_1_BIT;
-    attachments[0].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    attachments[0].storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    attachments[0].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    attachments[0].stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
-    attachments[0].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    attachments[0].finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-    attachments[1].flags = 0;
-    attachments[1].format = surfaceFormat.format;
-    attachments[1].samples = VK_SAMPLE_COUNT_1_BIT;
-    attachments[1].loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    attachments[1].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    attachments[1].initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    attachments[1].finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    attachments.push_back(
+    {
+        0,
+        surfaceFormat.format,
+        VK_SAMPLE_COUNT_1_BIT,
+        VK_ATTACHMENT_LOAD_OP_CLEAR,
+        VK_ATTACHMENT_STORE_OP_STORE,
+        VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+        VK_ATTACHMENT_STORE_OP_DONT_CARE,
+        VK_IMAGE_LAYOUT_UNDEFINED,
+        VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+    });
 
     VkAttachmentReference subpassDepthStencilAttachment{};
     subpassDepthStencilAttachment.attachment = 0;
@@ -339,31 +345,34 @@ void Window::CreateRenderPass()
     subpassColorAttachments[0].attachment = 1;
     subpassColorAttachments[0].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-    std::array<VkSubpassDescription, 1> subpasses{};
-    subpasses[0].pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    subpasses[0].colorAttachmentCount = (uint32_t)subpassColorAttachments.size();
-    subpasses[0].pColorAttachments = subpassColorAttachments.data();
-    subpasses[0].pDepthStencilAttachment = &subpassDepthStencilAttachment;
-
-    VkRenderPassCreateInfo renderPassCreateInfo = {
-        VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,
-        nullptr,
+    std::vector<VkSubpassDescription> subpasses;
+    subpasses.push_back(
+    {
         0,
-        (uint32_t)attachments.size(),
-        attachments.data(),
-        (uint32_t)subpasses.size(),
-        subpasses.data(),
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        0,
+        nullptr,
+        (uint32_t)subpassColorAttachments.size(),
+        subpassColorAttachments.data(),
+        nullptr,
+        &subpassDepthStencilAttachment,
         0,
         nullptr
-    };
+    });
 
+    DebugTools::Assert(cachedInstance);
     VkDevice device = cachedInstance->GetDeviceRef().GetVkDevice();
-    DebugTools::Verify(vkCreateRenderPass(device, &renderPassCreateInfo, nullptr, &renderPass));
+    renderPass.Create(device, 0, attachments, subpasses, {});
 }
 
 void Window::DestroyRenderPass()
 {
-    vkDestroyRenderPass(cachedInstance->GetDeviceRef().GetVkDevice(), renderPass, nullptr);
+    if (cachedInstance)
+    {
+        VkDevice device = cachedInstance->GetDeviceRef().GetVkDevice();
+
+        renderPass.Destroy(device);
+    }
 }
 
 void Window::CreateFramebuffer()
@@ -372,31 +381,28 @@ void Window::CreateFramebuffer()
 
     for (uint32_t i = 0; i < swapchainImageCount; ++i)
     {
-        std::array<VkImageView, 2> attachments{};
+        std::vector<VkImageView> attachments(2);
         attachments[0] = depthStencilImageView.GetVkImageView();
         attachments[1] = swapchainImageViews[i].GetVkImageView();
 
-        VkFramebufferCreateInfo framebufferCreateInfo = {
-            VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,
-            nullptr,
-            0,
-            renderPass,
-            (uint32_t)attachments.size(),
-            attachments.data(),
-            windowCreateInfo.surfaceSize.width,
-            windowCreateInfo.surfaceSize.height,
-            1
-        };
+        DebugTools::Assert(cachedInstance);
+        VkDevice device = cachedInstance->GetDeviceRef().GetVkDevice();
 
-        vkCreateFramebuffer(cachedInstance->GetDeviceRef().GetVkDevice(), &framebufferCreateInfo, nullptr, &framebuffers[i]);
+        framebuffers[i].Create(device, 0, renderPass.GetVkRenderPass(), attachments,
+        { windowCreateInfo.surfaceSize.width, windowCreateInfo.surfaceSize.height, 1 });
     }
 }
 
 void Window::DestroyFramebuffer()
 {
-    for (VkFramebuffer& framebuffer : framebuffers)
+    if (cachedInstance)
     {
-        vkDestroyFramebuffer(cachedInstance->GetDeviceRef().GetVkDevice(), framebuffer, nullptr);
+        VkDevice device = cachedInstance->GetDeviceRef().GetVkDevice();
+
+        for (Framebuffer& framebuffer : framebuffers)
+        {
+            framebuffer.Destroy(device);
+        }
     }
 }
 
