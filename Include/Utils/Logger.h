@@ -10,11 +10,20 @@
 
 #include <string>
 
+#include "AndroidCore.h"
+
 /**
  * @file Logger.h
  */
 
 VULKAN_NS_BEGIN
+
+// #TODO Fix non-Android version.
+#ifdef __ANDROID__
+#define VULKAN_LOG(FORMAT, ...) LOGI(FORMAT, ##__VA_ARGS__);
+#else
+#define VULKAN_LOG(FORMAT, ...)
+#endif
 
 /**
  * @class Logger

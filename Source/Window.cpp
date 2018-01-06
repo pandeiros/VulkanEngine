@@ -6,8 +6,10 @@
 
 #include "Window.h"
 #include "Instance.h"
+#include "Utils/Logger.h"
 
 #include <array>
+#include <string>
 
 VULKAN_NS_USING;
 
@@ -66,6 +68,13 @@ void Window::BeginRender()
     DebugTools::Verify(vkWaitForFences(device, 1, &fenceSwapchainImageAvailable, VK_TRUE, UINT64_MAX));
     DebugTools::Verify(vkResetFences(device, 1, &fenceSwapchainImageAvailable));
     DebugTools::Verify(vkQueueWaitIdle(cachedInstance->GetDeviceRef().GetQueueRef().GetVkQueueRef()));
+
+    VULKAN_LOG("Swapchain image index %i", activeSwapchainImageID);
+
+//    if (activeSwapchainImageID >= swapchainImageCount)
+//    {
+//        activeSwapchainImageID = 0;
+//    }
 }
 
 void Window::EndRender(std::vector<VkSemaphore> waitSemaphores)
@@ -97,9 +106,9 @@ VkRenderPass Window::GetRenderPass()
     return renderPass.GetVkRenderPass();
 }
 
-Framebuffer& Window::GetActiveFramebuffer()
+VkFramebuffer Window::GetActiveFramebuffer()
 {
-    return framebuffers[activeSwapchainImageID];
+    return framebuffers[activeSwapchainImageID].GetVkFramebuffer();
 }
 
 void Window::CreateSurface()
@@ -112,7 +121,7 @@ void Window::CreateSurface()
     // Graphics family index may be changed to one supporting presenting and thus device should be reset.
     cachedInstance->GetDeviceRef().CheckPhysicalDeviceDirty();
 
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &surfaceCapabilities);
+    DebugTools::Verify(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &surfaceCapabilities));
 
     if (surfaceCapabilities.currentExtent.width < UINT32_MAX)
     {
@@ -120,9 +129,8 @@ void Window::CreateSurface()
     }
 
     uint32_t formatCount = 0;
-    vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, nullptr);
-
-    DebugTools::Assert(formatCount, "Surface format missing.");
+    DebugTools::Verify(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, nullptr));
+    DebugTools::Assert(formatCount > 0, "Surface format missing.");
 
     std::vector<VkSurfaceFormatKHR> surfaceFormats(formatCount);
     vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, surfaceFormats.data());
@@ -146,20 +154,22 @@ void Window::DestroySurface()
 
 void Window::CreateSwapchain()
 {
-    if (swapchainImageCount < surfaceCapabilities.minImageCount + 1)
+    // Image count
+    uint32_t desiredSwapchainImageCount = 2;
+    if (desiredSwapchainImageCount < surfaceCapabilities.minImageCount)
     {
-        swapchainImageCount = surfaceCapabilities.minImageCount + 1;
+        desiredSwapchainImageCount = surfaceCapabilities.minImageCount;
     }
 
     if (surfaceCapabilities.maxImageCount > 0)
     {
-        if (swapchainImageCount > surfaceCapabilities.maxImageCount)
+        if (desiredSwapchainImageCount > surfaceCapabilities.maxImageCount)
         {
-            swapchainImageCount = surfaceCapabilities.maxImageCount;
+            desiredSwapchainImageCount = surfaceCapabilities.maxImageCount;
         }
     }
 
-
+    // Present mode
     VkPhysicalDevice physicalDevice = cachedInstance->GetDeviceRef().GetPhysicalDevice()->GetVkPhysicalDevice();
     VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
 
@@ -172,31 +182,72 @@ void Window::CreateSwapchain()
     for (VkPresentModeKHR& mode : presentModes)
     {
         if (mode == VK_PRESENT_MODE_MAILBOX_KHR)
+        {
             presentMode = mode;
+        }
     }
 
-    uint32_t imageArrayLayers = 1;
+    // Pre-transform.
+    VkSurfaceTransformFlagBitsKHR preTransform;
+    if (surfaceCapabilities.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR)
+    {
+        preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+    }
+    else
+    {
+        preTransform = surfaceCapabilities.currentTransform;
+    }
 
+    // Composite alpha mode
+    VkCompositeAlphaFlagBitsKHR compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+    VkCompositeAlphaFlagBitsKHR compositeAlphaFlags[4] =
+    {
+        VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
+        VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR,
+        VK_COMPOSITE_ALPHA_POST_MULTIPLIED_BIT_KHR,
+        VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR
+    };
+
+    for (uint32_t i = 0; i < sizeof(compositeAlphaFlags); ++i)
+    {
+        if (surfaceCapabilities.supportedCompositeAlpha & compositeAlphaFlags[i])
+        {
+            compositeAlpha = compositeAlphaFlags[i];
+            break;
+        }
+    }
+
+    // Clipped
+    VkBool32 isClipped = true;
+
+#ifdef __ANDROID__
+    isClipped = false;
+#endif
+
+    uint32_t imageArrayLayers = 1;
     VkDevice device = cachedInstance->GetDeviceRef().GetVkDevice();
 
     swapchain.Create(device,
         0,
         surface,
-        swapchainImageCount,
+        desiredSwapchainImageCount,
         {
             surfaceFormat.format,
-            surfaceFormat.colorSpace,
+//            surfaceFormat.colorSpace,
+            VK_COLORSPACE_SRGB_NONLINEAR_KHR,
             windowCreateInfo.surfaceSize,
             imageArrayLayers,
-            VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+            VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, // | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
             VK_SHARING_MODE_EXCLUSIVE
         },
         {},
-        VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR,
-        VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
+        preTransform,
+        compositeAlpha,
         presentMode,
-        VK_TRUE,
+        isClipped,
         VK_NULL_HANDLE);
+
+    swapchainImageCount = swapchain.GetImageCount();
 }
 
 void Window::DestroySwapchain()
@@ -312,38 +363,37 @@ void Window::CreateRenderPass()
 {
     std::vector<VkAttachmentDescription> attachments;
     attachments.push_back(
-    {
-        0,
-        depthStencilImage.GetVkFormat(),
-        VK_SAMPLE_COUNT_1_BIT,
-        VK_ATTACHMENT_LOAD_OP_CLEAR,
-        VK_ATTACHMENT_STORE_OP_DONT_CARE,
-        VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-        VK_ATTACHMENT_STORE_OP_STORE,
-        VK_IMAGE_LAYOUT_UNDEFINED,
-        VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
-    });
-
+        {
+            0,
+            surfaceFormat.format,
+            VK_SAMPLE_COUNT_1_BIT,
+            VK_ATTACHMENT_LOAD_OP_CLEAR,
+            VK_ATTACHMENT_STORE_OP_STORE,
+            VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+            VK_ATTACHMENT_STORE_OP_DONT_CARE,
+            VK_IMAGE_LAYOUT_UNDEFINED,
+            VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+        });
     attachments.push_back(
-    {
-        0,
-        surfaceFormat.format,
-        VK_SAMPLE_COUNT_1_BIT,
-        VK_ATTACHMENT_LOAD_OP_CLEAR,
-        VK_ATTACHMENT_STORE_OP_STORE,
-        VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-        VK_ATTACHMENT_STORE_OP_DONT_CARE,
-        VK_IMAGE_LAYOUT_UNDEFINED,
-        VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
-    });
-
-    VkAttachmentReference subpassDepthStencilAttachment{};
-    subpassDepthStencilAttachment.attachment = 0;
-    subpassDepthStencilAttachment.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        {
+            0,
+            depthStencilImage.GetVkFormat(),
+            VK_SAMPLE_COUNT_1_BIT,
+            VK_ATTACHMENT_LOAD_OP_CLEAR,
+            VK_ATTACHMENT_STORE_OP_DONT_CARE,
+            VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+            VK_ATTACHMENT_STORE_OP_STORE,
+            VK_IMAGE_LAYOUT_UNDEFINED,
+            VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+        });
 
     std::array<VkAttachmentReference, 1> subpassColorAttachments;
-    subpassColorAttachments[0].attachment = 1;
+    subpassColorAttachments[0].attachment = 0;
     subpassColorAttachments[0].layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+    VkAttachmentReference subpassDepthStencilAttachment{};
+    subpassDepthStencilAttachment.attachment = 1;
+    subpassDepthStencilAttachment.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
     std::vector<VkSubpassDescription> subpasses;
     subpasses.push_back(
@@ -382,8 +432,8 @@ void Window::CreateFramebuffer()
     for (uint32_t i = 0; i < swapchainImageCount; ++i)
     {
         std::vector<VkImageView> attachments(2);
-        attachments[0] = depthStencilImageView.GetVkImageView();
-        attachments[1] = swapchainImageViews[i].GetVkImageView();
+        attachments[0] = swapchainImageViews[i].GetVkImageView();
+        attachments[1] = depthStencilImageView.GetVkImageView();
 
         DebugTools::Assert(cachedInstance);
         VkDevice device = cachedInstance->GetDeviceRef().GetVkDevice();

@@ -66,14 +66,14 @@ int main()
 
         std::vector<VkClearValue> clearValues = std::vector<VkClearValue>(2);
 
-        clearValues[0].depthStencil.depth = 0.f;
-        clearValues[0].depthStencil.stencil = 0;
-        clearValues[1].color.float32[0] = std::sin(colorRotator) * 0.5f + 0.5f;
-        clearValues[1].color.float32[1] = std::sin(colorRotator + (float)PI * 2.f / 3.f) * 0.5f + 0.5f;
-        clearValues[1].color.float32[2] = std::sin(colorRotator + (float)PI * 4.f / 3.f) * 0.5f + 0.5f;
-        clearValues[1].color.float32[3] = 1.f;
+        clearValues[1].depthStencil.depth = 0.f;
+        clearValues[1].depthStencil.stencil = 0;
+        clearValues[0].color.float32[0] = std::sin(colorRotator) * 0.5f + 0.5f;
+        clearValues[0].color.float32[1] = std::sin(colorRotator + (float)PI * 2.f / 3.f) * 0.5f + 0.5f;
+        clearValues[0].color.float32[2] = std::sin(colorRotator + (float)PI * 4.f / 3.f) * 0.5f + 0.5f;
+        clearValues[0].color.float32[3] = 1.f;
 
-        commandBuffer.BeginRenderPass(window.GetRenderPass(), window.GetActiveFramebuffer().GetVkFramebuffer(), renderArea, clearValues, VK_SUBPASS_CONTENTS_INLINE);
+        commandBuffer.BeginRenderPass(window.GetRenderPass(), window.GetActiveFramebuffer(), renderArea, clearValues, VK_SUBPASS_CONTENTS_INLINE);
         commandBuffer.EndRenderPass();
 
         commandBuffer.End();
@@ -82,7 +82,7 @@ int main()
 
         window.EndRender({semaphoreRenderComplete});
 
-        colorRotator += 0.001f;
+        colorRotator += 0.1f;
     }
 
     queue.WaitIdle();

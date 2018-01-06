@@ -8,7 +8,7 @@
 
 VULKAN_NS_USING;
 
-void Swapchain::Create(VkDevice device, VkSwapchainCreateFlagsKHR flags, VkSurfaceKHR surface, uint32_t minImageCount, SwapchainImageInfo imageinfo,
+void Swapchain::Create(VkDevice device, VkSwapchainCreateFlagsKHR flags, VkSurfaceKHR surface, uint32_t desiredImageCount, SwapchainImageInfo imageinfo,
     std::vector<uint32_t> queueFamilyIndices, VkSurfaceTransformFlagBitsKHR preTransform, VkCompositeAlphaFlagBitsKHR compositeAlpha,
     VkPresentModeKHR presentMode, VkBool32 clipped, VkSwapchainKHR oldSwapchain)
 {
@@ -17,7 +17,7 @@ void Swapchain::Create(VkDevice device, VkSwapchainCreateFlagsKHR flags, VkSurfa
         nullptr,
         0,
         surface,
-        minImageCount,
+        desiredImageCount,
         imageinfo.imageFormat,
         imageinfo.imageColorSpace,
         imageinfo.imageExtent,
@@ -34,7 +34,7 @@ void Swapchain::Create(VkDevice device, VkSwapchainCreateFlagsKHR flags, VkSurfa
     };
 
     DebugTools::Verify(vkCreateSwapchainKHR(device, &swapchainCreateInfo, nullptr, &swapchain));
-    DebugTools::Verify(vkGetSwapchainImagesKHR(device, swapchain, &minImageCount, nullptr));
+    DebugTools::Verify(vkGetSwapchainImagesKHR(device, swapchain, &imageCount, nullptr));
 }
 
 void Swapchain::Destroy(VkDevice device)
@@ -50,4 +50,9 @@ void Swapchain::Destroy(VkDevice device)
 VkSwapchainKHR& Swapchain::GetVkSwapchain()
 {
     return swapchain;
+}
+
+uint32_t Swapchain::GetImageCount() const
+{
+    return imageCount;
 }

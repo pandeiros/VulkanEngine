@@ -10,8 +10,6 @@
 #include <iomanip>
 #include <string>
 
-#include "AndroidCore.h"
-
 VULKAN_NS_USING;
 
 uint32_t Logger::indentation = 0;
@@ -23,7 +21,7 @@ void Logger::Log(const char* message)
 
 void Logger::Log(uint32_t message)
 {
-    // TODO Fix for Android
+    //TODO Fix for Android
     //LogInternal(std::to_string(message));
 }
 

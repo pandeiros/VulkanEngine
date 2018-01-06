@@ -47,7 +47,7 @@ public:
 
     void Create(Instance* instance, const WindowCreateInfo& windowCreateInfo);
     void Destroy();
-
+    
     bool Update();
     void Close();
 
@@ -56,7 +56,7 @@ public:
 
     VkExtent2D GetSurfaceSize();
     VkRenderPass GetRenderPass();
-    Framebuffer& GetActiveFramebuffer();
+    VkFramebuffer GetActiveFramebuffer();
 
 private:
     WindowCreateInfo windowCreateInfo = {};

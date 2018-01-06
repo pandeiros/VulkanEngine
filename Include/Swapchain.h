@@ -40,7 +40,7 @@ public:
      */
     ~Swapchain() = default;
 
-    void Create(VkDevice device, VkSwapchainCreateFlagsKHR flags, VkSurfaceKHR surface, uint32_t minImageCount, SwapchainImageInfo imageinfo,
+    void Create(VkDevice device, VkSwapchainCreateFlagsKHR flags, VkSurfaceKHR surface, uint32_t desiredImageCount, SwapchainImageInfo imageinfo,
         std::vector<uint32_t> queueFamilyIndices, VkSurfaceTransformFlagBitsKHR preTransform, VkCompositeAlphaFlagBitsKHR compositeAlpha,
         VkPresentModeKHR presentMode, VkBool32 clipped, VkSwapchainKHR oldSwapchain);
 
@@ -48,10 +48,14 @@ public:
 
     VkSwapchainKHR& GetVkSwapchain();
 
+    uint32_t GetImageCount() const;
+
 protected:
     VkSwapchainKHR swapchain = VK_NULL_HANDLE;
 
     VkSwapchainCreateInfoKHR swapchainCreateInfo = {};
+
+    uint32_t imageCount;
 };
 
 VULKAN_NS_END
