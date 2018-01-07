@@ -38,19 +38,23 @@ extern "C" {
 class AndroidUtils
 {
 public:
-    static void Clean()
-    {
-        if (vulkanApplication)
-        {
-            vulkanApplication->Destroy();
-        }
+    static void Init();
+    static void Close();
 
-        delete vulkanApplication;
-    }
+    static void Start();
+    static void Update();
+
+    static void Pause();
+    static void Resume();
+
+    static void Clean();
 
     static vulkan::VulkanObject* vulkanApplication;
     static android_app* nativeApplication;
     static gvr::ControllerApi* controllerApi;
+
+private:
+    static bool isPaused;
 };
 
 #endif //__ANDROID__
@@ -103,10 +107,6 @@ ANativeWindow* AndroidGetApplicationWindow();
 FILE* AndroidFopen(const char* fname, const char* mode);
 void AndroidGetWindowSize(int32_t& width, int32_t& height);
 bool AndroidLoadFile(const char* filePath, std::string *data);
-
-//
-//float GetControllerXPos();
-//
 
 // #TODO Delete this (probably...)
 // Main entry point of samples

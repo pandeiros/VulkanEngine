@@ -58,7 +58,7 @@ int vulkan_android_main(int argc, char *argv[]) //, vulkan_android_app* androidA
         return VK_NOT_READY;
     }
 
-    AndroidApplication *application = new AndroidApplication();
+    AndroidApplication* application = new AndroidApplication();
     application->Create("Vulkan Engine App Test", 1, VK_MAKE_VERSION(1, 0, 2));
 
     AndroidUtils::vulkanApplication = application;

@@ -68,13 +68,6 @@ void Window::BeginRender()
     DebugTools::Verify(vkWaitForFences(device, 1, &fenceSwapchainImageAvailable, VK_TRUE, UINT64_MAX));
     DebugTools::Verify(vkResetFences(device, 1, &fenceSwapchainImageAvailable));
     DebugTools::Verify(vkQueueWaitIdle(cachedInstance->GetDeviceRef().GetQueueRef().GetVkQueueRef()));
-
-    VULKAN_LOG("Swapchain image index %i", activeSwapchainImageID);
-
-//    if (activeSwapchainImageID >= swapchainImageCount)
-//    {
-//        activeSwapchainImageID = 0;
-//    }
 }
 
 void Window::EndRender(std::vector<VkSemaphore> waitSemaphores)

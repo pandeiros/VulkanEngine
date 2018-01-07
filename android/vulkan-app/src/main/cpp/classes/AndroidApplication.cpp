@@ -8,23 +8,19 @@ void AndroidApplication::Init()
     vulkan::Application::Init();
 
     vulkan::Device& device = instance.GetDeviceRef();
-//    VkDevice device = instance.GetDeviceRef().GetVkDevice();
 
     commandPool.Create(device.GetVkDevice(), VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
                        instance.GetDeviceRef().GetPhysicalDevice()->GetGraphicsFamilyIndex());
     commandPool.AllocateCommandBuffer(device.GetVkDevice(), VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
     device.CreateSemaphore(&semaphoreRenderComplete);
-//    {
-//        VkSemaphoreCreateInfo semaphoreCreateInfo{};
-//        semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-//        vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, &semaphoreRenderComplete);
-//    }
 
     timer = std::chrono::steady_clock();
     lastTime = timer.now();
 
     SetUpdateEnabled(true);
+
+    LOGI(" === VULKAN APP STARTED SUCCESSFULLY! ===");
 }
 
 void AndroidApplication::Tick()
@@ -60,21 +56,23 @@ void AndroidApplication::Tick()
 
         std::vector<VkClearValue> clearValues = std::vector<VkClearValue>(2);
 
-        clearValues[1].depthStencil.depth = 0.f;
-        clearValues[1].depthStencil.stencil = 0;
-//        clearValues[1].color.float32[0] = std::sin(colorRotator) * 0.5f + 0.5f;
-//        clearValues[1].color.float32[1] = std::sin(colorRotator + (float)PI * 2.f / 3.f) * 0.5f + 0.5f;
+//        clearValues[0].color.float32[0] = std::sin(colorRotator) * 0.5f + 0.5f;
+//        clearValues[0].color.float32[1] = std::sin(colorRotator + (float)PI * 2.f / 3.f) * 0.5f + 0.5f;
         clearValues[0].color.float32[0] = controller_state.GetTouchPos().x;
         clearValues[0].color.float32[1] = controller_state.GetTouchPos().y;
         clearValues[0].color.float32[2] = std::sin(colorRotator + (float)PI * 4.f / 3.f) * 0.5f + 0.5f;
         clearValues[0].color.float32[3] = 1.f;
+
+        clearValues[1].depthStencil.depth = 0.f;
+        clearValues[1].depthStencil.stencil = 0;
 
         commandBuffer.BeginRenderPass(window.GetRenderPass(), window.GetActiveFramebuffer(), renderArea, clearValues, VK_SUBPASS_CONTENTS_INLINE);
         commandBuffer.EndRenderPass();
 
         commandBuffer.End();
 
-        queue.Submit(nullptr, {}, { commandBuffer.GetVkCommandBufferRef() }, {semaphoreRenderComplete}, VK_NULL_HANDLE);
+        VkPipelineStageFlags pipelineStageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        queue.Submit(&pipelineStageFlags, {}, { commandBuffer.GetVkCommandBufferRef() }, {semaphoreRenderComplete}, VK_NULL_HANDLE);
 
         window.EndRender({semaphoreRenderComplete});
 

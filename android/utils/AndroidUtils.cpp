@@ -16,10 +16,6 @@
 #include <iostream>
 
 #ifdef __ANDROID__
-vulkan::VulkanObject* AndroidUtils::vulkanApplication = nullptr;
-android_app* AndroidUtils::nativeApplication = nullptr;
-gvr::ControllerApi* AndroidUtils::controllerApi = nullptr;
-
 #include <unordered_map>
 #include "shaderc/shaderc.hpp"
 
@@ -28,9 +24,7 @@ gvr::ControllerApi* AndroidUtils::controllerApi = nullptr;
 #endif
 
 // For timestamp code (get_milliseconds)
-#ifdef WIN32
-#include <Windows.h>
-#else
+#ifdef __ANDROID__
 #include <sys/time.h>
 #endif
 
@@ -810,46 +804,93 @@ private:
     char buffer_[kBufferSize];
 };
 
-static bool bReady = false;
-
 void Android_handle_cmd(android_app *app, int32_t cmd) {
     switch (cmd)
     {
-    case APP_CMD_INIT_WINDOW:
+        case APP_CMD_INPUT_CHANGED:
+            LOGW("APP_CMD_INPUT_CHANGED");
+            break;
 
-        // The window is being shown, get it ready.
-        AndroidUtils::vulkanApplication->Init();
+        case APP_CMD_INIT_WINDOW:
+            LOGW("APP_CMD_INIT_WINDOW");
+            // The window is being shown, get it ready.
+            AndroidUtils::Init();
+            break;
 
-        LOGI("\n");
-        LOGI("=================================================");
-        LOGI("          VULKAN APP STARTED SUCCESSFULLY!");
-        LOGI("=================================================");
-        LOGI("\n");
-        break;
-    case APP_CMD_TERM_WINDOW:
-        // The window is being hidden or closed, clean it up.
-        AndroidUtils::Clean();
-        break;
-    default:
-        LOGI("event not handled: %d", cmd);
+        case APP_CMD_TERM_WINDOW:
+            LOGW("APP_CMD_TERM_WINDOW");
+            // The window is being hidden or closed, clean it up.
+            AndroidUtils::Close();
+            break;
+
+        case APP_CMD_GAINED_FOCUS:
+            LOGW("APP_CMD_GAINED_FOCUS");
+            // The window is being hidden or closed, clean it up.
+            AndroidUtils::Resume();
+            break;
+
+        case APP_CMD_LOST_FOCUS:
+            LOGW("APP_CMD_LOST_FOCUS");
+            // The window is being hidden or closed, clean it up.
+            AndroidUtils::Pause();
+            break;
+
+        case APP_CMD_START:
+            LOGW("APP_CMD_START");
+            AndroidUtils::Start();
+            break;
+
+        case APP_CMD_RESUME:
+            LOGW("APP_CMD_RESUME");
+            AndroidUtils::Resume();
+            break;
+
+        case APP_CMD_SAVE_STATE:
+            // #TODO Handle this.
+            LOGW("APP_CMD_SAVE_STATE");
+            break;
+
+        case APP_CMD_PAUSE:
+            LOGW("APP_CMD_PAUSE");
+            AndroidUtils::Pause();
+            break;
+
+        case APP_CMD_STOP:
+            LOGW("APP_CMD_STOP");
+            break;
+
+        case APP_CMD_DESTROY:
+            LOGW("APP_CMD_DESTROY");
+            break;
+
+        default:
+            LOGE("Event code not handled: %d", cmd);
     }
 }
 
-bool Android_process_command() {
+bool Android_process_command()
+{
     assert(AndroidUtils::nativeApplication != nullptr);
+
     int events;
     android_poll_source *source;
+
     // Poll all pending events.
-    if (ALooper_pollAll(0, NULL, &events, (void **)&source) >= 0) {
+    if (ALooper_pollAll(0, NULL, &events, (void **)&source) >= 0)
+    {
         // Process each polled events
-        if (source != NULL) source->process(AndroidUtils::nativeApplication, source);
+        if (source != NULL)
+        {
+            source->process(AndroidUtils::nativeApplication, source);
+        }
     }
-    return AndroidUtils::nativeApplication->destroyRequested;
+
+    return AndroidUtils::nativeApplication->destroyRequested == 0;
 }
 
 NATIVE_METHOD(void, nativeOnCreate)
-(JNIEnv* env, jobject obj, jobject asset_mgr, jlong gvr_context_ptr) {
-
+(JNIEnv* env, jobject obj, jobject asset_mgr, jlong gvr_context_ptr)
+{
     LOGI("============ NATIVE ON CREATE ============");
 
     jlong j_native_gvr_context = gvr_context_ptr;
@@ -886,17 +927,8 @@ NATIVE_METHOD(void, nativeOnCreate)
 
     controller_state.Update(*controller_api);
 
-    LOGE("::: CONTROLLER INIT");
-
-    LOGE("::: %s", gvr::ControllerApi::ToString(controller_state.GetBatteryLevel()));
-    //    controller_api->
-    //    LOGE("")
-
-    // Main loop
-    //    do {
-    //        controller_state.Update(*controller_api);
-    //        LOGE("::: %s", gvr::ControllerApi::ToString(controller_state.GetBatteryLevel()));
-    //    } while (true);
+    LOGI("CONTROLLER INIT");
+    //LOGE("%s", gvr::ControllerApi::ToString(controller_state.GetBatteryLevel()));
 }
 
 //static gvr::ControllerState controller_state;
@@ -937,33 +969,22 @@ void android_main(struct android_app *app)
     std::cout.rdbuf(new AndroidBuffer(ANDROID_LOG_INFO));
     std::cerr.rdbuf(new AndroidBuffer(ANDROID_LOG_ERROR));
 
-//   gvr::ControllerState controller_state;
-
     vulkan_android_main(0, nullptr);
-
-//    vulkan::VulkanObject* vkApplication = AndroidUtils::vulkanApplication;
 
     // Main loop
     do {
-        Android_process_command();
-
-        if (AndroidUtils::vulkanApplication)
+        if (!Android_process_command())
         {
-            AndroidUtils::vulkanApplication->Update();
-
-//          gvr::ControllerApi* api = static_cast<gvr::ControllerApi*>(nativeApplication.AndroidUtils::androidApplication.userData);
-//          if (api)
-//          {
-//              controller_state.Update(*api);
-//          }
-
-            //LOGE("::: %f", controller_state.GetTouchPos().x);
-
-            if (AndroidUtils::vulkanApplication->IsPendingKill())
-            {
-                break;
-            }
+            break;
         }
+
+        AndroidUtils::Update();
+
+        if (AndroidUtils::vulkanApplication && AndroidUtils::vulkanApplication->IsPendingKill())
+        {
+            break;
+        }
+
     }  // Check if system requested to quit the application
     while (app->destroyRequested == 0);
 
@@ -1074,14 +1095,62 @@ FILE *AndroidFopen(const char *fname, const char *mode) {
     return funopen(asset, android_read, android_write, android_seek, android_close);
 }
 
-//float GetControllerXPos()
-//{
-//    if (AndroidUtils::nativeApplication && AndroidUtils::nativeApplication->userData)
-//    {
-//        return controller_state.GetTouchPos().x;
-//    }
-//
-//    return 0.f;
-//}
+#endif
+
+// AndroidUtils static class definitions.
+#ifdef __ANDROID__
+
+vulkan::VulkanObject* AndroidUtils::vulkanApplication = nullptr;
+android_app* AndroidUtils::nativeApplication = nullptr;
+gvr::ControllerApi* AndroidUtils::controllerApi = nullptr;
+bool AndroidUtils::isPaused = true;
+
+void AndroidUtils::Init()
+{
+    if (vulkanApplication)
+    {
+        vulkanApplication->Init();
+    }
+}
+
+void AndroidUtils::Close()
+{
+    Clean();
+}
+
+void AndroidUtils::Start()
+{
+    isPaused = false;
+}
+
+void AndroidUtils::Update()
+{
+    if (vulkanApplication && !isPaused)
+    {
+        vulkanApplication->Update();
+    }
+}
+
+void AndroidUtils::Pause()
+{
+    isPaused = true;
+}
+
+void AndroidUtils::Resume()
+{
+    isPaused = false;
+}
+
+void AndroidUtils::Clean()
+{
+    isPaused = true;
+
+    if (vulkanApplication)
+    {
+        vulkanApplication->Destroy();
+    }
+
+    delete vulkanApplication;
+}
 
 #endif

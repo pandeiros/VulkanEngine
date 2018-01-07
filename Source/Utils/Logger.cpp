@@ -34,10 +34,8 @@ void Logger::LogInternal(const std::string& message)
 {
     //std::cout << std::setw(indentation * 2) << "" << std::setw(0) << message << "\n";
 
-    // #TODO Implement global application TAG (i.e. VK-SAMPLE below).
 #ifdef __ANDROID__
     LOGI("%s", message.c_str());
-    //__android_log_print(ANDROID_LOG_INFO, "VK-SAMPLE", "%s", message.c_str());
 #else
     std::cout << message << "\n";
 #endif
