@@ -160,7 +160,7 @@ void Device::CreateInternal()
         VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
         nullptr,
         0,
-        cachedPhysicalDevice->GetGraphicsFamilyIndex(),
+        cachedPhysicalDevice->GetGraphicsQueueFamilyIndex(),
         1,
         priorityQueue
     };
@@ -180,7 +180,7 @@ void Device::CreateInternal()
 
     if (DebugTools::Verify(vkCreateDevice(cachedPhysicalDevice->GetVkPhysicalDevice(), &deviceCreateInfo, nullptr, &device)) == VK_SUCCESS)
     {
-        vkGetDeviceQueue(device, cachedPhysicalDevice->GetGraphicsFamilyIndex(), 0, &queue.GetVkQueueRef());
+        vkGetDeviceQueue(device, cachedPhysicalDevice->GetGraphicsQueueFamilyIndex(), 0, &queue.GetVkQueueRef());
     }
 
 }

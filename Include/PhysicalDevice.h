@@ -44,7 +44,7 @@ public:
     const std::vector<VkExtensionProperties>& GetAvailableDeviceExtensions() const;
     const std::vector<VkDisplayPropertiesKHR>& GetPhysicalDeviceDisplayProperties() const;
 
-    uint32_t GetGraphicsFamilyIndex() const;
+    uint32_t GetGraphicsQueueFamilyIndex() const;
     uint32_t GetPresentQueueFamilyIndex(VkSurfaceKHR surface);
 
     VkFormatProperties GetFormatProperties(VkFormat format) const;

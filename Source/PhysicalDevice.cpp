@@ -87,7 +87,7 @@ const std::vector<VkLayerProperties>& PhysicalDevice::GetAvailableDeviceLayers()
     return availableDeviceLayers;
 }
 
-uint32_t PhysicalDevice::GetGraphicsFamilyIndex() const
+uint32_t PhysicalDevice::GetGraphicsQueueFamilyIndex() const
 {
     return graphicsQueueFamilyIndex;
 }
@@ -164,6 +164,9 @@ void PhysicalDevice::LogInfo()
 {
     Logger::Log(physicalDeviceProperties.deviceName);
     Logger::Log(physicalDeviceProperties.deviceID);
+
+    VULKAN_LOG("PhysicalDevice", Warning, "Graphics queue family index: %d", graphicsQueueFamilyIndex);
+    VULKAN_LOG("PhysicalDevice", Info, "Present queue family index: %d", presentQueueFamilyIndex);
 
     Logger::Log("Device layers");
     for (VkLayerProperties& layer : availableDeviceLayers)

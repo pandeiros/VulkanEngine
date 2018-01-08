@@ -12,7 +12,7 @@
 
 #define VULKAN_ANDROID_TAG "VULKAN_ENGINE"
 
-#ifdef __ANDROID__  // #TODO Change this logging macros.
+#ifdef __ANDROID__
 
 #include <android/log.h>
 
@@ -22,6 +22,6 @@
 #define LOGE(...) ((void)__android_log_print(ANDROID_LOG_ERROR, VULKAN_ANDROID_TAG, __VA_ARGS__))
 
  // Replace printf to logcat output.
-#define printf(...) __android_log_print(ANDROID_LOG_DEBUG, VULKAN_ANDROID_TAG, __VA_ARGS__);
+//#define printf(...) __android_log_print(ANDROID_LOG_INFO, VULKAN_ANDROID_TAG, __VA_ARGS__);
 
 #endif

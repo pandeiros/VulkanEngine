@@ -10,7 +10,7 @@ void AndroidApplication::Init()
     vulkan::Device& device = instance.GetDeviceRef();
 
     commandPool.Create(device.GetVkDevice(), VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-                       instance.GetDeviceRef().GetPhysicalDevice()->GetGraphicsFamilyIndex());
+                       instance.GetDeviceRef().GetPhysicalDevice()->GetGraphicsQueueFamilyIndex());
     commandPool.AllocateCommandBuffer(device.GetVkDevice(), VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
     device.CreateSemaphore(&semaphoreRenderComplete);

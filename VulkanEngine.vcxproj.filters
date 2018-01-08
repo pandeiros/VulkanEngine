@@ -215,5 +215,8 @@
     <ClInclude Include="include\Swapchain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\VarArgs.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

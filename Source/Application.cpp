@@ -47,11 +47,12 @@ void Application::Init()
     });
 
     engine.EnumeratePhysicalDevices(instance.GetVkInstance());
-    engine.LogSystemInfo();
 
     instance.CreateDevice();
 
     instance.CreateAppWindow();
+
+    engine.LogSystemInfo();
 }
 
 void Application::Destroy()

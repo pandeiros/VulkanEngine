@@ -7,6 +7,7 @@
 #pragma once
 
 #include "VulkanCore.h"
+
 #include "PhysicalDevice.h"
 #include "Image.h"
 #include "ImageView.h"
@@ -47,7 +48,7 @@ public:
 
     void Create(Instance* instance, const WindowCreateInfo& windowCreateInfo);
     void Destroy();
-    
+
     bool Update();
     void Close();
 

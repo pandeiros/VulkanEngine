@@ -23,7 +23,7 @@ int main()
 
     CommandPool commandPool;
     commandPool.Create(device, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-        instance.GetDeviceRef().GetPhysicalDevice()->GetGraphicsFamilyIndex());
+        instance.GetDeviceRef().GetPhysicalDevice()->GetGraphicsQueueFamilyIndex());
 
     commandPool.AllocateCommandBuffer(device, VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 

@@ -8,9 +8,10 @@
 
 #include "VulkanCore.h"
 
-#include <string>
-
 #include "AndroidCore.h"
+#include "VarArgs.h"
+
+#include <string>
 
 /**
  * @file Logger.h
@@ -18,11 +19,23 @@
 
 VULKAN_NS_BEGIN
 
-// #TODO Fix non-Android version.
+enum LogVerbosity
+{
+    Verbose,
+    Debug,
+    Info,
+    Warning,
+    Error,
+    Fatal
+};
+
+#define VULKAN_LOG(CategoryName, Verbosity, Format, ...) \
+    Logger::Logf(__FILE__, __LINE__, CategoryName, LogVerbosity::Verbosity, Format, ##__VA_ARGS__);
+
 #ifdef __ANDROID__
-#define VULKAN_LOG(FORMAT, ...) LOGI(FORMAT, ##__VA_ARGS__);
+#define VULKAN_PLATFORM_VERBOSITY android_LogPriority
 #else
-#define VULKAN_LOG(FORMAT, ...)
+#define VULKAN_PLATFORM_VERBOSITY LogVerbosity
 #endif
 
 /**
@@ -31,6 +44,10 @@ VULKAN_NS_BEGIN
 class Logger
 {
 public:
+    VARARG_DECL(static void, static void, {}, Logf, VARARG_NONE, const char*,
+        VARARG_EXTRA(const char* File) VARARG_EXTRA(int Line) VARARG_EXTRA(const char* Category) VARARG_EXTRA(LogVerbosity Verbosity),
+        VARARG_EXTRA(File) VARARG_EXTRA(Line) VARARG_EXTRA(Category) VARARG_EXTRA(Verbosity));
+
     //static void Log(const std::string message);
     static void Log(std::string& message);
     static void Log(const char* message);
@@ -38,6 +55,10 @@ public:
     //static void Log(char message[]);
 
 private:
+    static const char* GetVerbosityString(LogVerbosity Verbosity);
+
+    static VULKAN_PLATFORM_VERBOSITY GetPlatformVerbosity(LogVerbosity Verbosity);
+
     static void LogInternal(const std::string& message);
     //static void LogInternal(std::string message);
 

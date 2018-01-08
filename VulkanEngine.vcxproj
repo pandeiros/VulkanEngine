@@ -408,6 +408,10 @@
     <ClInclude Include="include\Utils\DebugTools.h" />
     <ClInclude Include="include\Utils\Logger.h" />
     <ClInclude Include="include\Utils\Math.h" />
+    <ClInclude Include="include\VarArgs.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="include\VulkanCore.h">
       <SubType>
       </SubType>
