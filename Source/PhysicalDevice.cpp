@@ -5,6 +5,7 @@
  */
 
 #include "PhysicalDevice.h"
+#include "Core.h"
 
 VULKAN_NS_USING;
 
@@ -34,7 +35,7 @@ void PhysicalDevice::Create(const VkPhysicalDevice physicalDevice)
         }
     }
 
-    DebugTools::Assert(graphicsQueueFamilyIndex != UINT32_MAX, "Queue family supporting graphics not found.");
+    VK_ASSERT(graphicsQueueFamilyIndex != UINT32_MAX, "Queue family supporting graphics not found.");
 
     uint32_t layerCount = 0;
     vkEnumerateDeviceLayerProperties(physicalDevice, &layerCount, nullptr);
@@ -113,7 +114,7 @@ uint32_t PhysicalDevice::GetPresentQueueFamilyIndex(VkSurfaceKHR surface)
         }
     }
 
-    DebugTools::Assert(presentQueueFamilyIndex != UINT32_MAX, "Present queue family index not found!");
+    VK_ASSERT(presentQueueFamilyIndex != UINT32_MAX, "Present queue family index not found!");
 
     if (tempGraphicsIndex != graphicsQueueFamilyIndex)
     {
@@ -162,30 +163,29 @@ std::vector<VkSparseImageFormatProperties> PhysicalDevice::GetSparseImageFormatP
 
 void PhysicalDevice::LogInfo()
 {
-    Logger::Log(physicalDeviceProperties.deviceName);
-    Logger::Log(physicalDeviceProperties.deviceID);
+    //Logger::Log(physicalDeviceProperties.deviceName);
+    //Logger::Log(physicalDeviceProperties.deviceID);
 
-    VULKAN_LOG("PhysicalDevice", Warning, "Graphics queue family index: %d", graphicsQueueFamilyIndex);
-    VULKAN_LOG("PhysicalDevice", Info, "Present queue family index: %d", presentQueueFamilyIndex);
+    //VULKAN_LOG("PhysicalDevice", Warning, "Graphics queue family index: %d", graphicsQueueFamilyIndex);
+    //VULKAN_LOG("PhysicalDevice", Info, "Present queue family index: %d", presentQueueFamilyIndex);
 
-    Logger::Log("Device layers");
-    for (VkLayerProperties& layer : availableDeviceLayers)
-    {
-        Logger::Log(layer.layerName);
-    }
+    //Logger::Log("Device layers");
+    //for (VkLayerProperties& layer : availableDeviceLayers)
+    //{
+    //    Logger::Log(layer.layerName);
+    //}
 
-    Logger::Log("Device extensions");
-    for (VkExtensionProperties& extension : availableDeviceExtensions)
-    {
-        Logger::Log(extension.extensionName);
-    }
+    //Logger::Log("Device extensions");
+    //for (VkExtensionProperties& extension : availableDeviceExtensions)
+    //{
+    //    Logger::Log(extension.extensionName);
+    //}
 
-    Logger::Log("Device display properties");
-    for (VkDisplayPropertiesKHR& property : displayProperties)
-    {
-        Logger::Log(property.displayName);
-    }
-
+    //Logger::Log("Device display properties");
+    //for (VkDisplayPropertiesKHR& property : displayProperties)
+    //{
+    //    Logger::Log(property.displayName);
+    //}
 }
 
 uint32_t PhysicalDevice::GetMemoryTypeIndex(const VkMemoryRequirements* MemoryRequirements, const VkMemoryPropertyFlags RequiredProperties)

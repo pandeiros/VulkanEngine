@@ -5,7 +5,7 @@
  */
 
 #include "Instance.h"
-#include "Utils/Logger.h"
+#include "Core.h"
 #include "AndroidUtils.h"
 
 #include <sstream>
@@ -57,7 +57,7 @@ void Instance::CreateAppWindow()
 
 #ifdef __ANDROID__
     AndroidGetWindowSize(width, height);
-    DebugTools::Assert(width > 0 && height > 0, "Invalid window size.");
+    VK_ASSERT(width > 0 && height > 0, "Invalid window size.");
 #elif _WIN32
     height = 1080;
     width = 1920;
@@ -124,8 +124,8 @@ VulkanDebugCallback(VkDebugReportFlagsEXT MsgFlags, VkDebugReportObjectTypeEXT O
     }
 
     oss << "@[" << LayerPrefix << "] " << Msg << "\n";
-//    Logger::Log(oss.str());
-    Logger::Log(oss.str().c_str());
+
+    //Logger::Log(oss.str().c_str());
 
 #ifdef _WIN32
     if (MsgFlags & VK_DEBUG_REPORT_ERROR_BIT_EXT)
@@ -156,7 +156,7 @@ void Instance::SetupDebug()
     VULKAN_GET_INSTANCE_PROC_ADDR(instance, DestroyDebugReportCallbackEXT);
 
     // #TODO Remove after fixing VULKAN_GET_INSTANCE_PROC_ADDR in VulkanMisc)
-    DebugTools::Assert(fvkCreateDebugReportCallbackEXT && fvkDestroyDebugReportCallbackEXT, "Cannot fetch debug function pointers.");
+    VK_ASSERT(fvkCreateDebugReportCallbackEXT && fvkDestroyDebugReportCallbackEXT, "Cannot fetch debug function pointers.");
 
     DebugTools::Verify(fvkCreateDebugReportCallbackEXT(instance, &debugCallbackCreateInfo, nullptr, &debugReport));
 }

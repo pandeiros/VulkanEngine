@@ -9,7 +9,7 @@
 #define VULKAN_ENGINE_VERSION VK_MAKE_VERSION(0, 0, 2)
 #define VULKAN_ENGINE_NAME "Vulkan Engine"
 
-#include "Utils/Logger.h"
+//#include "Utils/Logger.h"
 #include "PhysicalDevice.h"
 
 #include <vector>

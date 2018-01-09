@@ -18,8 +18,7 @@
 
 #include "Platform.h"
 #include "BuildOptions.h"
-#include "Utils/Logger.h"
-#include "Utils/DebugTools.h"
+#include "Utils/LogTypes.h"
 
 #include <iostream>
 #include <vector>
@@ -33,6 +32,8 @@
 #define VULKAN_SAMPLE_COUNT VK_SAMPLE_COUNT_1_BIT
 
 VULKAN_NS_BEGIN
+
+VULKAN_DECLARE_LOG_CATEGORY(LogEngine);
 
 // #TODO Move this function somewhere else.
 template<typename T>

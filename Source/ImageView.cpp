@@ -5,6 +5,7 @@
  */
 
 #include "ImageView.h"
+#include "Core.h"
 
 VULKAN_NS_USING;
 

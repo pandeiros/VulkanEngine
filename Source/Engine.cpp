@@ -9,7 +9,7 @@
 #include <cstdlib>
 #include <algorithm>
 
-#include "Utils/Math.h"
+#include "Core.h"
 
 VULKAN_NS_USING;
 
@@ -32,27 +32,27 @@ void Engine::LogSystemInfo()
         InitInstanceProperties();
     }
 
-    Logger::Log("Instance properties:");
-    for (LayerProperties& instanceProperty : instanceProperties)
-    {
-        Logger::Log(instanceProperty.properties.layerName);
-        for (VkExtensionProperties& extensionProperty : instanceProperty.extensions)
-        {
-            Logger::Log(extensionProperty.extensionName);
-        }
-    }
+    //Logger::Log("Instance properties:");
+    //for (LayerProperties& instanceProperty : instanceProperties)
+    //{
+    //    Logger::Log(instanceProperty.properties.layerName);
+    //    for (VkExtensionProperties& extensionProperty : instanceProperty.extensions)
+    //    {
+    //        Logger::Log(extensionProperty.extensionName);
+    //    }
+    //}
 
-    Logger::Log("\nGlobal extensions:");
-    for (VkExtensionProperties extension : globalInstanceExtensions)
-    {
-        Logger::Log(extension.extensionName);
-    }
+    //Logger::Log("\nGlobal extensions:");
+    //for (VkExtensionProperties extension : globalInstanceExtensions)
+    //{
+    //    Logger::Log(extension.extensionName);
+    //}
 
-    Logger::Log("\nPhysical devices:");
-    for (PhysicalDevice& physicalDevice : physicalDevices)
-    {
-        physicalDevice.LogInfo();
-    }
+    //Logger::Log("\nPhysical devices:");
+    //for (PhysicalDevice& physicalDevice : physicalDevices)
+    //{
+    //    physicalDevice.LogInfo();
+    //}
 }
 
 void Engine::InitInstanceProperties()
@@ -90,7 +90,7 @@ void Engine::ValidateInstanceProperties(std::vector<const char*>& instanceLayers
         std::vector<LayerProperties> instancePropertiesCopy = instanceProperties;
         instanceLayers.erase(std::remove_if(instanceLayers.begin(), instanceLayers.end(), [&instancePropertiesCopy](const char* layer)
         {
-            Logger::Log((std::string(" >>> ") + std::string(layer)).c_str());
+            //Logger::Log((std::string(" >>> ") + std::string(layer)).c_str());
             return std::find_if(instancePropertiesCopy.begin(), instancePropertiesCopy.end(), [&layer](const LayerProperties& layerProperties)
             {
                 return layerProperties.properties.layerName == layer;

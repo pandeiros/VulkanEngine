@@ -5,18 +5,19 @@
  */
 
 #include "Utils/Logger.h"
+#include "Utils/DebugTools.h"
 
 #include <iostream>
 #include <iomanip>
 #include <string>
-//#include <cstdio>
-//#include <cstdarg>
+#include <cassert>
+#include <cstdarg>
 
 VULKAN_NS_USING;
 
 VARARG_BODY(void, Logger::Logf, const char*,
-    VARARG_EXTRA(const char* File) VARARG_EXTRA(int Line)
-    VARARG_EXTRA(const char* Category) VARARG_EXTRA(LogVerbosity Verbosity))
+    VARARG_EXTRA(const char* file) VARARG_EXTRA(int line)
+    VARARG_EXTRA(const char* category) VARARG_EXTRA(LogVerbosity verbosity))
 {
 #ifndef VULKAN_NO_LOGGING
     constexpr size_t MAX_BUFFER_SIZE = 1024;
@@ -27,11 +28,25 @@ VARARG_BODY(void, Logger::Logf, const char*,
     vsnprintf(buffer, MAX_BUFFER_SIZE, Format, argptr);
     va_end(argptr);
 
+    char* categorySuffix = ": ";
+    if (strlen(category) == 0)
+    {
+        categorySuffix = "";
+    }
+
+    if (verbosity == LogVerbosity::Fatal)
+    {
+        // #TODO Change this to some exit method.
+        VK_ASSERT(0, buffer);
+    }
+    else
+    {
 #ifdef _WIN32
-    printf("[%s] %s: %s", GetVerbosityString(Verbosity), Category, buffer);
+        printf("[%s] %s%s%s\n", GetVerbosityString(verbosity), category, categorySuffix, buffer);
 #elif __ANDROID__
-    __android_log_print(GetPlatformVerbosity(Verbosity), VULKAN_ANDROID_TAG, "%s: %s", Category, buffer);
+        __android_log_print(GetPlatformVerbosity(verbosity), VULKAN_ANDROID_TAG, "%s%s%s", category, categorySuffix, buffer);
 #endif
+    }
 
     //if (Verbosity != ELogVerbosity::Fatal)
     //{
@@ -78,24 +93,6 @@ VARARG_BODY(void, Logger::Logf, const char*,
 #endif
 }
 
-uint32_t Logger::indentation = 0;
-
-void Logger::Log(const char* message)
-{
-    LogInternal(message);
-}
-
-void Logger::Log(uint32_t message)
-{
-    //TODO Fix for Android
-    //LogInternal(std::to_string(message));
-}
-
-void Logger::Log(std::string& message)
-{
-    LogInternal(message);
-}
-
 const char* Logger::GetVerbosityString(LogVerbosity Verbosity)
 {
     switch (Verbosity)
@@ -111,7 +108,7 @@ const char* Logger::GetVerbosityString(LogVerbosity Verbosity)
     case LogVerbosity::Error:
         return "Error";
     case LogVerbosity::Fatal:
-        return "Fatal";
+        return "FATAL";
     default:
         return "Info";
     }
@@ -139,16 +136,5 @@ VULKAN_PLATFORM_VERBOSITY Logger::GetPlatformVerbosity(LogVerbosity Verbosity)
     }
 #else
     return Verbosity;
-#endif
-}
-
-void Logger::LogInternal(const std::string& message)
-{
-    //std::cout << std::setw(indentation * 2) << "" << std::setw(0) << message << "\n";
-
-#ifdef __ANDROID__
-    LOGI("%s", message.c_str());
-#else
-    std::cout << message << "\n";
 #endif
 }

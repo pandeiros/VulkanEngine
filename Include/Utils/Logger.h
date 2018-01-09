@@ -8,6 +8,7 @@
 
 #include "VulkanCore.h"
 
+#include "LogTypes.h"
 #include "AndroidCore.h"
 #include "VarArgs.h"
 
@@ -19,25 +20,6 @@
 
 VULKAN_NS_BEGIN
 
-enum LogVerbosity
-{
-    Verbose,
-    Debug,
-    Info,
-    Warning,
-    Error,
-    Fatal
-};
-
-#define VULKAN_LOG(CategoryName, Verbosity, Format, ...) \
-    Logger::Logf(__FILE__, __LINE__, CategoryName, LogVerbosity::Verbosity, Format, ##__VA_ARGS__);
-
-#ifdef __ANDROID__
-#define VULKAN_PLATFORM_VERBOSITY android_LogPriority
-#else
-#define VULKAN_PLATFORM_VERBOSITY LogVerbosity
-#endif
-
 /**
  * @class Logger
  */
@@ -45,24 +27,23 @@ class Logger
 {
 public:
     VARARG_DECL(static void, static void, {}, Logf, VARARG_NONE, const char*,
-        VARARG_EXTRA(const char* File) VARARG_EXTRA(int Line) VARARG_EXTRA(const char* Category) VARARG_EXTRA(LogVerbosity Verbosity),
-        VARARG_EXTRA(File) VARARG_EXTRA(Line) VARARG_EXTRA(Category) VARARG_EXTRA(Verbosity));
+        VARARG_EXTRA(const char* file) VARARG_EXTRA(int line) VARARG_EXTRA(const char* category) VARARG_EXTRA(LogVerbosity verbosity),
+        VARARG_EXTRA(file) VARARG_EXTRA(line) VARARG_EXTRA(category) VARARG_EXTRA(verbosity));
 
-    //static void Log(const std::string message);
-    static void Log(std::string& message);
-    static void Log(const char* message);
-    static void Log(uint32_t message);
-    //static void Log(char message[]);
+    VARARG_DECL(static void, static void, {}, Logf, VARARG_NONE, const char*,
+        VARARG_EXTRA(const char* file) VARARG_EXTRA(int line) VARARG_EXTRA(LogVerbosity verbosity),
+        VARARG_EXTRA(file) VARARG_EXTRA(line) VARARG_EXTRA("") VARARG_EXTRA(verbosity));
 
-private:
+    VARARG_DECL(static void, static void, {}, Logf, VARARG_NONE, const char*,
+        VARARG_EXTRA(const char* file) VARARG_EXTRA(int line),
+        VARARG_EXTRA(file) VARARG_EXTRA(line) VARARG_EXTRA("") VARARG_EXTRA(LogVerbosity::Info));
+
     static const char* GetVerbosityString(LogVerbosity Verbosity);
 
+private:
     static VULKAN_PLATFORM_VERBOSITY GetPlatformVerbosity(LogVerbosity Verbosity);
 
-    static void LogInternal(const std::string& message);
-    //static void LogInternal(std::string message);
-
-    static uint32_t indentation;
+    //static uint32_t indentation;
 };
 
 VULKAN_NS_END

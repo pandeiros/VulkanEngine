@@ -1,8 +1,16 @@
+/**
+ * Vulkan Engine
+ *
+ * Copyright (C) 2016-2017 Pawel Kaczynski
+ */
+
 #include "Platforms/Win32/Window_Win32.h"
-#include "Rendering/Windows_old.h"  // #TODO Delete
+//#include "Rendering/Windows_old.h"  // #TODO Delete
 #include "Window.h"
 #include "Instance.h"
 #include "Rendering/Renderer.h"
+#include "Core.h"
+
 #include <cassert>
 #include <string>
 
@@ -40,8 +48,8 @@ void Window::CreateOSWindow()
 
     WNDCLASSEX win_class {};
 
-    DebugTools::Assert(windowCreateInfo.surfaceSize.width > 0, "Surface width is equal to or less than 0!");
-    DebugTools::Assert(windowCreateInfo.surfaceSize.height > 0, "Surface height is equal to or less than 0!");
+    VK_ASSERT(windowCreateInfo.surfaceSize.width > 0, "Surface width is equal to or less than 0!");
+    VK_ASSERT(windowCreateInfo.surfaceSize.height > 0, "Surface height is equal to or less than 0!");
 
     win32Instance = GetModuleHandle(nullptr);
     win32ClassName = windowCreateInfo.windowName + "_" + std::to_string(win32ClassIdCounter);

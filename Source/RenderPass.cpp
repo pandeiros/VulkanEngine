@@ -5,6 +5,7 @@
  */
 
 #include "RenderPass.h"
+#include "Core.h"
 
 VULKAN_NS_USING;
 

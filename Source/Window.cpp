@@ -6,7 +6,7 @@
 
 #include "Window.h"
 #include "Instance.h"
-#include "Utils/Logger.h"
+#include "Core.h"
 
 #include <array>
 #include <string>
@@ -122,8 +122,8 @@ void Window::CreateSurface()
     }
 
     uint32_t formatCount = 0;
-    DebugTools::Verify(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, nullptr));
-    DebugTools::Assert(formatCount > 0, "Surface format missing.");
+    VK_VERIFY(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, nullptr));
+    VK_ASSERT(formatCount > 0, "Surface format missing.");
 
     std::vector<VkSurfaceFormatKHR> surfaceFormats(formatCount);
     vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, surfaceFormats.data());
@@ -134,7 +134,7 @@ void Window::CreateSurface()
     }
     else
     {
-        DebugTools::Assert(surfaceFormats.size() > 0, "Could not find any formats.");
+        VK_ASSERT(surfaceFormats.size() > 0, "Could not find any formats.");
 
         surfaceFormat = surfaceFormats[0];
     }
@@ -211,10 +211,10 @@ void Window::CreateSwapchain()
     }
 
     // Clipped
-    VkBool32 isClipped = true;
+    VkBool32 isClipped = VK_TRUE;
 
 #ifdef __ANDROID__
-    isClipped = false;
+    isClipped = VK_FALSE;
 #endif
 
     uint32_t imageArrayLayers = 1;
@@ -317,7 +317,7 @@ void Window::CreateDepthStencilImage()
         }
     }
 
-    DebugTools::Assert(depthStencilFormat != VK_FORMAT_UNDEFINED, "Depth stencil format not selected.");
+    VK_ASSERT(depthStencilFormat != VK_FORMAT_UNDEFINED, "Depth stencil format not selected.");
 
     bStencilAvailable = IsOfEnum<VkFormat>(depthStencilFormat, {
         VK_FORMAT_D32_SFLOAT_S8_UINT,
@@ -403,7 +403,7 @@ void Window::CreateRenderPass()
         nullptr
     });
 
-    DebugTools::Assert(cachedInstance);
+    VK_ASSERT(cachedInstance, "");
     VkDevice device = cachedInstance->GetDeviceRef().GetVkDevice();
     renderPass.Create(device, 0, attachments, subpasses, {});
 }
@@ -428,7 +428,7 @@ void Window::CreateFramebuffer()
         attachments[0] = swapchainImageViews[i].GetVkImageView();
         attachments[1] = depthStencilImageView.GetVkImageView();
 
-        DebugTools::Assert(cachedInstance);
+        VK_ASSERT(cachedInstance, "");
         VkDevice device = cachedInstance->GetDeviceRef().GetVkDevice();
 
         framebuffers[i].Create(device, 0, renderPass.GetVkRenderPass(), attachments,

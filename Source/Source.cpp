@@ -6,7 +6,7 @@
 #include <chrono>
 
 #include "Application.h"
-#include "Utils/Math.h"
+#include "Core.h"
 
 VULKAN_NS_USING;
 
@@ -14,6 +14,8 @@ VULKAN_NS_USING;
 
 int main()
 {
+    VK_LOG(LogEngine, Error, "TEstujemy %s", "FATAL ERRORY");
+    VK_ASSERT(0 == 1, "Asserciatko");
     Application application;
     application.Create("Vulkan Engine Test", 1, VK_MAKE_VERSION(1, 0, 2));
     application.Init();

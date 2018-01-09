@@ -25,7 +25,7 @@ void Application::Create(const char* applicationName, uint32_t applicationVersio
 void Application::Init()
 {
 #ifdef __ANDROID__
-    DebugTools::Assert(InitVulkan() != 0, "Initialization of Vulkan APIs failed!");
+    VK_ASSERT(InitVulkan() != 0, "Initialization of Vulkan APIs failed!");
 #endif
 
     Engine::RegisterGlobalEngine(&engine);

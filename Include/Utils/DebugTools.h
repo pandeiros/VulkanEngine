@@ -9,6 +9,7 @@
 #include "VulkanCore.h"
 
 #include "VulkanMisc.h"
+#include "VarArgs.h"
 
 /**
  * @file DebugTools.h
@@ -19,15 +20,11 @@ VULKAN_NS_BEGIN
 /**
  * Helper assertion and verify macros.
  */
-#define VK_ASSERT_INTERNAL_1(COND)          DebugTools::Assert(COND)
-#define VK_ASSERT_INTERNAL_2(COND, MSG)     DebugTools::Assert(COND, MSG)
 
-#define VK_ASSERT_INTERNAL(...)             GET_3RD_ARG(__VA_ARGS__,    \
-                                                VK_ASSERT_INTERNAL_2,   \
-                                                VK_ASSERT_INTERNAL_1, )
+#define VK_ASSERT(Condition, Format, ...) \
+    DebugTools::Assert(__FILE__, __LINE__, Condition, Format, ##__VA_ARGS__);
 
-#define VK_ASSERT(...)                      VK_ASSERT_INTERNAL(__VA_ARGS__)(__VA_ARGS__)
-#define VK_VERIFY(RESULT)                   DebugTools::Verify(RESULT)
+#define VK_VERIFY(RESULT)   DebugTools::Verify(RESULT)
 
 /**
  * @class DebugTools
@@ -35,18 +32,21 @@ VULKAN_NS_BEGIN
 class DebugTools
 {
 public:
-    /**
-     * Default constructor.
-     */
-    DebugTools() = default;
+    ///**
+    // * Default constructor.
+    // */
+    //DebugTools() = default;
 
-    /**
-     * Default destructor.
-     */
-    ~DebugTools() = default;
+    ///**
+    // * Default destructor.
+    // */
+    //~DebugTools() = default;
+
+    VARARG_DECL(static void, static void, {}, Assert, VARARG_NONE, const char*,
+        VARARG_EXTRA(const char* file) VARARG_EXTRA(int line) VARARG_EXTRA(bool condition),
+        VARARG_EXTRA(file) VARARG_EXTRA(line) VARARG_EXTRA(condition));
 
     static VkResult Verify(VkResult result);
-    static void Assert(const bool condition, const char* message = "");
 };
 
 VULKAN_NS_END

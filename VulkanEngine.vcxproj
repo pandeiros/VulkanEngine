@@ -363,6 +363,7 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="Include\Core.h" />
     <ClInclude Include="include\Device.h">
       <SubType>
       </SubType>
@@ -407,6 +408,7 @@
     </ClInclude>
     <ClInclude Include="include\Utils\DebugTools.h" />
     <ClInclude Include="include\Utils\Logger.h" />
+    <ClInclude Include="Include\Utils\LogTypes.h" />
     <ClInclude Include="include\Utils\Math.h" />
     <ClInclude Include="include\VarArgs.h">
       <SubType>
