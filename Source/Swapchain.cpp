@@ -34,8 +34,8 @@ void Swapchain::Create(VkDevice device, VkSwapchainCreateFlagsKHR flags, VkSurfa
         oldSwapchain
     };
 
-    DebugTools::Verify(vkCreateSwapchainKHR(device, &swapchainCreateInfo, nullptr, &swapchain));
-    DebugTools::Verify(vkGetSwapchainImagesKHR(device, swapchain, &imageCount, nullptr));
+    VK_VERIFY(vkCreateSwapchainKHR(device, &swapchainCreateInfo, nullptr, &swapchain));
+    VK_VERIFY(vkGetSwapchainImagesKHR(device, swapchain, &imageCount, nullptr));
 }
 
 void Swapchain::Destroy(VkDevice device)

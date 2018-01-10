@@ -64,10 +64,10 @@ void Window::BeginRender()
 {
     VkDevice device = cachedInstance->GetDeviceRef().GetVkDevice();
 
-    DebugTools::Verify(vkAcquireNextImageKHR(device, swapchain.GetVkSwapchain(), UINT64_MAX, VK_NULL_HANDLE, fenceSwapchainImageAvailable, &activeSwapchainImageID));
-    DebugTools::Verify(vkWaitForFences(device, 1, &fenceSwapchainImageAvailable, VK_TRUE, UINT64_MAX));
-    DebugTools::Verify(vkResetFences(device, 1, &fenceSwapchainImageAvailable));
-    DebugTools::Verify(vkQueueWaitIdle(cachedInstance->GetDeviceRef().GetQueueRef().GetVkQueueRef()));
+    VK_VERIFY(vkAcquireNextImageKHR(device, swapchain.GetVkSwapchain(), UINT64_MAX, VK_NULL_HANDLE, fenceSwapchainImageAvailable, &activeSwapchainImageID));
+    VK_VERIFY(vkWaitForFences(device, 1, &fenceSwapchainImageAvailable, VK_TRUE, UINT64_MAX));
+    VK_VERIFY(vkResetFences(device, 1, &fenceSwapchainImageAvailable));
+    VK_VERIFY(vkQueueWaitIdle(cachedInstance->GetDeviceRef().GetQueueRef().GetVkQueueRef()));
 }
 
 void Window::EndRender(std::vector<VkSemaphore> waitSemaphores)
@@ -85,8 +85,8 @@ void Window::EndRender(std::vector<VkSemaphore> waitSemaphores)
         &presentResult
     };
 
-    DebugTools::Verify(vkQueuePresentKHR(cachedInstance->GetDeviceRef().GetQueueRef().GetVkQueueRef(), &presentInfo));
-    DebugTools::Verify(presentResult);
+    VK_VERIFY(vkQueuePresentKHR(cachedInstance->GetDeviceRef().GetQueueRef().GetVkQueueRef(), &presentInfo));
+    VK_VERIFY(presentResult);
 }
 
 VkExtent2D Window::GetSurfaceSize()
@@ -114,7 +114,7 @@ void Window::CreateSurface()
     // Graphics family index may be changed to one supporting presenting and thus device should be reset.
     cachedInstance->GetDeviceRef().CheckPhysicalDeviceDirty();
 
-    DebugTools::Verify(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &surfaceCapabilities));
+    VK_VERIFY(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &surfaceCapabilities));
 
     if (surfaceCapabilities.currentExtent.width < UINT32_MAX)
     {
@@ -167,9 +167,9 @@ void Window::CreateSwapchain()
     VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
 
     uint32_t presentModeCount = 0;
-    DebugTools::Verify(vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, nullptr));
+    VK_VERIFY(vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, nullptr));
     std::vector<VkPresentModeKHR> presentModes(presentModeCount);
-    DebugTools::Verify(vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, presentModes.data()));
+    VK_VERIFY(vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, presentModes.data()));
 
     // #TODO Maybe pass required modes as arguments to Create function?
     for (VkPresentModeKHR& mode : presentModes)
@@ -260,7 +260,7 @@ void Window::CreateSwapchainImages()
     swapchainImages.resize(swapchainImageCount);
     swapchainImageViews.resize(swapchainImageCount);
 
-    DebugTools::Verify(vkGetSwapchainImagesKHR(device, swapchain.GetVkSwapchain(), &swapchainImageCount, swapchainImages.data()));
+    VK_VERIFY(vkGetSwapchainImagesKHR(device, swapchain.GetVkSwapchain(), &swapchainImageCount, swapchainImages.data()));
 
     for (uint32_t i = 0; i < swapchainImageCount; ++i)
     {

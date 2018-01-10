@@ -24,7 +24,7 @@ void RenderPass::Create(VkDevice device, VkRenderPassCreateFlags flags, std::vec
         dependencies.data()
     };
 
-    DebugTools::Verify(vkCreateRenderPass(device, &renderPassCreateInfo, nullptr, &renderPass));
+    VK_VERIFY(vkCreateRenderPass(device, &renderPassCreateInfo, nullptr, &renderPass));
 }
 
 void RenderPass::Destroy(VkDevice device)

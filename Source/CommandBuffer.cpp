@@ -23,7 +23,7 @@ void CommandBuffer::Begin(VkCommandBufferUsageFlags flags, const VkCommandBuffer
         &inheritanceInfo
     };
 
-    DebugTools::Verify(vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo));
+    VK_VERIFY(vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo));
 }
 
 void CommandBuffer::Begin(VkCommandBufferUsageFlags flags, const VkCommandBufferInheritanceInfo* inheritanceInfo)
@@ -35,17 +35,17 @@ void CommandBuffer::Begin(VkCommandBufferUsageFlags flags, const VkCommandBuffer
         inheritanceInfo
     };
 
-    DebugTools::Verify(vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo));
+    VK_VERIFY(vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo));
 }
 
 void CommandBuffer::Reset(VkCommandBufferResetFlags flags)
 {
-    DebugTools::Verify(vkResetCommandBuffer(commandBuffer, flags));
+    VK_VERIFY(vkResetCommandBuffer(commandBuffer, flags));
 }
 
 void CommandBuffer::End()
 {
-    DebugTools::Verify(vkEndCommandBuffer(commandBuffer));
+    VK_VERIFY(vkEndCommandBuffer(commandBuffer));
 }
 
 void CommandBuffer::BeginRenderPass(VkRenderPass renderPass, VkFramebuffer framebuffer, VkRect2D renderArea, std::vector<VkClearValue> clearValues, VkSubpassContents subpassContents)

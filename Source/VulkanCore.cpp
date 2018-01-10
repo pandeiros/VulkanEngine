@@ -6,8 +6,6 @@
 
 #include "VulkanCore.h"
 
-VULKAN_DEFINE_LOG_CATEGORY(LogEngine);
-
 VULKAN_NS_USING;
 
 void VulkanObject::Update()

@@ -21,7 +21,7 @@ void BufferView::Create(VkDevice device, VkBufferViewCreateFlags flags, VkBuffer
         range
     };
 
-    DebugTools::Verify(vkCreateBufferView(device, &bufferViewCreateInfo, nullptr, &bufferView));
+    VK_VERIFY(vkCreateBufferView(device, &bufferViewCreateInfo, nullptr, &bufferView));
 }
 
 void BufferView::Destroy(VkDevice device)

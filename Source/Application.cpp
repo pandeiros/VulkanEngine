@@ -5,6 +5,7 @@
  */
 
 #include "Application.h"
+#include "Core.h"
 #include "Instance.h"
 
 VULKAN_NS_USING;

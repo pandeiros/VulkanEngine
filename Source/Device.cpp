@@ -61,12 +61,12 @@ PhysicalDevice* Device::GetPhysicalDevice()
 
 void Device::FlushMappedMemoryRanges(std::vector<VkMappedMemoryRange> memoryRanges)
 {
-    DebugTools::Verify(vkFlushMappedMemoryRanges(device, (uint32_t)memoryRanges.size(), memoryRanges.data()));
+    VK_VERIFY(vkFlushMappedMemoryRanges(device, (uint32_t)memoryRanges.size(), memoryRanges.data()));
 }
 
 void Device::InvalidateMappedMemoryRanges(std::vector<VkMappedMemoryRange> memoryRanges)
 {
-    DebugTools::Verify(vkInvalidateMappedMemoryRanges(device, (uint32_t)memoryRanges.size(), memoryRanges.data()));
+    VK_VERIFY(vkInvalidateMappedMemoryRanges(device, (uint32_t)memoryRanges.size(), memoryRanges.data()));
 }
 
 uint32_t Device::GetMemoryTypeForImage(const VkMemoryRequirements memoryRequirements, VkMemoryPropertyFlags preferredFlags, VkMemoryPropertyFlags requiredFlags)
@@ -117,12 +117,12 @@ uint32_t Device::GetMemoryTypeForImage(const VkMemoryRequirements memoryRequirem
 
 void Device::BindBufferMemory(VkBuffer buffer, VkDeviceMemory memory, VkDeviceSize size)
 {
-    DebugTools::Verify(vkBindBufferMemory(device, buffer, memory, size));
+    VK_VERIFY(vkBindBufferMemory(device, buffer, memory, size));
 }
 
 void Device::BindImageMemory(VkImage image, VkDeviceMemory memory, VkDeviceSize size)
 {
-    DebugTools::Verify(vkBindImageMemory(device, image, memory, size));
+    VK_VERIFY(vkBindImageMemory(device, image, memory, size));
 }
 
 void Device::WaitIdle()
@@ -179,7 +179,7 @@ void Device::CreateInternal()
         &cachedRequiredFeatures
     };
 
-    if (DebugTools::Verify(vkCreateDevice(cachedPhysicalDevice->GetVkPhysicalDevice(), &deviceCreateInfo, nullptr, &device)) == VK_SUCCESS)
+    if (VK_VERIFY(vkCreateDevice(cachedPhysicalDevice->GetVkPhysicalDevice(), &deviceCreateInfo, nullptr, &device)) == VK_SUCCESS)
     {
         vkGetDeviceQueue(device, cachedPhysicalDevice->GetGraphicsQueueFamilyIndex(), 0, &queue.GetVkQueueRef());
     }

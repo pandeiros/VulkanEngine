@@ -52,58 +52,58 @@ VkResult DebugTools::Verify(VkResult result)
             VK_LOG(LogDebug, Fatal, "VK_ERROR_OUT_OF_HOST_MEMORY");
             break;
         case VK_ERROR_OUT_OF_DEVICE_MEMORY:
-            //Logger::Log("VK_ERROR_OUT_OF_DEVICE_MEMORY");
+            VK_LOG(LogDebug, Fatal, "VK_ERROR_OUT_OF_DEVICE_MEMORY");
             break;
         case VK_ERROR_INITIALIZATION_FAILED:
-            //Logger::Log("VK_ERROR_INITIALIZATION_FAILED");
+            VK_LOG(LogDebug, Fatal, "VK_ERROR_INITIALIZATION_FAILED");
             break;
         case VK_ERROR_DEVICE_LOST:
-            //Logger::Log("VK_ERROR_DEVICE_LOST");
+            VK_LOG(LogDebug, Fatal, "VK_ERROR_DEVICE_LOST");
             break;
         case VK_ERROR_MEMORY_MAP_FAILED:
-            //Logger::Log("VK_ERROR_MEMORY_MAP_FAILED");
+            VK_LOG(LogDebug, Fatal, "VK_ERROR_MEMORY_MAP_FAILED");
             break;
         case VK_ERROR_LAYER_NOT_PRESENT:
-            //Logger::Log("VK_ERROR_LAYER_NOT_PRESENT");
+            VK_LOG(LogDebug, Fatal, "VK_ERROR_LAYER_NOT_PRESENT");
             break;
         case VK_ERROR_EXTENSION_NOT_PRESENT:
-            //Logger::Log("VK_ERROR_EXTENSION_NOT_PRESENT");
+            VK_LOG(LogDebug, Fatal, "VK_ERROR_EXTENSION_NOT_PRESENT");
             break;
         case VK_ERROR_FEATURE_NOT_PRESENT:
-            //Logger::Log("VK_ERROR_FEATURE_NOT_PRESENT");
+            VK_LOG(LogDebug, Fatal, "VK_ERROR_FEATURE_NOT_PRESENT");
             break;
         case VK_ERROR_INCOMPATIBLE_DRIVER:
-            //Logger::Log("VK_ERROR_INCOMPATIBLE_DRIVER");
+            VK_LOG(LogDebug, Fatal, "VK_ERROR_INCOMPATIBLE_DRIVER");
             break;
         case VK_ERROR_TOO_MANY_OBJECTS:
-            //Logger::Log("VK_ERROR_TOO_MANY_OBJECTS");
+            VK_LOG(LogDebug, Fatal, "VK_ERROR_TOO_MANY_OBJECTS");
             break;
         case VK_ERROR_FORMAT_NOT_SUPPORTED:
-            //Logger::Log("VK_ERROR_FORMAT_NOT_SUPPORTED");
+            VK_LOG(LogDebug, Fatal, "VK_ERROR_FORMAT_NOT_SUPPORTED");
             break;
         case VK_ERROR_FRAGMENTED_POOL:
-            //Logger::Log("VK_ERROR_FRAGMENTED_POOL");
+            VK_LOG(LogDebug, Fatal, "VK_ERROR_FRAGMENTED_POOL");
             break;
         case VK_ERROR_SURFACE_LOST_KHR:
-            //Logger::Log("VK_ERROR_SURFACE_LOST_KHR");
+            VK_LOG(LogDebug, Fatal, "VK_ERROR_SURFACE_LOST_KHR");
             break;
         case VK_ERROR_NATIVE_WINDOW_IN_USE_KHR:
-            //Logger::Log("VK_ERROR_NATIVE_WINDOW_IN_USE_KHR");
+            VK_LOG(LogDebug, Fatal, "VK_ERROR_NATIVE_WINDOW_IN_USE_KHR");
             break;
         case VK_SUBOPTIMAL_KHR:
-            //Logger::Log("VK_SUBOPTIMAL_KHR");
+            VK_LOG(LogDebug, Fatal, "VK_SUBOPTIMAL_KHR");
             break;
         case VK_ERROR_OUT_OF_DATE_KHR:
-            //Logger::Log("VK_ERROR_OUT_OF_DATE_KHR");
+            VK_LOG(LogDebug, Fatal, "VK_ERROR_OUT_OF_DATE_KHR");
             break;
         case VK_ERROR_INCOMPATIBLE_DISPLAY_KHR:
-            //Logger::Log("VK_ERROR_INCOMPATIBLE_DISPLAY_KHR");
+            VK_LOG(LogDebug, Fatal, "VK_ERROR_INCOMPATIBLE_DISPLAY_KHR");
             break;
         case VK_ERROR_VALIDATION_FAILED_EXT:
-            //Logger::Log("VK_ERROR_VALIDATION_FAILED_EXT");
+            VK_LOG(LogDebug, Fatal, "VK_ERROR_VALIDATION_FAILED_EXT");
             break;
         case VK_ERROR_INVALID_SHADER_NV:
-            //Logger::Log("VK_ERROR_INVALID_SHADER_NV");
+            VK_LOG(LogDebug, Fatal, "VK_ERROR_INVALID_SHADER_NV");
             break;
         default:
             break;
@@ -115,4 +115,15 @@ VkResult DebugTools::Verify(VkResult result)
 #endif // VULKAN_ENABLE_RUNTIME_DEBUG
 
     return result;
+}
+
+VkDebugReportFlagsEXT DebugTools::GetVulkanDebugFlagsEnabled()
+{
+    return
+        //VK_DEBUG_REPORT_INFORMATION_BIT_EXT |
+        VK_DEBUG_REPORT_WARNING_BIT_EXT |
+        VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT |
+        VK_DEBUG_REPORT_ERROR_BIT_EXT |
+        //VK_DEBUG_REPORT_DEBUG_BIT_EXT |
+        0;
 }

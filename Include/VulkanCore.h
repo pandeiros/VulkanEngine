@@ -34,6 +34,7 @@
 VULKAN_NS_BEGIN
 
 VULKAN_DECLARE_LOG_CATEGORY(LogEngine);
+VULKAN_DECLARE_LOG_CATEGORY(LogVulkan);
 
 // #TODO Move this function somewhere else.
 template<typename T>

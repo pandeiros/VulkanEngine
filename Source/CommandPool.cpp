@@ -18,7 +18,7 @@ void CommandPool::Create(VkDevice device, VkCommandPoolCreateFlags flags, uint32
         queueFamilyIndex
     };
 
-    DebugTools::Verify(vkCreateCommandPool(device, &commandPoolCreateInfo, nullptr, &commandPool));
+    VK_VERIFY(vkCreateCommandPool(device, &commandPoolCreateInfo, nullptr, &commandPool));
 }
 
 void CommandPool::Destroy(VkDevice device)
@@ -32,7 +32,7 @@ void CommandPool::Destroy(VkDevice device)
 
 void CommandPool::Reset(VkDevice device, VkCommandPoolResetFlags flags)
 {
-    DebugTools::Verify(vkResetCommandPool(device, commandPool, flags));
+    VK_VERIFY(vkResetCommandPool(device, commandPool, flags));
 }
 
 void CommandPool::AllocateCommandBuffer(VkDevice device, VkCommandBufferLevel level)
@@ -47,7 +47,7 @@ void CommandPool::AllocateCommandBuffer(VkDevice device, VkCommandBufferLevel le
             1
         };
 
-        DebugTools::Verify(vkAllocateCommandBuffers(device, &commandBufferAllocateInfo, &commandBuffer.GetVkCommandBufferRef()));
+        VK_VERIFY(vkAllocateCommandBuffers(device, &commandBufferAllocateInfo, &commandBuffer.GetVkCommandBufferRef()));
     }
 }
 

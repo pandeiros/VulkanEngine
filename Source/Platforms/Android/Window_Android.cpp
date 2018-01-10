@@ -1,7 +1,7 @@
-#include "Platforms/Win32/Window_Win32.h"
 #include "Window.h"
+#include "Core.h"
 #include "Instance.h"
-#include "Rendering/Renderer.h"
+//#include "Rendering/Renderer.h"
 #include "AndroidUtils.h"
 
 #include <cassert>
@@ -25,7 +25,7 @@ void Window::CreateOSSurface()
     surfaceCreateInfo.flags = 0;
     surfaceCreateInfo.window = AndroidGetApplicationWindow();
 
-    DebugTools::Verify(fvkCreateAndroidSurfaceKHR(cachedInstance->GetVkInstance(), &surfaceCreateInfo, nullptr, &surface));
+    VK_VERIFY(fvkCreateAndroidSurfaceKHR(cachedInstance->GetVkInstance(), &surfaceCreateInfo, nullptr, &surface));
 }
 
 void Window::UpdateOSWindow()

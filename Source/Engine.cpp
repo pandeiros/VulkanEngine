@@ -13,6 +13,8 @@
 
 VULKAN_NS_USING;
 
+VULKAN_DEFINE_LOG_CATEGORY(LogEngine);
+
 Engine* Engine::engine = nullptr;
 
 void Engine::RegisterGlobalEngine(Engine* engine)
@@ -32,38 +34,38 @@ void Engine::LogSystemInfo()
         InitInstanceProperties();
     }
 
-    //Logger::Log("Instance properties:");
-    //for (LayerProperties& instanceProperty : instanceProperties)
-    //{
-    //    Logger::Log(instanceProperty.properties.layerName);
-    //    for (VkExtensionProperties& extensionProperty : instanceProperty.extensions)
-    //    {
-    //        Logger::Log(extensionProperty.extensionName);
-    //    }
-    //}
+    VK_LOG(LogEngine, Debug, "Instance properties:");
+    for (LayerProperties& instanceProperty : instanceProperties)
+    {
+        VK_LOG(LogEngine, Debug, "  %s", instanceProperty.properties.layerName);
+        for (VkExtensionProperties& extensionProperty : instanceProperty.extensions)
+        {
+            VK_LOG(LogEngine, Debug, "    %s", extensionProperty.extensionName);
+        }
+    }
 
-    //Logger::Log("\nGlobal extensions:");
-    //for (VkExtensionProperties extension : globalInstanceExtensions)
-    //{
-    //    Logger::Log(extension.extensionName);
-    //}
+    VK_LOG(LogEngine, Debug, "Global extensions:");
+    for (VkExtensionProperties extension : globalInstanceExtensions)
+    {
+        VK_LOG(LogEngine, Debug, "  %s", extension.extensionName);
+    }
 
-    //Logger::Log("\nPhysical devices:");
-    //for (PhysicalDevice& physicalDevice : physicalDevices)
-    //{
-    //    physicalDevice.LogInfo();
-    //}
+    VK_LOG(LogEngine, Debug, "Physical devices:");
+    for (PhysicalDevice& physicalDevice : physicalDevices)
+    {
+        physicalDevice.LogInfo();
+    }
 }
 
 void Engine::InitInstanceProperties()
 {
-    DebugTools::Verify(EnumerateInstanceLayers());
+    VK_VERIFY(EnumerateInstanceLayers());
 
     uint32_t globalExtensionCount = 0;
     VkResult result;
     do
     {
-        DebugTools::Verify(vkEnumerateInstanceExtensionProperties(nullptr, &globalExtensionCount, nullptr));
+        VK_VERIFY(vkEnumerateInstanceExtensionProperties(nullptr, &globalExtensionCount, nullptr));
 
         if (globalExtensionCount == 0)
         {
@@ -90,17 +92,21 @@ void Engine::ValidateInstanceProperties(std::vector<const char*>& instanceLayers
         std::vector<LayerProperties> instancePropertiesCopy = instanceProperties;
         instanceLayers.erase(std::remove_if(instanceLayers.begin(), instanceLayers.end(), [&instancePropertiesCopy](const char* layer)
         {
-            //Logger::Log((std::string(" >>> ") + std::string(layer)).c_str());
             return std::find_if(instancePropertiesCopy.begin(), instancePropertiesCopy.end(), [&layer](const LayerProperties& layerProperties)
             {
                 return layerProperties.properties.layerName == layer;
             }) != instancePropertiesCopy.end();
         }), instanceLayers.end());
 
-        // #TODO Make this as a verbose log.
-        //std::vector<const char*> instanceLayersDiff = Math::Diff<const char*>(instanceLayersCopy, instanceLayers);
-        //Logger::Log("  Instance layers diff:");
-        //Math::Print(instanceLayersDiff);
+        std::vector<const char*> instanceLayersDiff = Math::Diff<const char*>(instanceLayersCopy, instanceLayers);
+        if (instanceLayersDiff.size() > 0)
+        {
+            VK_LOG(LogEngine, Verbose, "Invalid instance layers:");
+            for (auto& layer : instanceLayersDiff)
+            {
+                VK_LOG(LogEngine, Verbose, " %s", layer);
+            }
+        }
     }
 
     if (globalInstanceExtensions.size() == 0)
@@ -121,10 +127,15 @@ void Engine::ValidateInstanceProperties(std::vector<const char*>& instanceLayers
             }) != globalInstanceExtensionsCopy.end());
         }), instanceExtensions.end());
 
-        // #TODO Make this as a verbose log.
-        //std::vector<const char*> instanceExtensionsDiff = Math::Diff<const char*>(instanceExtensionsCopy, instanceExtensions);
-        //Logger::Log("  Instance extensions diff:");
-        //Math::Print(instanceExtensionsDiff);
+        std::vector<const char*> instanceExtensionsDiff = Math::Diff<const char*>(instanceExtensionsCopy, instanceExtensions);
+        if (instanceExtensionsDiff.size() > 0)
+        {
+            VK_LOG(LogEngine, Verbose, "Invalid instance extensions:");
+            for (auto& extension : instanceExtensionsDiff)
+            {
+                VK_LOG(LogEngine, Verbose, " %s", extension);
+            }
+        }
     }
 }
 

@@ -12,6 +12,8 @@
 
 VULKAN_NS_USING;
 
+VULKAN_DEFINE_LOG_CATEGORY(LogVulkan);
+
 void Instance::Create(VkApplicationInfo applicationInfo, std::vector<const char*> instanceLayers, std::vector<const char*> instaceExtensions)
 {
     Engine* engine = Engine::GetEngine();
@@ -32,7 +34,7 @@ void Instance::Create(VkApplicationInfo applicationInfo, std::vector<const char*
         instaceExtensions.data()
     };
 
-    DebugTools::Verify(vkCreateInstance(&instanceCreateInfo, nullptr, &instance));
+    VK_VERIFY(vkCreateInstance(&instanceCreateInfo, nullptr, &instance));
 
     SetupDebug();
 }
@@ -101,38 +103,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL
 VulkanDebugCallback(VkDebugReportFlagsEXT MsgFlags, VkDebugReportObjectTypeEXT ObjectType, uint64_t SourceObject,
     size_t Location, int32_t MsgCode, const char* LayerPrefix, const char* Msg, void* UserData)
 {
-    std::ostringstream oss;
-    if (MsgFlags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT)
-    {
-        oss << "INFO: ";
-    }
-    if (MsgFlags & VK_DEBUG_REPORT_WARNING_BIT_EXT)
-    {
-        oss << "WARNING: ";
-    }
-    if (MsgFlags & VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT)
-    {
-        oss << "PERFORMANCE: ";
-    }
-    if (MsgFlags & VK_DEBUG_REPORT_ERROR_BIT_EXT)
-    {
-        oss << "ERROR: ";
-    }
-    if (MsgFlags & VK_DEBUG_REPORT_DEBUG_BIT_EXT)
-    {
-        oss << "DEBUG: ";
-    }
-
-    oss << "@[" << LayerPrefix << "] " << Msg << "\n";
-
-    //Logger::Log(oss.str().c_str());
-
-#ifdef _WIN32
-    if (MsgFlags & VK_DEBUG_REPORT_ERROR_BIT_EXT)
-    {
-        MessageBox(NULL, oss.str().c_str(), "Vulkan Error!", 0);
-    }
-#endif
+    VULKAN_LOGGER(LogVulkan.GetCategoryName(), Logger::GetVerbosity(MsgFlags), "%s", Msg);
 
     return VK_FALSE;
 }
@@ -142,12 +113,7 @@ void Instance::SetupDebug()
     debugCallbackCreateInfo = {
         VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT,
         nullptr,
-        //VK_DEBUG_REPORT_INFORMATION_BIT_EXT |
-        VK_DEBUG_REPORT_WARNING_BIT_EXT |
-        VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT |
-        VK_DEBUG_REPORT_ERROR_BIT_EXT |
-        //VK_DEBUG_REPORT_DEBUG_BIT_EXT |
-        0,
+        DebugTools::GetVulkanDebugFlagsEnabled(),
         VulkanDebugCallback,
         nullptr
     };
@@ -156,9 +122,9 @@ void Instance::SetupDebug()
     VULKAN_GET_INSTANCE_PROC_ADDR(instance, DestroyDebugReportCallbackEXT);
 
     // #TODO Remove after fixing VULKAN_GET_INSTANCE_PROC_ADDR in VulkanMisc)
-    VK_ASSERT(fvkCreateDebugReportCallbackEXT && fvkDestroyDebugReportCallbackEXT, "Cannot fetch debug function pointers.");
+    //VK_ASSERT(fvkCreateDebugReportCallbackEXT && fvkDestroyDebugReportCallbackEXT, "Cannot fetch debug function pointers.");
 
-    DebugTools::Verify(fvkCreateDebugReportCallbackEXT(instance, &debugCallbackCreateInfo, nullptr, &debugReport));
+    VK_VERIFY(fvkCreateDebugReportCallbackEXT(instance, &debugCallbackCreateInfo, nullptr, &debugReport));
 }
 
 void Instance::DestroyDebug()
@@ -173,9 +139,9 @@ void Instance::DestroyDebug()
 
 #else
 
-void Renderer::SetupDebug()
+void Instance::SetupDebug()
 {}
-void Renderer::DestroyDebug()
+void Instance::DestroyDebug()
 {}
 
 #endif // VULKAN_ENABLE_DEBUG

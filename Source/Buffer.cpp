@@ -22,7 +22,7 @@ void Buffer::CreateExclusive(VkDevice device, VkBufferCreateFlags flags, VkDevic
         nullptr
     };
 
-    DebugTools::Verify(vkCreateBuffer(device, &bufferCreateInfo, nullptr, &buffer));
+    VK_VERIFY(vkCreateBuffer(device, &bufferCreateInfo, nullptr, &buffer));
 }
 
 void Buffer::CreateConcurrent(VkDevice device, VkBufferCreateFlags flags, VkDeviceSize size, VkBufferUsageFlags usage, std::vector<uint32_t> queueFamilyIndices)
@@ -38,7 +38,7 @@ void Buffer::CreateConcurrent(VkDevice device, VkBufferCreateFlags flags, VkDevi
         queueFamilyIndices.data()
     };
 
-    DebugTools::Verify(vkCreateBuffer(device, &bufferCreateInfo, nullptr, &buffer));
+    VK_VERIFY(vkCreateBuffer(device, &bufferCreateInfo, nullptr, &buffer));
 }
 
 void Buffer::Destroy(VkDevice device)

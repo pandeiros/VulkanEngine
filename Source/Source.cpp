@@ -14,8 +14,8 @@ VULKAN_NS_USING;
 
 int main()
 {
-    VK_LOG(LogEngine, Error, "TEstujemy %s", "FATAL ERRORY");
-    VK_ASSERT(0 == 1, "Asserciatko");
+    Logger::LogTest();
+
     Application application;
     application.Create("Vulkan Engine Test", 1, VK_MAKE_VERSION(1, 0, 2));
     application.Init();

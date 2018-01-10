@@ -20,14 +20,13 @@ VULKAN_NS_BEGIN
 #define TEXT_PASTE(x) #x
 #define VULKAN_TEXT(x) TEXT_PASTE(x)
 
-#define VULKAN_GET_INSTANCE_PROC_ADDR(INSTANCE, ENTRY_POINT)                                                   \
+#define VULKAN_GET_INSTANCE_PROC_ADDR(INSTANCE, ENTRY_POINT)                                            \
     {                                                                                                   \
         fvk##ENTRY_POINT = (PFN_vk##ENTRY_POINT)vkGetInstanceProcAddr(INSTANCE, "vk" #ENTRY_POINT);     \
         if (fvk##ENTRY_POINT == NULL)                                                                   \
         {                                                                                               \
+            VK_LOG(LogEngine, Fatal, "vkGetInstanceProcAddr failed to find vk" #ENTRY_POINT);           \
         }                                                                                               \
     }
-
-//VULKAN_LOG("Engine", Fatal, "vkGetDeviceProcAddr failed to find vk" #ENTRY_POINT);        \
 
 VULKAN_NS_END

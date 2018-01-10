@@ -16,7 +16,7 @@ VkQueue& Queue::GetVkQueueRef()
 
 void Queue::Submit(std::vector<VkSubmitInfo> submits, VkFence fence)
 {
-    DebugTools::Verify(vkQueueSubmit(queue, (uint32_t)submits.size(), submits.data(), fence));
+    VK_VERIFY(vkQueueSubmit(queue, (uint32_t)submits.size(), submits.data(), fence));
 }
 
 void Queue::Submit(const VkPipelineStageFlags* waitDstStageMask, const std::vector<VkSemaphore>& waitSemaphores, const std::vector<VkCommandBuffer>& commandBuffers, const std::vector<VkSemaphore>& signalSemaphores, VkFence fence)
@@ -33,12 +33,12 @@ void Queue::Submit(const VkPipelineStageFlags* waitDstStageMask, const std::vect
         signalSemaphores.data()
     };
 
-    DebugTools::Verify(vkQueueSubmit(queue, 1, &submitInfo, fence));
+    VK_VERIFY(vkQueueSubmit(queue, 1, &submitInfo, fence));
 }
 
 void Queue::BindSparse(const std::vector<VkBindSparseInfo> bindSparseInfo, VkFence fence)
 {
-    DebugTools::Verify(vkQueueBindSparse(queue, (uint32_t)bindSparseInfo.size(), bindSparseInfo.data(), fence));
+    VK_VERIFY(vkQueueBindSparse(queue, (uint32_t)bindSparseInfo.size(), bindSparseInfo.data(), fence));
 }
 
 void Queue::BindSparse(const std::vector<VkSemaphore> waitSemaphores, const std::vector<VkSemaphore> signalSemaphores, const std::vector<VkSparseBufferMemoryBindInfo> bufferBinds, const std::vector<VkSparseImageOpaqueMemoryBindInfo> imageOpaqueBinds, const std::vector<VkSparseImageMemoryBindInfo> imageBinds, VkFence fence)

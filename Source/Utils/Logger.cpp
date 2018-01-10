@@ -28,23 +28,26 @@ VARARG_BODY(void, Logger::Logf, const char*,
     vsnprintf(buffer, MAX_BUFFER_SIZE, Format, argptr);
     va_end(argptr);
 
-    char* categorySuffix = ": ";
-    if (strlen(category) == 0)
-    {
-        categorySuffix = "";
-    }
-
     if (verbosity == LogVerbosity::Fatal)
     {
-        // #TODO Change this to some exit method.
         VK_ASSERT(0, buffer);
     }
     else
     {
 #ifdef _WIN32
-        printf("[%s] %s%s%s\n", GetVerbosityString(verbosity), category, categorySuffix, buffer);
+        HANDLE winConsole;
+        winConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+        SetConsoleTextAttribute(winConsole, GetVerbosityColor(verbosity));
+        printf("[%7.7s] %s%s%s\n", GetVerbosityString(verbosity), category, (strlen(category) == 0 ? "" : ": "), buffer);
+        SetConsoleTextAttribute(winConsole, 15);
+
+        if (verbosity == LogVerbosity::Error)
+        {
+            MessageBox(NULL, buffer, "Error", 0);
+        }
 #elif __ANDROID__
-        __android_log_print(GetPlatformVerbosity(verbosity), VULKAN_ANDROID_TAG, "%s%s%s", category, categorySuffix, buffer);
+        __android_log_print(GetPlatformVerbosity(verbosity), VULKAN_ANDROID_TAG, "%s%s%s", category, (strlen(category) == 0 ? "" : ": "), buffer);
 #endif
     }
 
@@ -93,31 +96,66 @@ VARARG_BODY(void, Logger::Logf, const char*,
 #endif
 }
 
-const char* Logger::GetVerbosityString(LogVerbosity Verbosity)
+const char* Logger::GetVerbosityString(LogVerbosity verbosity)
 {
-    switch (Verbosity)
+    switch (verbosity)
     {
     case LogVerbosity::Verbose:
         return "Verbose";
     case LogVerbosity::Debug:
-        return "Debug";
+        return " Debug ";
     case LogVerbosity::Info:
-        return "Info";
+        return " Info  ";
     case LogVerbosity::Warning:
         return "Warning";
     case LogVerbosity::Error:
-        return "Error";
+        return " Error ";
     case LogVerbosity::Fatal:
-        return "FATAL";
+        return " FATAL ";
     default:
-        return "Info";
+        return " Info  ";
     }
 }
 
-VULKAN_PLATFORM_VERBOSITY Logger::GetPlatformVerbosity(LogVerbosity Verbosity)
+LogVerbosity Logger::GetVerbosity(VkDebugReportFlagsEXT Flags)
+{
+    if (Flags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT)
+    {
+        return LogVerbosity::Info;
+    }
+    else if (Flags & VK_DEBUG_REPORT_WARNING_BIT_EXT)
+    {
+        return LogVerbosity::Warning;
+    }
+    else if (Flags & VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT)
+    {
+        return LogVerbosity::Warning;
+    }
+    else if (Flags & VK_DEBUG_REPORT_ERROR_BIT_EXT)
+    {
+        return LogVerbosity::Error;
+    }
+    else if (Flags & VK_DEBUG_REPORT_DEBUG_BIT_EXT)
+    {
+        return LogVerbosity::Debug;
+    }
+
+    return LogVerbosity::Info;
+}
+
+void Logger::LogTest()
+{
+    VULKAN_LOGGER("Logger", LogVerbosity::Verbose, "Test");
+    VULKAN_LOGGER("Logger", LogVerbosity::Debug, "Test");
+    VULKAN_LOGGER("Logger", LogVerbosity::Info, "Test");
+    VULKAN_LOGGER("Logger", LogVerbosity::Warning, "Test");
+    //VULKAN_LOGGER("Logger", LogVerbosity::Error, "Test");
+}
+
+VULKAN_PLATFORM_VERBOSITY Logger::GetPlatformVerbosity(LogVerbosity verbosity)
 {
 #ifdef __ANDROID__
-    switch (Verbosity)
+    switch (verbosity)
     {
     case LogVerbosity::Verbose:
         return android_LogPriority::ANDROID_LOG_VERBOSE;
@@ -135,6 +173,40 @@ VULKAN_PLATFORM_VERBOSITY Logger::GetPlatformVerbosity(LogVerbosity Verbosity)
         return android_LogPriority::ANDROID_LOG_DEFAULT;
     }
 #else
-    return Verbosity;
+    return verbosity;
 #endif
+}
+
+int Logger::GetVerbosityColor(LogVerbosity verbosity)
+{
+    int colorCode = -1;
+
+#ifdef _WIN32
+    switch (verbosity)
+    {
+    case LogVerbosity::Verbose:
+        colorCode = 8;
+        break;
+    case LogVerbosity::Debug:
+        colorCode = 11;
+        break;
+    case LogVerbosity::Info:
+        colorCode = 10;
+        break;
+    case LogVerbosity::Warning:
+        colorCode = 14;
+        break;
+    case LogVerbosity::Error:
+        colorCode = 12;
+        break;
+    case LogVerbosity::Fatal:
+        colorCode = 12;
+        break;
+    default:
+        colorCode = 8;
+        break;
+    }
+#endif
+
+    return colorCode;
 }

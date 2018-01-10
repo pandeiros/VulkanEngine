@@ -123,7 +123,7 @@ void Window::CreateOSSurface()
         win32Window
     };
 
-    DebugTools::Verify(vkCreateWin32SurfaceKHR(cachedInstance->GetVkInstance(), &surfaceCreateInfo, nullptr, &surface));
+    VK_VERIFY(vkCreateWin32SurfaceKHR(cachedInstance->GetVkInstance(), &surfaceCreateInfo, nullptr, &surface));
 }
 
 void Window::UpdateOSWindow()

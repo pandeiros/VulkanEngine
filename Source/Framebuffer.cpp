@@ -23,7 +23,7 @@ void Framebuffer::Create(VkDevice device, VkFramebufferCreateFlags flags, VkRend
         dimensions.layers
     };
 
-    DebugTools::Verify(vkCreateFramebuffer(device, &framebufferCreateInfo, nullptr, &framebuffer));
+    VK_VERIFY(vkCreateFramebuffer(device, &framebufferCreateInfo, nullptr, &framebuffer));
 }
 
 void Framebuffer::Destroy(VkDevice device)

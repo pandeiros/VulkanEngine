@@ -15,5 +15,3 @@
 /**
  * @file Core.h
  */
-
-VULKAN_NS_BEGIN

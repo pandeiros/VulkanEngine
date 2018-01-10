@@ -23,7 +23,7 @@ void ImageView::Create(VkDevice device, VkImageViewCreateFlags flags, VkImage im
         subresourceRange
     };
 
-    DebugTools::Verify(vkCreateImageView(device, &imageViewCreateInfo, nullptr, &imageView));
+    VK_VERIFY(vkCreateImageView(device, &imageViewCreateInfo, nullptr, &imageView));
 }
 
 void ImageView::Destroy(VkDevice device)

@@ -9,6 +9,8 @@
 
 VULKAN_NS_USING;
 
+VULKAN_DECLARE_LOG_CATEGORY_STATIC(LogPhysicalDevice);
+
 void PhysicalDevice::Create(const VkPhysicalDevice physicalDevice)
 {
     this->physicalDevice = physicalDevice;
@@ -163,29 +165,30 @@ std::vector<VkSparseImageFormatProperties> PhysicalDevice::GetSparseImageFormatP
 
 void PhysicalDevice::LogInfo()
 {
-    //Logger::Log(physicalDeviceProperties.deviceName);
-    //Logger::Log(physicalDeviceProperties.deviceID);
+    VK_LOG(LogPhysicalDevice, Debug, "Physical device:");
+    VK_LOG(LogPhysicalDevice, Debug, "%s", physicalDeviceProperties.deviceName);
+    VK_LOG(LogPhysicalDevice, Debug, "%u", physicalDeviceProperties.deviceID);
 
-    //VULKAN_LOG("PhysicalDevice", Warning, "Graphics queue family index: %d", graphicsQueueFamilyIndex);
-    //VULKAN_LOG("PhysicalDevice", Info, "Present queue family index: %d", presentQueueFamilyIndex);
+    VK_LOG(LogPhysicalDevice, Debug, "Graphics queue family index: %u", graphicsQueueFamilyIndex);
+    VK_LOG(LogPhysicalDevice, Debug, "Present queue family index: %u", presentQueueFamilyIndex);
 
-    //Logger::Log("Device layers");
-    //for (VkLayerProperties& layer : availableDeviceLayers)
-    //{
-    //    Logger::Log(layer.layerName);
-    //}
+    VK_LOG(LogPhysicalDevice, Debug, "Device layers:");
+    for (VkLayerProperties& layer : availableDeviceLayers)
+    {
+        VK_LOG(LogPhysicalDevice, Debug, "  %s", layer.layerName);
+    }
 
-    //Logger::Log("Device extensions");
-    //for (VkExtensionProperties& extension : availableDeviceExtensions)
-    //{
-    //    Logger::Log(extension.extensionName);
-    //}
+    VK_LOG(LogPhysicalDevice, Debug, "Device extensions:");
+    for (VkExtensionProperties& extension : availableDeviceExtensions)
+    {
+        VK_LOG(LogPhysicalDevice, Debug, "  %s", extension.extensionName);
+    }
 
-    //Logger::Log("Device display properties");
-    //for (VkDisplayPropertiesKHR& property : displayProperties)
-    //{
-    //    Logger::Log(property.displayName);
-    //}
+    VK_LOG(LogPhysicalDevice, Debug, "Device display properties:");
+    for (VkDisplayPropertiesKHR& property : displayProperties)
+    {
+        VK_LOG(LogPhysicalDevice, Debug, "  %s", property.displayName);
+    }
 }
 
 uint32_t PhysicalDevice::GetMemoryTypeIndex(const VkMemoryRequirements* MemoryRequirements, const VkMemoryPropertyFlags RequiredProperties)

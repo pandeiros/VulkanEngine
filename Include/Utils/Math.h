@@ -45,15 +45,6 @@ public:
         return diff;
     }
 
-    //template<typename T>
-    //static void Print(const T& container)
-    //{
-    //    for (auto & element : container)
-    //    {
-    //        Logger::Log(element);
-    //    }
-    //}
-
 private:
 
 };

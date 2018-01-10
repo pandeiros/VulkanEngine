@@ -38,12 +38,14 @@ public:
         VARARG_EXTRA(const char* file) VARARG_EXTRA(int line),
         VARARG_EXTRA(file) VARARG_EXTRA(line) VARARG_EXTRA("") VARARG_EXTRA(LogVerbosity::Info));
 
-    static const char* GetVerbosityString(LogVerbosity Verbosity);
+    static const char* GetVerbosityString(LogVerbosity verbosity);
+    static LogVerbosity GetVerbosity(VkDebugReportFlagsEXT Flags);
+    static VULKAN_PLATFORM_VERBOSITY GetPlatformVerbosity(LogVerbosity verbosity);
+
+    static void LogTest();
 
 private:
-    static VULKAN_PLATFORM_VERBOSITY GetPlatformVerbosity(LogVerbosity Verbosity);
-
-    //static uint32_t indentation;
+    static int GetVerbosityColor(LogVerbosity verbosity);
 };
 
 VULKAN_NS_END

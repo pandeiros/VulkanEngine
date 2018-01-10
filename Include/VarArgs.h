@@ -17,17 +17,16 @@
 #define VARARG_NONE
 #define VARARG_PURE =0
 
-//static inline uint32		CheckVA(uint32 dw) { return dw; }
-//static inline uint8			CheckVA(uint8 b) { return b; }
 static inline int			CheckVA(int i)              { return i; }
-static inline uint32_t		CheckVA(uint32_t ui)        { return ui; }
+static inline int		CheckVA(uint32_t ui)        { return (int)ui; }
 //static inline uint64		CheckVA(uint64 qw)          { return qw; }
 //static inline int64		CheckVA(int64 sqw)          { return sqw; }
 static inline double		CheckVA(double d)           { return d; }
 static inline long		    CheckVA(long d)             { return d; }
 static inline long		    CheckVA(unsigned long d)    { return d; }
 static inline char			CheckVA(char c)             { return c; }
-static inline void*			CheckVA(char* s)            { return (void*)s; }
+//static inline void*			CheckVA(char* s)            { return (void*)s; }
+static inline char*			CheckVA(char* s)            { return s; }
 static inline bool		    CheckVA(bool b)             { return b; }
 template<class T> T*		CheckVA(T* p)               { return p; }
 template<class T> const T*	CheckVA(const T* p)         { return p; }

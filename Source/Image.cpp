@@ -33,7 +33,7 @@ void Image::Create(VkDevice device, VkImageCreateFlags flags, VkImageType type, 
         initialLayout
     };
 
-    DebugTools::Verify(vkCreateImage(device, &imageCreateInfo, nullptr, &image));
+    VK_VERIFY(vkCreateImage(device, &imageCreateInfo, nullptr, &image));
 }
 
 void Image::Destroy(VkDevice device)
@@ -123,7 +123,7 @@ void SparseImage::Create(VkDevice device, VkImageCreateFlags flags, VkImageType 
         initialLayout
     };
 
-    if (DebugTools::Verify(vkCreateImage(device, &imageCreateInfo, nullptr, &image)) == VK_SUCCESS
+    if (VK_VERIFY(vkCreateImage(device, &imageCreateInfo, nullptr, &image)) == VK_SUCCESS
         && flags & VK_IMAGE_CREATE_SPARSE_BINDING_BIT)
     {
         uint32_t requirementsCount = 0;

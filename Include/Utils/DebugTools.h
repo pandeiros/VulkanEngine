@@ -32,21 +32,13 @@ VULKAN_NS_BEGIN
 class DebugTools
 {
 public:
-    ///**
-    // * Default constructor.
-    // */
-    //DebugTools() = default;
-
-    ///**
-    // * Default destructor.
-    // */
-    //~DebugTools() = default;
-
     VARARG_DECL(static void, static void, {}, Assert, VARARG_NONE, const char*,
         VARARG_EXTRA(const char* file) VARARG_EXTRA(int line) VARARG_EXTRA(bool condition),
         VARARG_EXTRA(file) VARARG_EXTRA(line) VARARG_EXTRA(condition));
 
     static VkResult Verify(VkResult result);
+
+    static VkDebugReportFlagsEXT GetVulkanDebugFlagsEnabled();
 };
 
 VULKAN_NS_END
