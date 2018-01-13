@@ -14,8 +14,6 @@ VULKAN_NS_USING;
 
 int main()
 {
-    Logger::LogTest();
-
     Application application;
     application.Create("Vulkan Engine Test", 1, VK_MAKE_VERSION(1, 0, 2));
     application.Init();
@@ -47,15 +45,19 @@ int main()
     CommandBuffer& commandBuffer = commandPool.GetCommandBufferRef();
     Queue& queue = instance.GetDeviceRef().GetQueueRef();
 
+    Engine::GetEngine()->UseFixedFrameRate(true);
+
     while (window.Update())
     {
+        Engine::GetEngine()->Update();
+
         ++frameCounter;
         if (lastTime + std::chrono::seconds(1) < timer.now())
         {
             lastTime = timer.now();
             FPS = frameCounter;
             frameCounter = 0;
-            std::cout << "FPS: " << FPS << "\n";
+            VK_LOG(LogEngine, Debug, "FPS: %.0f", Engine::GetEngine()->GetFPS());
         }
 
         window.BeginRender();

@@ -81,8 +81,6 @@ private:
     // Swapchain
     //////////////////////////////////////////////////////////////////////////
 
-    // #TODO Create Swapchain class.
-
     void CreateSwapchain();
     void DestroySwapchain();
 
@@ -106,8 +104,7 @@ private:
     Image depthStencilImage;
     ImageView depthStencilImageView;
     Memory depthStencilImageMemory;
-    //VkDeviceMemory depthStencilImageMemory = VK_NULL_HANDLE;
-    //VkFormat depthStencilFormat = VK_FORMAT_UNDEFINED;
+
     bool bStencilAvailable = false;
 
     //////////////////////////////////////////////////////////////////////////

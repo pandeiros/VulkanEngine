@@ -57,7 +57,7 @@ class VulkanObject
 public:
     virtual void Init() {};
     virtual void Destroy() {};
-    void Update();
+    void Update(float deltaTime);
 
     bool IsDirty() const;
     void SetDirty(bool isDirty);
@@ -68,7 +68,7 @@ public:
     void SetPendingKill(bool pendingKill);
 
 protected:
-    virtual void Tick() {};
+    virtual void Tick(float deltaTime) {};
 
 private:
     bool bIsDirty = false;

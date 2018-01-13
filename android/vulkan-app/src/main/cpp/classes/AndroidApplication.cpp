@@ -15,6 +15,8 @@ void AndroidApplication::Init()
 
     device.CreateSemaphore(&semaphoreRenderComplete);
 
+
+
     timer = std::chrono::steady_clock();
     lastTime = timer.now();
 
@@ -23,7 +25,7 @@ void AndroidApplication::Init()
     LOGI(" === VULKAN APP STARTED SUCCESSFULLY! ===");
 }
 
-void AndroidApplication::Tick()
+void AndroidApplication::Tick(float deltaTime)
 {
     vulkan::Window& window = instance.GetWindowRef();
     vulkan::CommandBuffer& commandBuffer = commandPool.GetCommandBufferRef();

@@ -8,6 +8,8 @@
 
 #include "AndroidUtils.h"
 
+#include <Engine.h>
+
 #include <stdio.h>
 #include <assert.h>
 #include <cstdlib>
@@ -1127,7 +1129,7 @@ void AndroidUtils::Update()
 {
     if (vulkanApplication && !isPaused)
     {
-        vulkanApplication->Update();
+        vulkan::Engine::GetEngine()->Update();
     }
 }
 

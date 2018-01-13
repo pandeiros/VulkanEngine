@@ -8,32 +8,29 @@
 
 #include "VulkanCore.h"
 
-#include "Buffer.h"
-
 /**
- * @file Renderer.h
+ * @file Object.h
  */
 
 VULKAN_NS_BEGIN
 
-/*
- * @class Renderer
+/**
+ * @class Object
  */
-class Renderer
+class Object
 {
 public:
     /**
      * Default constructor.
      */
-    Renderer() = default;
+    Object() = default;
 
     /**
      * Default destructor.
      */
-    ~Renderer() = default;
+    ~Object() = default;
 
-protected:
-    Buffer uniformBuffer;
+
 };
 
 VULKAN_NS_END

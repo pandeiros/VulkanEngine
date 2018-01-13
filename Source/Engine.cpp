@@ -17,14 +17,145 @@ VULKAN_DEFINE_LOG_CATEGORY(LogEngine);
 
 Engine* Engine::engine = nullptr;
 
-void Engine::RegisterGlobalEngine(Engine* engine)
+void Engine::InitStatic()
 {
-    Engine::engine = engine;
+    if (engine)
+    {
+        delete engine;
+    }
+
+    engine = new Engine;
+    engine->Init();
 }
 
 Engine* Engine::GetEngine()
 {
     return engine;
+}
+
+void Engine::Init()
+{
+    InitInstanceProperties();
+
+    SetFrameRate(60);
+
+    timer = std::chrono::steady_clock();
+    lastFrameTime = startTime = timer.now();
+}
+
+void Engine::Update()
+{
+    std::chrono::duration<float> frameTimeDiff = std::chrono::duration_cast<std::chrono::duration<float>>(timer.now() - lastFrameTime);
+    lastFrameTime = timer.now();
+
+    timeSinceLastUpdate += frameTimeDiff.count();
+
+    // Uncapped (almost frame rate).
+    float deltaTime = frameTimeDiff.count() < GetMinDeltaTime() ? GetMinDeltaTime() : frameTimeDiff.count();
+
+    // Fixed frame rate
+    if (bUseFixedFrameRate)
+    {
+        deltaTime = timePerFrame;
+    }
+    // Max frame rate is set.
+    else if (maxFPS > 0)
+    {
+        deltaTime = minTimePerFrame;
+    }
+
+    fpsTime += frameTimeDiff.count();
+
+    // We only proceed if at least deltaTime seconds have passed after last frame.
+    if (timeSinceLastUpdate >= deltaTime)
+    {
+        timeSinceLastUpdate -= deltaTime;
+        frameTimes.push(deltaTime);
+
+        UpdateInternal(deltaTime);
+
+        if (fpsTime >= 1.f)
+        {
+            currentFPS = (float)frameTimes.size() / fpsTime;
+
+            float oldestFrameTime = frameTimes.front();
+            frameTimes.pop();
+            fpsTime -= oldestFrameTime;
+        }
+    }
+}
+
+void Engine::UseFixedFrameRate(bool useFixedFrameRate)
+{
+    bUseFixedFrameRate = useFixedFrameRate;
+}
+
+void Engine::SetFrameRate(uint32_t newFrameRate)
+{
+    VK_ASSERT(newFrameRate > 0, "Frame rate has to be greater than 0!");
+
+    frameRate = newFrameRate;
+    timePerFrame = 1.f / frameRate;
+
+    if (timePerFrame < GetMinDeltaTime())
+    {
+        VK_LOG(LogEngine, Warning, "Time per frame (%.2f) for specified maximum framerate is below minimum (%.2f).", timePerFrame, GetMinDeltaTime());
+    }
+}
+
+void Engine::SetMaxFrameRate(uint32_t maxFrameRate)
+{
+    maxFPS = maxFrameRate;
+
+    if (maxFPS > 0)
+    {
+        minTimePerFrame = 1.f / maxFPS;
+
+        if (minTimePerFrame < GetMinDeltaTime())
+        {
+            VK_LOG(LogEngine, Warning, "Time per frame (%.2f) for specified maximum framerate is below minimum (%.2f).", minTimePerFrame, GetMinDeltaTime());
+        }
+    }
+    else
+    {
+        minTimePerFrame = GetMinDeltaTime();
+    }
+}
+
+float Engine::GetFPS() const
+{
+    return currentFPS;
+}
+
+void Engine::UpdateInternal(float deltaTime)
+{
+    if (deltaTime < 0.0001f)
+    {
+        deltaTime = 0.0001f;
+    }
+
+    for (auto& object : applicationObjects)
+    {
+        if (object)
+        {
+            object->Update(deltaTime);
+        }
+    }
+
+    world.Update(deltaTime);
+}
+
+float Engine::GetMinDeltaTime() const
+{
+    return 0.0001f;
+}
+
+void Engine::RegisterObject(VulkanObject* object)
+{
+    if (std::find(applicationObjects.begin(), applicationObjects.end(), object) != applicationObjects.end())
+    {
+        applicationObjects.push_back(object);
+    }
 }
 
 void Engine::LogSystemInfo()

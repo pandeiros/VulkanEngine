@@ -306,14 +306,20 @@ void Window::CreateDepthStencilImage()
     PhysicalDevice* physicalDevice = cachedInstance->GetDeviceRef().GetPhysicalDevice();
 
     VkFormat depthStencilFormat = VK_FORMAT_UNDEFINED;
+    VkImageTiling depthStencilImageTiling = VK_IMAGE_TILING_OPTIMAL;
     for (VkFormat& format : desiredFormats)
     {
-        VkFormatProperties formatProperties{};
-        vkGetPhysicalDeviceFormatProperties(physicalDevice->GetVkPhysicalDevice(), format, &formatProperties);
+        VkFormatProperties formatProperties = physicalDevice->GetFormatProperties(format);
         if (formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT)
         {
             depthStencilFormat = format;
             break;
+        }
+        else if (formatProperties.linearTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
+            && depthStencilFormat == VK_FORMAT_UNDEFINED)
+        {
+            depthStencilImageTiling = VK_IMAGE_TILING_LINEAR;
+            depthStencilFormat = format;
         }
     }
 

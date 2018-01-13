@@ -40,9 +40,6 @@ public:
     Instance& GetInstanceRef();
 
 protected:
-    //virtual void Tick() override
-    //{};
-
     Instance instance;
     Engine engine;
 

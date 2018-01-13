@@ -8,11 +8,11 @@
 
 VULKAN_NS_USING;
 
-void VulkanObject::Update()
+void VulkanObject::Update(float deltaTime)
 {
     if (bIsUpdateEnabled)
     {
-        this->Tick();
+        this->Tick(deltaTime);
     }
 }
 

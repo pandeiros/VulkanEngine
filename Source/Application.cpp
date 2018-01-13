@@ -29,10 +29,8 @@ void Application::Init()
     VK_ASSERT(InitVulkan() != 0, "Initialization of Vulkan APIs failed!");
 #endif
 
-    Engine::RegisterGlobalEngine(&engine);
-
-    // Some debug stuff.
-    engine.InitInstanceProperties();
+    Engine::InitStatic();
+    Engine::GetEngine()->RegisterObject(this);
 
     instance.Create(applicationInfo,
     {
@@ -47,13 +45,13 @@ void Application::Init()
         VK_EXT_DEBUG_REPORT_EXTENSION_NAME
     });
 
-    engine.EnumeratePhysicalDevices(instance.GetVkInstance());
+    Engine::GetEngine()->EnumeratePhysicalDevices(instance.GetVkInstance());
 
     instance.CreateDevice();
 
     instance.CreateAppWindow();
 
-    engine.LogSystemInfo();
+    Engine::GetEngine()->LogSystemInfo();
 }
 
 void Application::Destroy()

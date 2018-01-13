@@ -149,7 +149,7 @@ void Logger::LogTest()
     VULKAN_LOGGER("Logger", LogVerbosity::Debug, "Test");
     VULKAN_LOGGER("Logger", LogVerbosity::Info, "Test");
     VULKAN_LOGGER("Logger", LogVerbosity::Warning, "Test");
-    //VULKAN_LOGGER("Logger", LogVerbosity::Error, "Test");
+    VULKAN_LOGGER("Logger", LogVerbosity::Error, "Test");
 }
 
 VULKAN_PLATFORM_VERBOSITY Logger::GetPlatformVerbosity(LogVerbosity verbosity)

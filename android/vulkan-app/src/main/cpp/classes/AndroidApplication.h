@@ -2,6 +2,8 @@
 
 #include <CommandPool.h>
 #include <Application.h>
+#include <Buffer.h>
+
 #include "gvr.h"
 #include "gvr_controller.h"
 
@@ -14,11 +16,12 @@ public:
     virtual void Destroy() override;
 
 protected:
-    virtual void Tick() override;
+    virtual void Tick(float deltaTime) override;
 
 private:
     vulkan::CommandPool commandPool;
     VkSemaphore semaphoreRenderComplete;
+    vulkan::Buffer uniformBuffer;
 
     // Test variables.
     float colorRotator = 0.f;
