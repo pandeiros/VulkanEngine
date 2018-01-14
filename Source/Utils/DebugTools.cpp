@@ -11,7 +11,7 @@
 
 VULKAN_NS_USING;
 
-VULKAN_DECLARE_LOG_CATEGORY_STATIC(LogDebug);
+VK_DECLARE_LOG_CATEGORY(LogDebug);
 
 VARARG_BODY(void, DebugTools::Assert, const char*,
     VARARG_EXTRA(const char* file) VARARG_EXTRA(int line)

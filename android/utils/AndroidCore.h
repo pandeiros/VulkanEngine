@@ -24,4 +24,8 @@
  // Replace printf to logcat output.
 //#define printf(...) __android_log_print(ANDROID_LOG_INFO, VULKAN_ANDROID_TAG, __VA_ARGS__);
 
+#define NATIVE_METHOD(RETURN_TYPE, NAME) \
+  JNIEXPORT RETURN_TYPE JNICALL                 \
+      Java_com_pandeiros_vulkanapp_VulkanAppActivity_##NAME
+
 #endif

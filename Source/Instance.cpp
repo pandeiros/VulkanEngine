@@ -12,7 +12,25 @@
 
 VULKAN_NS_USING;
 
-VULKAN_DEFINE_LOG_CATEGORY(LogVulkan);
+void Instance::Init()
+{
+    CreateDevice();
+    CreateAppWindow();
+}
+
+void Instance::Destroy()
+{
+    window.Destroy();
+    device.Destroy();
+    DestroyDebug();
+
+    if (instance)
+    {
+        vkDestroyInstance(instance, nullptr);
+    }
+
+    instance = VK_NULL_HANDLE;
+}
 
 void Instance::Create(VkApplicationInfo applicationInfo, std::vector<const char*> instanceLayers, std::vector<const char*> instaceExtensions)
 {
@@ -66,20 +84,6 @@ void Instance::CreateAppWindow()
 #endif
 
     window.Create(this, { "Vulkan Engine", { (uint32_t)width, (uint32_t)height } });
-}
-
-void Instance::Destroy()
-{
-    window.Destroy();
-    device.Destroy();
-    DestroyDebug();
-
-    if (instance)
-    {
-        vkDestroyInstance(instance, nullptr);
-    }
-
-    instance = VK_NULL_HANDLE;
 }
 
 VkInstance Instance::GetVkInstance()

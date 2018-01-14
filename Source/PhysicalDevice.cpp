@@ -9,7 +9,7 @@
 
 VULKAN_NS_USING;
 
-VULKAN_DECLARE_LOG_CATEGORY_STATIC(LogPhysicalDevice);
+VK_DECLARE_LOG_CATEGORY(LogPhysicalDevice);
 
 void PhysicalDevice::Create(const VkPhysicalDevice physicalDevice)
 {
@@ -207,5 +207,4 @@ uint32_t PhysicalDevice::GetMemoryTypeIndex(const VkMemoryRequirements* MemoryRe
     VK_ASSERT(0, "Could not find property memory type.");
 
     return UINT32_MAX;
-
 }

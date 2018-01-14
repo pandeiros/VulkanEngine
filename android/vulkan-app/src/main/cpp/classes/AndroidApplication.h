@@ -27,8 +27,6 @@ private:
     float colorRotator = 0.f;
     std::chrono::steady_clock timer;
     std::chrono::steady_clock::time_point lastTime;
-    uint64_t frameCounter = 0;
-    uint64_t FPS = 0;
 
     // GVR Controller
     gvr::ControllerState controller_state;

@@ -17,7 +17,6 @@
 
 #include "VulkanCore.h"
 #include "AndroidCore.h"
-#include "Utils/Math.h"
 
 #ifdef __ANDROID__
 #include <unistd.h>
@@ -25,10 +24,6 @@
 #include <android_native_app_glue.h>
 #include "gvr.h"
 #include "gvr_controller.h"
-
-#define NATIVE_METHOD(return_type, method_name) \
-  JNIEXPORT return_type JNICALL                 \
-      Java_com_pandeiros_vulkanapp_VulkanAppActivity_##method_name
 
 extern "C" {
     NATIVE_METHOD(void, nativeOnCreate)
@@ -49,7 +44,7 @@ public:
 
     static void Clean();
 
-    static vulkan::VulkanObject* vulkanApplication;
+    static vulkan::VulkanClass* vulkanApplication;
     static android_app* nativeApplication;
     static gvr::ControllerApi* controllerApi;
 
@@ -58,6 +53,8 @@ private:
 };
 
 #endif //__ANDROID__
+
+VK_DECLARE_LOG_CATEGORY(LogAndroid);
 
 // #TODO Check out this defines (if really needed).
 

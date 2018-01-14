@@ -14,16 +14,6 @@
 
 VULKAN_NS_BEGIN
 
-enum LogVerbosity
-{
-    Verbose,
-    Debug,
-    Info,
-    Warning,
-    Error,
-    Fatal
-};
-
 struct LogCategory
 {
 public:
@@ -44,40 +34,31 @@ protected:
     const char* Category;
 };
 
-#define VULKAN_DECLARE_LOG_CATEGORY_STATIC(CategoryName)                \
-    static struct LogCategory##CategoryName : public LogCategory        \
-    {                                                                   \
-    public:                                                             \
-        LogCategory##CategoryName() : LogCategory(#CategoryName) {}     \
+enum LogVerbosity
+{
+    Verbose,
+    Debug,
+    Info,
+    Warning,
+    Error,
+    Fatal
+};
+
+#define VULKAN_DECLARE_LOG_CATEGORY_INTERNAL(CategoryName, Qualifier)                   \
+    Qualifier struct LogCategory##CategoryName : public VULKAN_NS_PREFIX(LogCategory)   \
+    {                                                                                   \
+    public:                                                                             \
+        LogCategory##CategoryName() : LogCategory(#CategoryName) {}                     \
     } CategoryName
 
-
-#ifdef _WIN32
-#define VULKAN_DECLARE_LOG_CATEGORY(CategoryName)                       \
-    extern struct LogCategory##CategoryName : public LogCategory        \
-    {                                                                   \
-    public:                                                             \
-        LogCategory##CategoryName() : LogCategory(#CategoryName) {}     \
-    } CategoryName
-
-#elif __ANDROID__
-#define VULKAN_DECLARE_LOG_CATEGORY(CategoryName)                       \
-    VULKAN_DECLARE_LOG_CATEGORY_STATIC(CategoryName)
-#endif
-
-
-#ifdef _WIN32
-#define VULKAN_DEFINE_LOG_CATEGORY(CategoryName)    \
-    LogCategory##CategoryName CategoryName;
-#elif __ANDROID__
-#define VULKAN_DEFINE_LOG_CATEGORY(CategoryName)
-#endif
+#define VK_DECLARE_LOG_CATEGORY(CategoryName)                                           \
+    VULKAN_DECLARE_LOG_CATEGORY_INTERNAL(CategoryName, static)
 
 #define VK_LOG(CategoryName, Verbosity, Format, ...) \
-    Logger::Logf(__FILE__, __LINE__, CategoryName.GetCategoryName(), LogVerbosity::Verbosity, Format, ##__VA_ARGS__);
+    VULKAN_NS_PREFIX(Logger)::Logf(__FILE__, __LINE__, CategoryName.GetCategoryName(), VULKAN_NS_PREFIX(LogVerbosity)::Verbosity, Format, ##__VA_ARGS__);
 
 #define VULKAN_LOGGER(...) \
-    Logger::Logf(__FILE__, __LINE__, ##__VA_ARGS__);
+    VULKAN_NS_PREFIX(Logger)::Logf(__FILE__, __LINE__, ##__VA_ARGS__);
 
 #ifdef __ANDROID__
 #define VULKAN_PLATFORM_VERBOSITY android_LogPriority

@@ -19,7 +19,7 @@ VULKAN_NS_BEGIN
 /**
  * @class PhysicalDevice
  */
-class PhysicalDevice : public VulkanObject
+class PhysicalDevice : public VulkanClass
 {
 public:
     /**

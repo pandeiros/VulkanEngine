@@ -58,7 +58,9 @@ public:
     void UseFixedFrameRate(bool useFixedFrameRate);
     void SetFrameRate(uint32_t newFrameRate);
     void SetMaxFrameRate(uint32_t maxFrameRate);
+
     float GetFPS() const;
+    float GetTimeFromStart() const;
 
 private:
     void UpdateInternal(float deltaTime);
@@ -84,10 +86,11 @@ private:
     //////////////////////////////////////////////////////////////////////////
 
 public:
-    void RegisterObject(VulkanObject* object);
+    void RegisterObject(VulkanClass* object);
+    World* GetWorld();
 
 private:
-    std::vector<VulkanObject*> applicationObjects;
+    std::vector<VulkanClass*> applicationObjects;
     World world;
 
     //////////////////////////////////////////////////////////////////////////

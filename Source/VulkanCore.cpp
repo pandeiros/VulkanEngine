@@ -8,7 +8,7 @@
 
 VULKAN_NS_USING;
 
-void VulkanObject::Update(float deltaTime)
+void VulkanClass::Update(float deltaTime)
 {
     if (bIsUpdateEnabled)
     {
@@ -16,27 +16,27 @@ void VulkanObject::Update(float deltaTime)
     }
 }
 
-bool VulkanObject::IsDirty() const
+bool VulkanClass::IsDirty() const
 {
     return bIsDirty;
 }
 
-void VulkanObject::SetDirty(const bool isDirty)
+void VulkanClass::SetDirty(const bool isDirty)
 {
     bIsDirty = isDirty;
 }
 
-void VulkanObject::SetUpdateEnabled(const bool isUpdateEnabled)
+void VulkanClass::SetUpdateEnabled(const bool isUpdateEnabled)
 {
     bIsUpdateEnabled = isUpdateEnabled;
 }
 
-bool VulkanObject::IsPendingKill() const
+bool VulkanClass::IsPendingKill() const
 {
     return bPendingKill;
 }
 
-void VulkanObject::SetPendingKill(const bool pendingKill)
+void VulkanClass::SetPendingKill(const bool pendingKill)
 {
     bPendingKill = pendingKill;
 }

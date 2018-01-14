@@ -10,10 +10,16 @@
 #define VULKAN_NS_BEGIN
 #define VULKAN_NS_END
 #define VULKAN_NS_USING
+#define VULKAN_NS_NAME
+#define VULKAN_NS_DECLARE(NAME)
+#define VULKAN_NS_PREFIX(NAME) NAME
 #else
-#define VULKAN_NS_BEGIN namespace vulkan {
+#define VULKAN_NS_NAME vulkan
+#define VULKAN_NS_BEGIN namespace VULKAN_NS_NAME {
 #define VULKAN_NS_END   }
-#define VULKAN_NS_USING using namespace vulkan
+#define VULKAN_NS_USING using namespace VULKAN_NS_NAME
+#define VULKAN_NS_DECLARE(NAME) using VULKAN_NS_NAME::NAME
+#define VULKAN_NS_PREFIX(NAME) VULKAN_NS_NAME::NAME
 #endif
 
 #include "Platform.h"
@@ -33,8 +39,8 @@
 
 VULKAN_NS_BEGIN
 
-VULKAN_DECLARE_LOG_CATEGORY(LogEngine);
-VULKAN_DECLARE_LOG_CATEGORY(LogVulkan);
+VK_DECLARE_LOG_CATEGORY(LogEngine);
+VK_DECLARE_LOG_CATEGORY(LogVulkan);
 
 // #TODO Move this function somewhere else.
 template<typename T>
@@ -50,11 +56,21 @@ bool IsOfEnum(T Value, std::vector<T> Enums)
 }
 
 /**
- * @class VulkanObject
+ * @class VulkanClass
  */
-class VulkanObject
+class VulkanClass
 {
 public:
+    /**
+     * Default constructor.
+     */
+    VulkanClass() = default;
+
+    /**
+     * Default destructor.
+     */
+    ~VulkanClass() = default;
+
     virtual void Init() {};
     virtual void Destroy() {};
     void Update(float deltaTime);

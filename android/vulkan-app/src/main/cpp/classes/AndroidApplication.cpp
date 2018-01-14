@@ -1,7 +1,12 @@
 #include "AndroidApplication.h"
 
-#include <cmath>
 #include <AndroidUtils.h>
+#include <Core.h>
+#include <World.h>
+
+#include <cmath>
+
+VK_DECLARE_LOG_CATEGORY(LogApplication);
 
 void AndroidApplication::Init()
 {
@@ -14,6 +19,18 @@ void AndroidApplication::Init()
     commandPool.AllocateCommandBuffer(device.GetVkDevice(), VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
     device.CreateSemaphore(&semaphoreRenderComplete);
+
+    float fov = 45.f;
+    float aspect = instance.GetWindowRef().GetSurfaceSize().width / instance.GetWindowRef().GetSurfaceSize().height;
+    if (aspect > 1.f)
+    {
+        fov *= 1.f / aspect;
+    }
+    vulkan::Camera* camera = new vulkan::Camera(fov, aspect, 0.1f, 100.f,
+                                {glm::vec3(-5, 3, -10), glm::vec3(0, 0, 0), glm::vec3(0, -1, 0)});
+    vulkan::Engine::GetEngine()->GetWorld()->AddCamera(camera);
+
+    uniformBuffer.CreateExclusive(device.GetVkDevice(), 0, sizeof(camera->GetViewProjectionClipMatrix()), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
 
 
 
@@ -38,14 +55,11 @@ void AndroidApplication::Tick(float deltaTime)
             controller_state.Update(*AndroidUtils::controllerApi);
         }
 
-        ++frameCounter;
         std::chrono::duration<double> diff = std::chrono::duration_cast<std::chrono::duration<double>>(timer.now() - lastTime);
         if (diff.count() >= 1.0)
         {
             lastTime = timer.now();
-            FPS = frameCounter;
-            frameCounter = 0;
-//            std::cout << "FPS: " << FPS << "\n";
+            VK_LOG(LogApplication, Debug, "FPS: %.0f", vulkan::Engine::GetEngine()->GetFPS());
         }
 
         window.BeginRender();

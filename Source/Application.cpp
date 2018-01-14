@@ -10,19 +10,6 @@
 
 VULKAN_NS_USING;
 
-void Application::Create(const char* applicationName, uint32_t applicationVersion, uint32_t apiVersion)
-{
-    applicationInfo = {
-        VK_STRUCTURE_TYPE_APPLICATION_INFO,
-        nullptr,
-        applicationName,
-        applicationVersion,
-        VULKAN_ENGINE_NAME,
-        VULKAN_ENGINE_VERSION,
-        apiVersion
-    };
-}
-
 void Application::Init()
 {
 #ifdef __ANDROID__
@@ -47,9 +34,7 @@ void Application::Init()
 
     Engine::GetEngine()->EnumeratePhysicalDevices(instance.GetVkInstance());
 
-    instance.CreateDevice();
-
-    instance.CreateAppWindow();
+    instance.Init();
 
     Engine::GetEngine()->LogSystemInfo();
 }
@@ -57,6 +42,19 @@ void Application::Init()
 void Application::Destroy()
 {
     instance.Destroy();
+}
+
+void Application::Create(const char* applicationName, uint32_t applicationVersion, uint32_t apiVersion)
+{
+    applicationInfo = {
+        VK_STRUCTURE_TYPE_APPLICATION_INFO,
+        nullptr,
+        applicationName,
+        applicationVersion,
+        VULKAN_ENGINE_NAME,
+        VULKAN_ENGINE_VERSION,
+        apiVersion
+    };
 }
 
 Instance& Application::GetInstanceRef()

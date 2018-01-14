@@ -20,7 +20,7 @@ VULKAN_NS_BEGIN
 /**
  * @class Instance
  */
-class Instance
+class Instance : public VulkanClass
 {
 public:
     /**
@@ -33,11 +33,13 @@ public:
      */
     ~Instance() = default;
 
+    virtual void Init() override;
+    virtual void Destroy() override;
+
     void Create(VkApplicationInfo applicationInfo, std::vector<const char*> instanceLayers, std::vector<const char*> instaceExtensions);
+
     void CreateDevice();
     void CreateAppWindow();
-
-    void Destroy();
 
     VkInstance GetVkInstance();
     Device& GetDeviceRef();

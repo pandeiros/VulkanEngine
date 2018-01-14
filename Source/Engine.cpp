@@ -13,8 +13,6 @@
 
 VULKAN_NS_USING;
 
-VULKAN_DEFINE_LOG_CATEGORY(LogEngine);
-
 Engine* Engine::engine = nullptr;
 
 void Engine::InitStatic()
@@ -127,6 +125,11 @@ float Engine::GetFPS() const
     return currentFPS;
 }
 
+float Engine::GetTimeFromStart() const
+{
+    return std::chrono::duration_cast<std::chrono::duration<float>>(timer.now() - startTime).count();
+}
+
 void Engine::UpdateInternal(float deltaTime)
 {
     if (deltaTime < 0.0001f)
@@ -150,12 +153,17 @@ float Engine::GetMinDeltaTime() const
     return 0.0001f;
 }
 
-void Engine::RegisterObject(VulkanObject* object)
+void Engine::RegisterObject(VulkanClass* object)
 {
-    if (std::find(applicationObjects.begin(), applicationObjects.end(), object) != applicationObjects.end())
+    if (std::find(applicationObjects.begin(), applicationObjects.end(), object) == applicationObjects.end())
     {
         applicationObjects.push_back(object);
     }
+}
+
+World* Engine::GetWorld()
+{
+    return &world;
 }
 
 void Engine::LogSystemInfo()

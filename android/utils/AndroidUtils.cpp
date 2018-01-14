@@ -4,11 +4,10 @@
  * Copyright (C) 2016-2017 Pawel Kaczynski
  */
 
-//VULKAN_NS_USING;
-
 #include "AndroidUtils.h"
 
 #include <Engine.h>
+#include <Core.h>
 
 #include <stdio.h>
 #include <assert.h>
@@ -29,6 +28,8 @@
 #ifdef __ANDROID__
 #include <sys/time.h>
 #endif
+
+VULKAN_NS_USING;
 
 using namespace std;
 
@@ -810,7 +811,8 @@ void Android_handle_cmd(android_app *app, int32_t cmd) {
     switch (cmd)
     {
         case APP_CMD_INPUT_CHANGED:
-            LOGW("APP_CMD_INPUT_CHANGED");
+            //VK_LOG(LogAndroid, Debug, "Command received: APP_CMD_INPUT_CHANGED (%d)", cmd);
+//            LOGW("APP_CMD_INPUT_CHANGED");
             break;
 
         case APP_CMD_INIT_WINDOW:
@@ -1102,7 +1104,7 @@ FILE *AndroidFopen(const char *fname, const char *mode) {
 // AndroidUtils static class definitions.
 #ifdef __ANDROID__
 
-vulkan::VulkanObject* AndroidUtils::vulkanApplication = nullptr;
+vulkan::VulkanClass* AndroidUtils::vulkanApplication = nullptr;
 android_app* AndroidUtils::nativeApplication = nullptr;
 gvr::ControllerApi* AndroidUtils::controllerApi = nullptr;
 bool AndroidUtils::isPaused = true;
@@ -1127,7 +1129,7 @@ void AndroidUtils::Start()
 
 void AndroidUtils::Update()
 {
-    if (vulkanApplication && !isPaused)
+    if (vulkan::Engine::GetEngine() && !isPaused)
     {
         vulkan::Engine::GetEngine()->Update();
     }

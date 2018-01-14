@@ -19,7 +19,7 @@ VULKAN_NS_BEGIN
 /**
  * @class Application
  */
-class Application : public VulkanObject
+class Application : public VulkanClass
 {
 public:
     /**
@@ -32,10 +32,10 @@ public:
      */
     ~Application() = default;
 
-    void Create(const char* applicationName, uint32_t applicationVersion, uint32_t apiVersion);
-
     virtual void Init() override;
     virtual void Destroy() override;
+
+    void Create(const char* applicationName, uint32_t applicationVersion, uint32_t apiVersion);
 
     Instance& GetInstanceRef();
 
