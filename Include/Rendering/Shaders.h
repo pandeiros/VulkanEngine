@@ -8,6 +8,12 @@
 
 #include "VulkanCore.h"
 
+#ifdef __ANDROID__
+#include "shaderc/shaderc.hpp"
+#else
+#include <shaderc/shaderc.h>
+#endif
+
 /**
  * @file Shaders.h
  */
@@ -38,5 +44,21 @@ static const char* VULKAN_FRAGMENT_SHADER_TEXT =
     "void main() {\n"
     "   outColor = color;\n"
     "}\n";
+
+// #REFACTOR
+#ifdef __ANDROID__
+struct shader_type_mapping {
+    VkShaderStageFlagBits vkshader_type;
+    shaderc_shader_kind shaderc_type;
+};
+static const shader_type_mapping shader_map_table[] = {
+    {VK_SHADER_STAGE_VERTEX_BIT, shaderc_glsl_vertex_shader},
+    {VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT, shaderc_glsl_tess_control_shader},
+    {VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT, shaderc_glsl_tess_evaluation_shader},
+    {VK_SHADER_STAGE_GEOMETRY_BIT, shaderc_glsl_geometry_shader},
+    {VK_SHADER_STAGE_FRAGMENT_BIT, shaderc_glsl_fragment_shader},
+    {VK_SHADER_STAGE_COMPUTE_BIT, shaderc_glsl_compute_shader},
+};
+#endif
 
 VULKAN_NS_END

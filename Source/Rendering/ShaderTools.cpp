@@ -7,12 +7,10 @@
 #include "Rendering/ShaderTools.h"
 
 #include "Core.h"
+
 #include <glslang/Public/ShaderLang.h>
-
-#ifdef  __ANDROID__
-
 #include <SPIRV/GlslangToSpv.h>
-//#endif
+
 
 VULKAN_NS_USING;
 
@@ -153,6 +151,7 @@ void ShaderTools::FinalizeGLSLang()
 #endif
 }
 
+// #REFACTOR
 bool ShaderTools::glslToSPIRV(VkShaderStageFlagBits shaderStage, const char* shaderText, std::vector<unsigned int>& spirvData)
 {
 #ifndef __ANDROID__
@@ -192,11 +191,12 @@ bool ShaderTools::glslToSPIRV(VkShaderStageFlagBits shaderStage, const char* sha
     }
 
     glslang::GlslangToSpv(*program.getIntermediate(stage), spirvData);
+
 #else
     // On Android, use shaderc instead.
     shaderc::Compiler compiler;
     shaderc::SpvCompilationResult module =
-        compiler.CompileGlslToSpv(pshader, strlen(pshader), MapShadercType(shader_type), "shader");
+        compiler.CompileGlslToSpv(shaderText, strlen(shaderText), MapShadercType(shaderStage), "shader");
     if (module.GetCompilationStatus() != shaderc_compilation_status_success) {
         LOGE("Error: Id=%d, Msg=%s", module.GetCompilationStatus(), module.GetErrorMessage().c_str());
         return false;
@@ -205,3 +205,17 @@ bool ShaderTools::glslToSPIRV(VkShaderStageFlagBits shaderStage, const char* sha
 #endif
     return true;
 }
+
+// #REFACTOR
+#ifdef __ANDROID__
+shaderc_shader_kind ShaderTools::MapShadercType(VkShaderStageFlagBits vkShader)
+{
+    for (auto shader : shader_map_table) {
+        if (shader.vkshader_type == vkShader) {
+            return shader.shaderc_type;
+        }
+    }
+    assert(false);
+    return shaderc_glsl_infer_from_source;
+}
+#endif

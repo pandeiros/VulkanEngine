@@ -15,33 +15,6 @@ VK_DECLARE_LOG_CATEGORY(LogRenderer);
 
 void Renderer::CreateDescriptorSetLayout(VkDevice device)
 {
-
-    //std::vector<VkAttachmentDescription> attachments;
-    //attachments.push_back(
-    //{
-    //    0,
-    //    surfaceFormat.format,
-    //    VK_SAMPLE_COUNT_1_BIT,
-    //    VK_ATTACHMENT_LOAD_OP_CLEAR,
-    //    VK_ATTACHMENT_STORE_OP_STORE,
-    //    VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-    //    VK_ATTACHMENT_STORE_OP_DONT_CARE,
-    //    VK_IMAGE_LAYOUT_UNDEFINED,
-    //    VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
-    //});
-    //attachments.push_back(
-    //{
-    //    0,
-    //    depthStencilImage.GetVkFormat(),
-    //    VK_SAMPLE_COUNT_1_BIT,
-    //    VK_ATTACHMENT_LOAD_OP_CLEAR,
-    //    VK_ATTACHMENT_STORE_OP_DONT_CARE,
-    //    VK_ATTACHMENT_LOAD_OP_DONT_CARE,
-    //    VK_ATTACHMENT_STORE_OP_STORE,
-    //    VK_IMAGE_LAYOUT_UNDEFINED,
-    //    VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
-    //});
-
     std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
 
     // Uniform buffer.
@@ -95,7 +68,7 @@ void Renderer::CreatePipelineLayout(VkDevice device)
     VK_VERIFY(vkCreatePipelineLayout(device, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout));
 }
 
-void Renderer::InitShaders(const char* vertexShaderText, const char* fragmentShaderText)
+void Renderer::InitShaders(VkDevice device, const char* vertexShaderText, const char* fragmentShaderText)
 {
     if (!(vertexShaderText || fragmentShaderText))
     {
@@ -107,32 +80,60 @@ void Renderer::InitShaders(const char* vertexShaderText, const char* fragmentSha
 
     VkShaderModuleCreateInfo moduleCreateInfo;
 
-    //if (vertexShaderText)
-    //{
-    //    std::vector<unsigned int> vtx_spv;
+    if (vertexShaderText)
+    {
+        std::vector<unsigned int> vertexSPIRV;
 
-    //    pipelineShaderStageCreateInfo.push_back(
-    //    {
-    //        VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-    //        nullptr,
-    //        0,
-    //        VK_SHADER_STAGE_VERTEX_BIT,
-    //        nullptr,
-    //        "main",
-    //        nullptr
-    //    });
+        pipelineShaderStageCreateInfo.push_back({
+            VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+            nullptr,
+            0,
+            VK_SHADER_STAGE_VERTEX_BIT,
+            VK_NULL_HANDLE,
+            "main",
+            nullptr
+            });
 
-    //    retVal = GLSLtoSPV(VK_SHADER_STAGE_VERTEX_BIT, vertShaderText, vtx_spv);
-    //    assert(retVal);
 
-    //    moduleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    //    moduleCreateInfo.pNext = NULL;
-    //    moduleCreateInfo.flags = 0;
-    //    moduleCreateInfo.codeSize = vtx_spv.size() * sizeof(unsigned int);
-    //    moduleCreateInfo.pCode = vtx_spv.data();
-    //    res = vkCreateShaderModule(info.device, &moduleCreateInfo, NULL, &info.shaderStages[0].module);
-    //    assert(res == VK_SUCCESS);
-    //}
+        VK_ASSERT(ShaderTools::glslToSPIRV(VK_SHADER_STAGE_VERTEX_BIT, vertexShaderText, vertexSPIRV), "Cannot convert shader to SPIR-V.\n%s", vertexShaderText);
+
+        moduleCreateInfo = {
+            VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+            nullptr,
+            0,
+            vertexSPIRV.size() * sizeof(unsigned int),
+            vertexSPIRV.data()
+        };
+
+        VK_VERIFY(vkCreateShaderModule(device, &moduleCreateInfo, NULL, &pipelineShaderStageCreateInfo[0].module));
+    }
+
+    if (fragmentShaderText)
+    {
+        std::vector<unsigned int> fragmentSPIRV;
+
+        pipelineShaderStageCreateInfo.push_back({
+            VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+            nullptr,
+            0,
+            VK_SHADER_STAGE_FRAGMENT_BIT,
+            VK_NULL_HANDLE,
+            "main",
+            nullptr
+            });
+
+        VK_ASSERT(ShaderTools::glslToSPIRV(VK_SHADER_STAGE_FRAGMENT_BIT, fragmentShaderText, fragmentSPIRV), "Cannot convert shader to SPIR-V.\n%s", fragmentShaderText);
+
+        moduleCreateInfo = {
+            VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+            nullptr,
+            0,
+            fragmentSPIRV.size() * sizeof(unsigned int),
+            fragmentSPIRV.data()
+        };
+
+        VK_VERIFY(vkCreateShaderModule(device, &moduleCreateInfo, NULL, &pipelineShaderStageCreateInfo[1].module));
+    }
 
     ShaderTools::FinalizeGLSLang();
 }
@@ -140,4 +141,23 @@ void Renderer::InitShaders(const char* vertexShaderText, const char* fragmentSha
 Buffer& Renderer::GetUniformBuffer()
 {
     return uniformBuffer;
+}
+
+Buffer& Renderer::GetVertexBuffer()
+{
+    return vertexBuffer;
+}
+
+void Renderer::AddVertexInputBinding(uint32_t binding, uint32_t stride, VkVertexInputRate inputRate)
+{
+    vertexInputBindings.push_back({
+        binding, stride, inputRate
+        });
+}
+
+void Renderer::AddVertexInputAttribute(uint32_t location, uint32_t binding, VkFormat format, uint32_t offset)
+{
+    vertexInputAttributes.push_back({
+        location, binding, format, offset
+    });
 }

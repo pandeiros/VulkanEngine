@@ -10,9 +10,7 @@
 
 #include "Shaders.h"
 
-#include <shaderc/shaderc.h>
 #include <glslang/Include/ResourceLimits.h>
-//#include <glslang/Include/ResourceLimits.h>
 
 /**
  * @file ShaderTools.h
@@ -32,6 +30,10 @@ public:
     static void InitResources(TBuiltInResource &Resources);
     static bool glslToSPIRV(VkShaderStageFlagBits shaderStage, const char* shaderText, std::vector<unsigned int>& spirvData);
 
+private:
+#ifdef __ANDROID__
+    static shaderc_shader_kind MapShadercType(VkShaderStageFlagBits vkShader);
+#endif
     //static VkPipelineShaderStageCreateInfo
 };
 

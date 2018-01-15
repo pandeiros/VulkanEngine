@@ -191,10 +191,11 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)android/utils;%VULKAN_SDK%\Include;$(VULKAN_SDK)\shaderc\third_party\glslang;%VULKAN_SDK%\Third-Party\Include;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <AdditionalDependencies>vulkan-1.lib;shaderc_combined.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>%VULKAN_SDK%\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%VULKAN_SDK%\shaderc\build\libshaderc\Debug;%VULKAN_SDK%\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Development|x64'">
@@ -204,10 +205,11 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)android/utils;%VULKAN_SDK%\Include;$(VULKAN_SDK)\shaderc\third_party\glslang;%VULKAN_SDK%\Third-Party\Include;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/DVULKAN_DEV %(AdditionalOptions)</AdditionalOptions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <AdditionalDependencies>vulkan-1.lib;shaderc_combined.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>%VULKAN_SDK%\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%VULKAN_SDK%\shaderc\build\libshaderc\Debug;%VULKAN_SDK%\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Android|x64'">
@@ -246,6 +248,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)android/utils;%VULKAN_SDK%\Include;$(VULKAN_SDK)\shaderc\third_party\glslang;%VULKAN_SDK%\Third-Party\Include;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -313,6 +316,7 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="source\Primitive.cpp" />
     <ClCompile Include="source\Queue.cpp">
       <SubType>
       </SubType>
@@ -412,6 +416,7 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="include\Platforms\Win32\Window_Win32.h" />
+    <ClInclude Include="Include\Primitive.h" />
     <ClInclude Include="include\Queue.h">
       <SubType>
       </SubType>

@@ -3,6 +3,7 @@
 #include <AndroidUtils.h>
 #include <Core.h>
 #include <World.h>
+#include <Primitive.h>
 
 #include <cmath>
 
@@ -33,11 +34,27 @@ void AndroidApplication::Init()
 
     glm::mat4 mvpMatrix = vpMatrix * glm::mat4(1.0f);
 
-    vulkan::Buffer& uniformBuffer = vulkan::Engine::GetEngine()->GetRenderer()->GetUniformBuffer();
+    vulkan::Renderer* renderer = vulkan::Engine::GetEngine()->GetRenderer();
+
+    vulkan::Buffer& uniformBuffer = renderer->GetUniformBuffer();
     uniformBuffer.CreateExclusive(device.GetVkDevice(), 0, sizeof(mvpMatrix), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
     uniformBuffer.Allocate(device, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
     uniformBuffer.Copy(device.GetVkDevice(), &mvpMatrix, 0, sizeof(mvpMatrix));
     uniformBuffer.UpdateDescriptorInfo(0, sizeof(mvpMatrix));
+
+    vulkan::Cube cube {1.f};
+    uint32_t size, stride;
+    void* data = cube.GetData(size, stride);
+
+    vulkan::Buffer& vertexBuffer = renderer->GetVertexBuffer();
+    vertexBuffer.CreateExclusive(device.GetVkDevice(), 0, size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+    vertexBuffer.Allocate(device, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    vertexBuffer.Copy(device.GetVkDevice(), data, 0, size);
+    vertexBuffer.UpdateDescriptorInfo(0, size);
+
+    renderer->AddVertexInputBinding(0, stride, VK_VERTEX_INPUT_RATE_VERTEX);
+    renderer->AddVertexInputAttribute(0, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 0);
+    renderer->AddVertexInputAttribute(0, 1, VK_FORMAT_R32G32B32A32_SFLOAT, 16);
 
     timer = std::chrono::steady_clock();
     lastTime = timer.now();

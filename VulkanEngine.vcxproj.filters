@@ -135,6 +135,9 @@
     <ClCompile Include="source\Rendering\ShaderTools.cpp">
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="source\Primitive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\BuildOptions.h">
@@ -244,6 +247,9 @@
     </ClInclude>
     <ClInclude Include="include\Rendering\ShaderTools.h">
       <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Primitive.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
