@@ -39,6 +39,7 @@ public:
     VkDeviceSize GetMemoryCommitment(VkDevice device);
 
     void* MapMemory(VkDevice device, VkDeviceSize offset, VkDeviceSize size, VkMemoryMapFlags flags);
+    //void Copy(void* destination, void* source, uint32_t size);
     void UnmapMemory(VkDevice device);
 
     void FlushMappedMemoryRange(VkDevice device, VkDeviceSize offset, VkDeviceSize size);

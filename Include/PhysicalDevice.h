@@ -55,7 +55,7 @@ public:
 
     void LogInfo();
 
-    uint32_t GetMemoryTypeIndex(const VkMemoryRequirements* MemoryRequirements, const VkMemoryPropertyFlags RequiredProperties);
+    uint32_t GetMemoryTypeIndex(const VkMemoryRequirements* memoryRequirements, const VkMemoryPropertyFlags requiredProperties);
 
 private:
     VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;

@@ -166,6 +166,11 @@ World* Engine::GetWorld()
     return &world;
 }
 
+Renderer* Engine::GetRenderer()
+{
+    return &renderer;
+}
+
 void Engine::LogSystemInfo()
 {
     if (instanceProperties.size())

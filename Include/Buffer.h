@@ -8,6 +8,9 @@
 
 #include "VulkanCore.h"
 
+#include "Device.h"
+#include "Memory.h"
+
 /**
  * @file Buffer.h
  */
@@ -35,12 +38,21 @@ public:
 
     void Destroy(VkDevice device);
 
+    void Allocate(Device& device, const VkMemoryPropertyFlags requiredProperties);
+    void Copy(VkDevice device, void* sourceData, uint32_t offset, uint32_t size);
+
+    Memory& GetMemory();
     VkMemoryRequirements GetMemoryRequirements(VkDevice device);
+
+    void UpdateDescriptorInfo(VkDeviceSize offset, VkDeviceSize range);
 
 protected:
     VkBuffer buffer = VK_NULL_HANDLE;
 
     VkBufferCreateInfo bufferCreateInfo = {};
+    VkDescriptorBufferInfo descriptorInfo = {};
+
+    Memory memory;
 };
 
 /**

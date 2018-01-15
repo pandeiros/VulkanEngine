@@ -191,13 +191,13 @@ void PhysicalDevice::LogInfo()
     }
 }
 
-uint32_t PhysicalDevice::GetMemoryTypeIndex(const VkMemoryRequirements* MemoryRequirements, const VkMemoryPropertyFlags RequiredProperties)
+uint32_t PhysicalDevice::GetMemoryTypeIndex(const VkMemoryRequirements* memoryRequirements, const VkMemoryPropertyFlags requiredProperties)
 {
     for (uint32_t i = 0; i < memoryProperties.memoryTypeCount; ++i)
     {
-        if (MemoryRequirements->memoryTypeBits & (1 << i))
+        if (memoryRequirements->memoryTypeBits & (1 << i))
         {
-            if ((memoryProperties.memoryTypes[i].propertyFlags & RequiredProperties) == RequiredProperties)
+            if ((memoryProperties.memoryTypes[i].propertyFlags & requiredProperties) == requiredProperties)
             {
                 return i;
             }

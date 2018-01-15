@@ -48,7 +48,7 @@ public:
     Camera(float yFovDegrees, float aspectRatio, float zNear, float zFar, CameraTransform transform,
         const glm::mat4 clipMatrix = DEFAULT_CLIP_MATRIX);
 
-    glm::mat4 GetViewProjectionClipMatrix() const;
+    glm::mat4 GetViewProjectionMatrix() const;
 
 private:
     void UpdateMatrices();

@@ -23,7 +23,7 @@ Camera::Camera(float yFovDegrees, float aspectRatio, float zNear, float zFar, Ca
     UpdateMatrices();
 }
 
-glm::mat4 Camera::GetViewProjectionClipMatrix() const
+glm::mat4 Camera::GetViewProjectionMatrix() const
 {
     return viewProjectionClipMatrix;
 }

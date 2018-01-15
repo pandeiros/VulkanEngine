@@ -16,6 +16,12 @@
 
 VULKAN_NS_BEGIN
 
+/**
+ * Number of descriptor sets needs to match when allocation, creating pipeline layout
+ * and creating descriptor set layout.
+ */
+#define VULKAN_DESCRIPTOR_SETS_COUNT 1
+
 /*
  * @class Renderer
  */
@@ -32,8 +38,26 @@ public:
      */
     ~Renderer() = default;
 
+    void CreateDescriptorSetLayout(VkDevice device);
+    void CreatePipelineLayout(VkDevice device);
+
+    void InitShaders(const char* vertexShaderText, const char* fragmentShaderText);
+
+    Buffer& GetUniformBuffer();
+
 protected:
     Buffer uniformBuffer;
+
+    std::vector<VkDescriptorSetLayout> descriptorSetLayouts;
+    VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = {};
+
+    VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
+    VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
+
+    std::vector<VkPipelineShaderStageCreateInfo> pipelineShaderStageCreateInfo;
+
+private:
+    bool bTextureEnabled;
 };
 
 VULKAN_NS_END

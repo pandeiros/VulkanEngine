@@ -27,12 +27,17 @@ void AndroidApplication::Init()
         fov *= 1.f / aspect;
     }
     vulkan::Camera* camera = new vulkan::Camera(fov, aspect, 0.1f, 100.f,
-                                {glm::vec3(-5, 3, -10), glm::vec3(0, 0, 0), glm::vec3(0, -1, 0)});
+                                {glm::vec3(-5, 3, -10), glm::vec3(0, 0, 0), glm::vec3(0, -1, 0)}, vulkan::Camera::DEFAULT_CLIP_MATRIX);
     vulkan::Engine::GetEngine()->GetWorld()->AddCamera(camera);
+    glm::mat4 vpMatrix = camera->GetViewProjectionMatrix();
 
-    uniformBuffer.CreateExclusive(device.GetVkDevice(), 0, sizeof(camera->GetViewProjectionClipMatrix()), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+    glm::mat4 mvpMatrix = vpMatrix * glm::mat4(1.0f);
 
-
+    vulkan::Buffer& uniformBuffer = vulkan::Engine::GetEngine()->GetRenderer()->GetUniformBuffer();
+    uniformBuffer.CreateExclusive(device.GetVkDevice(), 0, sizeof(mvpMatrix), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+    uniformBuffer.Allocate(device, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    uniformBuffer.Copy(device.GetVkDevice(), &mvpMatrix, 0, sizeof(mvpMatrix));
+    uniformBuffer.UpdateDescriptorInfo(0, sizeof(mvpMatrix));
 
     timer = std::chrono::steady_clock();
     lastTime = timer.now();
