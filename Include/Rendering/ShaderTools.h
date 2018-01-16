@@ -34,7 +34,6 @@ private:
 #ifdef __ANDROID__
     static shaderc_shader_kind MapShadercType(VkShaderStageFlagBits vkShader);
 #endif
-    //static VkPipelineShaderStageCreateInfo
 };
 
 VULKAN_NS_END

@@ -11,7 +11,7 @@
 #ifdef __ANDROID__
 #include "shaderc/shaderc.hpp"
 #else
-#include <shaderc/shaderc.h>
+#include <shaderc/shaderc.hpp>
 #endif
 
 /**

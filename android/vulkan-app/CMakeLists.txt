@@ -13,6 +13,8 @@ set(GLSLANG_SPIRV_INCLUDE_DIR ${SHADERC_SRC}/third_party/glslang)
 
 set(INCLUDE_DATA_DIR ${INCLUDE_DATA_DIR} "${CMAKE_SOURCE_DIR}/src/main/cpp/classes")
 
+include_directories(${GLSLANG_SPIRV_INCLUDE_DIR})
+
 # get_filename_component(PROJECT_SOURCE_DIR
 #                         "${CMAKE_SOURCE_DIR}/../.."
 #                         ABSOLUTE)

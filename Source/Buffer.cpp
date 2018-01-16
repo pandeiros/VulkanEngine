@@ -85,3 +85,13 @@ void Buffer::UpdateDescriptorInfo(VkDeviceSize offset, VkDeviceSize range)
 {
     descriptorInfo = { buffer, offset, range };
 }
+
+VkBuffer* Buffer::GetVkBufferPtr()
+{
+    return &buffer;
+}
+
+VkDescriptorBufferInfo* Buffer::GetDescriptorInfo()
+{
+    return &descriptorInfo;
+}

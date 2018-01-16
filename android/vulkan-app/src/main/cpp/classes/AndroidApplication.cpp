@@ -4,6 +4,7 @@
 #include <Core.h>
 #include <World.h>
 #include <Primitive.h>
+#include <Rendering/ShaderTools.h>
 
 #include <cmath>
 
@@ -42,6 +43,10 @@ void AndroidApplication::Init()
     uniformBuffer.Copy(device.GetVkDevice(), &mvpMatrix, 0, sizeof(mvpMatrix));
     uniformBuffer.UpdateDescriptorInfo(0, sizeof(mvpMatrix));
 
+    renderer->CreateDescriptorSetLayout(device.GetVkDevice());
+    renderer->CreatePipelineLayout(device.GetVkDevice());
+    renderer->InitShaders(device.GetVkDevice(), vulkan::VULKAN_VERTEX_SHADER_TEXT, vulkan::VULKAN_FRAGMENT_SHADER_TEXT);
+
     vulkan::Cube cube {1.f};
     uint32_t size, stride;
     void* data = cube.GetData(size, stride);
@@ -54,7 +59,13 @@ void AndroidApplication::Init()
 
     renderer->AddVertexInputBinding(0, stride, VK_VERTEX_INPUT_RATE_VERTEX);
     renderer->AddVertexInputAttribute(0, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 0);
+    // #TODO Change format when using texture.
     renderer->AddVertexInputAttribute(0, 1, VK_FORMAT_R32G32B32A32_SFLOAT, 16);
+
+    renderer->InitDescriptorPool(device.GetVkDevice());
+    renderer->InitDescriptorSet(device.GetVkDevice());
+    renderer->InitPipelineCache(device.GetVkDevice());
+    renderer->InitPipeline(device.GetVkDevice(), instance.GetWindowRef().GetSurfaceSize(), instance.GetWindowRef().GetRenderPass());
 
     timer = std::chrono::steady_clock();
     lastTime = timer.now();
@@ -69,6 +80,7 @@ void AndroidApplication::Tick(float deltaTime)
     vulkan::Window& window = instance.GetWindowRef();
     vulkan::CommandBuffer& commandBuffer = commandPool.GetCommandBufferRef();
     vulkan::Queue& queue = instance.GetDeviceRef().GetQueueRef();
+    vulkan::Renderer* renderer = vulkan::Engine::GetEngine()->GetRenderer();
 
     if (window.Update())
     {
@@ -105,9 +117,20 @@ void AndroidApplication::Tick(float deltaTime)
         clearValues[1].depthStencil.stencil = 0;
 
         commandBuffer.BeginRenderPass(window.GetRenderPass(), window.GetActiveFramebuffer(), renderArea, clearValues, VK_SUBPASS_CONTENTS_INLINE);
-        commandBuffer.EndRenderPass();
 
+        renderer->BindPipeline(commandBuffer.GetVkCommandBufferRef(), VK_PIPELINE_BIND_POINT_GRAPHICS);
+        renderer->BindDescriptorSets(commandBuffer.GetVkCommandBufferRef(), VK_PIPELINE_BIND_POINT_GRAPHICS);
+        renderer->BindVertexBuffers(commandBuffer.GetVkCommandBufferRef(), {0});
+        renderer->CommandSetViewports(commandBuffer.GetVkCommandBufferRef());
+        renderer->CommandSetScissors(commandBuffer.GetVkCommandBufferRef());
+
+        // #REFACTOR
+        vkCmdDraw(commandBuffer.GetVkCommandBufferRef(), 12 * 3, 1, 0, 0);
+
+        commandBuffer.EndRenderPass();
         commandBuffer.End();
+
+
 
         VkPipelineStageFlags pipelineStageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
         queue.Submit(&pipelineStageFlags, {}, { commandBuffer.GetVkCommandBufferRef() }, {semaphoreRenderComplete}, VK_NULL_HANDLE);

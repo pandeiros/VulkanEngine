@@ -46,6 +46,9 @@ public:
 
     void UpdateDescriptorInfo(VkDeviceSize offset, VkDeviceSize range);
 
+    VkBuffer* GetVkBufferPtr();
+    VkDescriptorBufferInfo* GetDescriptorInfo();
+
 protected:
     VkBuffer buffer = VK_NULL_HANDLE;
 
