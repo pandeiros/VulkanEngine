@@ -26,6 +26,13 @@ void Engine::InitStatic()
     engine->Init();
 }
 
+void Engine::DestroyStatic(VkDevice device)
+{
+    engine->Destroy(device);
+
+    delete engine;
+}
+
 Engine* Engine::GetEngine()
 {
     return engine;
@@ -39,6 +46,16 @@ void Engine::Init()
 
     timer = std::chrono::steady_clock();
     lastFrameTime = startTime = timer.now();
+
+    bEnabled = true;
+}
+
+void Engine::Destroy(VkDevice device)
+{
+    bEnabled = false;
+
+    world.Destroy();
+    renderer.Destroy();
 }
 
 void Engine::Update()
@@ -132,9 +149,14 @@ float Engine::GetTimeFromStart() const
 
 void Engine::UpdateInternal(float deltaTime)
 {
-    if (deltaTime < 0.0001f)
+    if (!bEnabled)
     {
-        deltaTime = 0.0001f;
+        return;
+    }
+
+    if (deltaTime < GetMinDeltaTime())
+    {
+        deltaTime = GetMinDeltaTime();
     }
 
     for (auto& object : applicationObjects)

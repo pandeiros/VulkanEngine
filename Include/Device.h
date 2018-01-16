@@ -10,7 +10,7 @@
 #include "PhysicalDevice.h"
 #include "Queue.h"
 
-#include <vector>
+//#include <vector>
 
 /**
  * @file Device.h
@@ -24,16 +24,6 @@ VULKAN_NS_BEGIN
 class Device
 {
 public:
-    /**
-     * Default constructor.
-     */
-    Device() = default;
-
-    /**
-     * Default destructor.
-     */
-    ~Device() = default;
-
     void Create(PhysicalDevice& physicalDevice, std::vector<const char*> deviceExtensions = {},
         VkPhysicalDeviceFeatures requiredFeatures = {});
 
@@ -74,5 +64,7 @@ private:
     std::vector<const char*> cachedDeviceExtensions;
     VkPhysicalDeviceFeatures cachedRequiredFeatures;
 };
+
+typedef std::shared_ptr<Device> DevicePtr;
 
 VULKAN_NS_END

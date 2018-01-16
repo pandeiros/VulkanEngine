@@ -1,4 +1,4 @@
-/*
+/**
  * Vulkan Engine
  *
  * Copyright (C) 2016-2017 Pawel Kaczynski
@@ -28,13 +28,14 @@
 
 #include <iostream>
 #include <vector>
+#include <memory>
 
 /**
  * @file VulkanCore.h
  */
 
 /* Number of samples needs to be the same at image creation,
- * renderpass creation and pipeline creation. */
+ * render pass creation and pipeline creation. */
 #define VULKAN_SAMPLE_COUNT VK_SAMPLE_COUNT_1_BIT
 
 VULKAN_NS_BEGIN
@@ -55,6 +56,8 @@ bool IsOfEnum(T Value, std::vector<T> Enums)
     return false;
 }
 
+class Device;
+
 /**
  * @class VulkanClass
  */
@@ -62,9 +65,11 @@ class VulkanClass
 {
 public:
     /**
-     * Default constructor.
+     * Default constructors.
      */
     VulkanClass() = default;
+
+    VulkanClass(std::shared_ptr<Device> device);
 
     /**
      * Default destructor.
@@ -85,6 +90,8 @@ public:
 
 protected:
     virtual void Tick(float deltaTime) {};
+
+    VkDevice device;
 
 private:
     bool bIsDirty = false;

@@ -21,6 +21,7 @@ protected:
 private:
     vulkan::CommandPool commandPool;
     VkSemaphore semaphoreRenderComplete;
+    vulkan::Camera* camera;
 
     // Test variables.
     float colorRotator = 0.f;

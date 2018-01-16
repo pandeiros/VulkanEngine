@@ -23,16 +23,6 @@ VULKAN_NS_BEGIN
 class Instance : public VulkanClass
 {
 public:
-    /**
-     * Default constructor.
-     */
-    Instance() = default;
-
-    /**
-     * Default destructor.
-     */
-    ~Instance() = default;
-
     virtual void Init() override;
     virtual void Destroy() override;
 
@@ -42,6 +32,9 @@ public:
     void CreateAppWindow();
 
     VkInstance GetVkInstance();
+
+    std::shared_ptr<Device> GetDevicePtr();
+    Device* GetDevice();
     Device& GetDeviceRef();
     Window& GetWindowRef();
 
@@ -55,7 +48,7 @@ public:
 private:
     VkInstance instance = VK_NULL_HANDLE;
 
-    Device device;
+    std::shared_ptr<Device> device;
     Window window;
 
     VkInstanceCreateInfo instanceCreateInfo = {};

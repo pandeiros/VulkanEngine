@@ -21,7 +21,8 @@ void Instance::Init()
 void Instance::Destroy()
 {
     window.Destroy();
-    device.Destroy();
+    device->Destroy();
+
     DestroyDebug();
 
     if (instance)
@@ -63,7 +64,8 @@ void Instance::CreateDevice()
 
     if (engine && engine->GetPhysicalDevices().size() > 0)
     {
-        device.Create(engine->GetPhysicalDevices()[0],
+        device = std::make_shared<Device>();
+        device->Create(engine->GetPhysicalDevices()[0],
         {
             VK_KHR_SWAPCHAIN_EXTENSION_NAME
         },
@@ -91,10 +93,20 @@ VkInstance Instance::GetVkInstance()
     return instance;
 }
 
-Device& Instance::GetDeviceRef()
+std::shared_ptr<Device> Instance::GetDevicePtr()
 {
-    return device;
+    return std::shared_ptr<Device>(device);
 }
+
+Device* Instance::GetDevice()
+{
+    return device.get();
+}
+
+//Device& Instance::GetDeviceRef()
+//{
+//    return device;
+//}
 
 Window& Instance::GetWindowRef()
 {

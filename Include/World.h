@@ -40,7 +40,7 @@ public:
 /**
  * @class World
  */
-class World
+class World : public VulkanClass
 {
 public:
     /**
@@ -53,11 +53,13 @@ public:
      */
     ~World() = default;
 
+    void Destroy() override;
+
     //////////////////////////////////////////////////////////////////////////
     // World management
     //////////////////////////////////////////////////////////////////////////
 
-    void Update(float deltaTime);
+    void Tick(float deltaTime) override;
 
 private:
 

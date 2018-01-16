@@ -43,7 +43,7 @@ uint64_t Window::win32ClassIdCounter = 0;
 
 void Window::CreateOSWindow()
 {
-    PhysicalDevice* physicalDevice = cachedInstance->GetDeviceRef().GetPhysicalDevice();
+    PhysicalDevice* physicalDevice = cachedInstance->GetDevice()->GetPhysicalDevice();
     VK_ASSERT(vkGetPhysicalDeviceWin32PresentationSupportKHR(physicalDevice->GetVkPhysicalDevice(), physicalDevice->GetGraphicsQueueFamilyIndex()), "Queue family does not support presentation.");
 
     WNDCLASSEX win_class {};

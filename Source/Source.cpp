@@ -1,4 +1,9 @@
-//#include "Rendering\Renderer.h"
+/**
+ * Vulkan Engine
+ *
+ * Copyright (C) 2016-2017 Pawel Kaczynski
+ */
+
 #include "Window.h"
 #include "CommandPool.h"
 
@@ -14,16 +19,17 @@ VULKAN_NS_USING;
 
 int main()
 {
-    Application application;
-    application.Create("Vulkan Engine Test", 1, VK_MAKE_VERSION(1, 0, 2));
-    application.Init();
+    std::unique_ptr<Application> application(new Application("Vulkan Engine", 1, VK_MAKE_VERSION(1, 0, 2)));
 
-    Instance& instance = application.GetInstanceRef();
-    VkDevice device = instance.GetDeviceRef().GetVkDevice();
+    //application->Create("Vulkan Engine Test", 1, VK_MAKE_VERSION(1, 0, 2));
+    application->Init();
+
+    Instance& instance = application->GetInstanceRef();
+    VkDevice device = instance.GetDevice()->GetVkDevice();
 
     CommandPool commandPool;
     commandPool.Create(device, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-        instance.GetDeviceRef().GetPhysicalDevice()->GetGraphicsQueueFamilyIndex());
+        instance.GetDevice()->GetPhysicalDevice()->GetGraphicsQueueFamilyIndex());
 
     commandPool.AllocateCommandBuffer(device, VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
@@ -43,7 +49,7 @@ int main()
 
     Window& window = instance.GetWindowRef();
     CommandBuffer& commandBuffer = commandPool.GetCommandBufferRef();
-    Queue& queue = instance.GetDeviceRef().GetQueueRef();
+    Queue& queue = instance.GetDevice()->GetQueueRef();
 
     Engine::GetEngine()->UseFixedFrameRate(true);
 
@@ -95,7 +101,7 @@ int main()
 
     commandPool.Destroy(device);
 
-    application.Destroy();
+    application->Destroy();
 
     return 0;
 }

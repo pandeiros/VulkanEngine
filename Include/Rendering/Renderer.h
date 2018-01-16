@@ -33,8 +33,9 @@ VULKAN_NS_BEGIN
 
 /*
  * @class Renderer
+ * #TODO Find an elegant way to store VkDevice
  */
-class Renderer
+class Renderer : public VulkanClass
 {
 public:
     /**
@@ -112,6 +113,8 @@ protected:
     std::vector<VkVertexInputAttributeDescription> vertexInputAttributes;
 
 private:
+    VkDevice device;
+
     bool bTextureEnabled = false;
     bool bIncludeVertexInput = true;
 };

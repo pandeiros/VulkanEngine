@@ -28,7 +28,7 @@ void AndroidApplication::Init()
     {
         fov *= 1.f / aspect;
     }
-    vulkan::Camera* camera = new vulkan::Camera(fov, aspect, 0.1f, 100.f,
+    camera = new vulkan::Camera(fov, aspect, 0.1f, 100.f,
                                 {glm::vec3(-5, 3, -10), glm::vec3(0, 0, 0), glm::vec3(0, -1, 0)}, vulkan::Camera::DEFAULT_CLIP_MATRIX);
     vulkan::Engine::GetEngine()->GetWorld()->AddCamera(camera);
     glm::mat4 vpMatrix = camera->GetViewProjectionMatrix();
@@ -152,6 +152,8 @@ void AndroidApplication::Destroy()
 {
     vulkan::Queue& queue = instance.GetDeviceRef().GetQueueRef();
     queue.WaitIdle();
+
+    delete camera;
 
     vulkan::Device& device = instance.GetDeviceRef();
     device.DestroySemaphore(semaphoreRenderComplete);

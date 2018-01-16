@@ -22,10 +22,7 @@ VULKAN_NS_BEGIN
 class Application : public VulkanClass
 {
 public:
-    /**
-     * Default constructor.
-     */
-    Application() = default;
+    Application(const char* applicationName, uint32_t applicationVersion, uint32_t apiVersion);
 
     /**
      * Default destructor.
@@ -35,13 +32,12 @@ public:
     virtual void Init() override;
     virtual void Destroy() override;
 
-    void Create(const char* applicationName, uint32_t applicationVersion, uint32_t apiVersion);
+    //void Create(const char* applicationName, uint32_t applicationVersion, uint32_t apiVersion);
 
     Instance& GetInstanceRef();
 
 protected:
-    Instance instance;
-    Engine engine;
+    std::unique_ptr<Instance> instance;
 
 private:
     VkApplicationInfo applicationInfo = {};

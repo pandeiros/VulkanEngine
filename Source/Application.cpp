@@ -10,6 +10,19 @@
 
 VULKAN_NS_USING;
 
+Application::Application(const char* applicationName, uint32_t applicationVersion, uint32_t apiVersion)
+{
+    applicationInfo = {
+        VK_STRUCTURE_TYPE_APPLICATION_INFO,
+        nullptr,
+        applicationName,
+        applicationVersion,
+        VULKAN_ENGINE_NAME,
+        VULKAN_ENGINE_VERSION,
+        apiVersion
+    };
+}
+
 void Application::Init()
 {
 #ifdef __ANDROID__
@@ -19,7 +32,9 @@ void Application::Init()
     Engine::InitStatic();
     Engine::GetEngine()->RegisterObject(this);
 
-    instance.Create(applicationInfo,
+    instance = std::make_unique<Instance>();
+
+    instance->Create(applicationInfo,
     {
         "VK_LAYER_GOOGLE_threading",
         "VK_LAYER_LUNARG_object_tracker",
@@ -32,30 +47,32 @@ void Application::Init()
         VK_EXT_DEBUG_REPORT_EXTENSION_NAME
     });
 
-    Engine::GetEngine()->EnumeratePhysicalDevices(instance.GetVkInstance());
+    Engine::GetEngine()->EnumeratePhysicalDevices(instance->GetVkInstance());
 
-    instance.Init();
+    instance->Init();
 
     Engine::GetEngine()->LogSystemInfo();
 }
 
 void Application::Destroy()
 {
-    instance.Destroy();
+    Engine::GetEngine()->DestroyStatic(instance->GetDevice()->GetVkDevice());
+
+    instance->Destroy();
 }
 
-void Application::Create(const char* applicationName, uint32_t applicationVersion, uint32_t apiVersion)
-{
-    applicationInfo = {
-        VK_STRUCTURE_TYPE_APPLICATION_INFO,
-        nullptr,
-        applicationName,
-        applicationVersion,
-        VULKAN_ENGINE_NAME,
-        VULKAN_ENGINE_VERSION,
-        apiVersion
-    };
-}
+//void Application::Create(const char* applicationName, uint32_t applicationVersion, uint32_t apiVersion)
+//{
+//    applicationInfo = {
+//        VK_STRUCTURE_TYPE_APPLICATION_INFO,
+//        nullptr,
+//        applicationName,
+//        applicationVersion,
+//        VULKAN_ENGINE_NAME,
+//        VULKAN_ENGINE_VERSION,
+//        apiVersion
+//    };
+//}
 
 Instance& Application::GetInstanceRef()
 {

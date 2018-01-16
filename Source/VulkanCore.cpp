@@ -8,6 +8,11 @@
 
 VULKAN_NS_USING;
 
+VulkanClass::VulkanClass(std::shared_ptr<Device> device)
+{
+
+}
+
 void VulkanClass::Update(float deltaTime)
 {
     if (bIsUpdateEnabled)

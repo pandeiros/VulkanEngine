@@ -12,7 +12,12 @@ VULKAN_NS_USING;
 
 VK_DECLARE_LOG_CATEGORY(LogWorld);
 
-void World::Update(float deltaTime)
+void World::Destroy()
+{
+    cameras.clear();
+}
+
+void World::Tick(float deltaTime)
 {
 
 }

@@ -42,10 +42,13 @@ class Engine
 
 public:
     static void InitStatic();
+    static void DestroyStatic(VkDevice device);
+
     static Engine* GetEngine();
 
 private:
     void Init();
+    void Destroy(VkDevice device);
 
     static Engine* engine;
 
@@ -66,6 +69,8 @@ public:
 private:
     void UpdateInternal(float deltaTime);
     float GetMinDeltaTime() const;
+
+    bool bEnabled = false;
 
     bool bUseFixedFrameRate = false;
     uint32_t frameRate = 60;

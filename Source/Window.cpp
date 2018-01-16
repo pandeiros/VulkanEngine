@@ -32,7 +32,7 @@ void Window::Destroy()
 {
     if (cachedInstance)
     {
-        cachedInstance->GetDeviceRef().GetQueueRef().WaitIdle();
+        cachedInstance->GetDevice()->GetQueueRef().WaitIdle();
 
         DestroySynchronization();
         DestroyFramebuffer();
@@ -62,12 +62,12 @@ void Window::Close()
 
 void Window::BeginRender()
 {
-    VkDevice device = cachedInstance->GetDeviceRef().GetVkDevice();
+    VkDevice device = cachedInstance->GetDevice()->GetVkDevice();
 
     VK_VERIFY(vkAcquireNextImageKHR(device, swapchain.GetVkSwapchain(), UINT64_MAX, VK_NULL_HANDLE, fenceSwapchainImageAvailable, &activeSwapchainImageID));
     VK_VERIFY(vkWaitForFences(device, 1, &fenceSwapchainImageAvailable, VK_TRUE, UINT64_MAX));
     VK_VERIFY(vkResetFences(device, 1, &fenceSwapchainImageAvailable));
-    VK_VERIFY(vkQueueWaitIdle(cachedInstance->GetDeviceRef().GetQueueRef().GetVkQueueRef()));
+    VK_VERIFY(vkQueueWaitIdle(cachedInstance->GetDevice()->GetQueueRef().GetVkQueueRef()));
 }
 
 void Window::EndRender(std::vector<VkSemaphore> waitSemaphores)
@@ -85,7 +85,7 @@ void Window::EndRender(std::vector<VkSemaphore> waitSemaphores)
         &presentResult
     };
 
-    VK_VERIFY(vkQueuePresentKHR(cachedInstance->GetDeviceRef().GetQueueRef().GetVkQueueRef(), &presentInfo));
+    VK_VERIFY(vkQueuePresentKHR(cachedInstance->GetDevice()->GetQueueRef().GetVkQueueRef(), &presentInfo));
     VK_VERIFY(presentResult);
 }
 
@@ -108,11 +108,11 @@ void Window::CreateSurface()
 {
     CreateOSSurface();
 
-    VkPhysicalDevice physicalDevice = cachedInstance->GetDeviceRef().GetPhysicalDevice()->GetVkPhysicalDevice();
-    uint32_t presentQueueFamilyIndex = cachedInstance->GetDeviceRef().GetPhysicalDevice()->GetPresentQueueFamilyIndex(surface);
+    VkPhysicalDevice physicalDevice = cachedInstance->GetDevice()->GetPhysicalDevice()->GetVkPhysicalDevice();
+    uint32_t presentQueueFamilyIndex = cachedInstance->GetDevice()->GetPhysicalDevice()->GetPresentQueueFamilyIndex(surface);
 
     // Graphics family index may be changed to one supporting presenting and thus device should be reset.
-    cachedInstance->GetDeviceRef().CheckPhysicalDeviceDirty();
+    cachedInstance->GetDevice()->CheckPhysicalDeviceDirty();
 
     VK_VERIFY(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &surfaceCapabilities));
 
@@ -163,7 +163,7 @@ void Window::CreateSwapchain()
     }
 
     // Present mode
-    VkPhysicalDevice physicalDevice = cachedInstance->GetDeviceRef().GetPhysicalDevice()->GetVkPhysicalDevice();
+    VkPhysicalDevice physicalDevice = cachedInstance->GetDevice()->GetPhysicalDevice()->GetVkPhysicalDevice();
     VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
 
     uint32_t presentModeCount = 0;
@@ -218,7 +218,7 @@ void Window::CreateSwapchain()
 #endif
 
     uint32_t imageArrayLayers = 1;
-    VkDevice device = cachedInstance->GetDeviceRef().GetVkDevice();
+    VkDevice device = cachedInstance->GetDevice()->GetVkDevice();
 
     swapchain.Create(device,
         0,
@@ -247,7 +247,7 @@ void Window::DestroySwapchain()
 {
     if (cachedInstance)
     {
-        VkDevice device = cachedInstance->GetDeviceRef().GetVkDevice();
+        VkDevice device = cachedInstance->GetDevice()->GetVkDevice();
 
         swapchain.Destroy(device);
     }
@@ -255,7 +255,7 @@ void Window::DestroySwapchain()
 
 void Window::CreateSwapchainImages()
 {
-    VkDevice device = cachedInstance->GetDeviceRef().GetVkDevice();
+    VkDevice device = cachedInstance->GetDevice()->GetVkDevice();
 
     swapchainImages.resize(swapchainImageCount);
     swapchainImageViews.resize(swapchainImageCount);
@@ -280,7 +280,7 @@ void Window::DestroySwapchainImages()
 {
     for (ImageView& view : swapchainImageViews)
     {
-        vkDestroyImageView(cachedInstance->GetDeviceRef().GetVkDevice(), view.GetVkImageView(), nullptr);
+        vkDestroyImageView(cachedInstance->GetDevice()->GetVkDevice(), view.GetVkImageView(), nullptr);
     }
 }
 
@@ -302,8 +302,8 @@ void Window::CreateDepthStencilImage()
     };
 #endif
 
-    VkDevice device = cachedInstance->GetDeviceRef().GetVkDevice();
-    PhysicalDevice* physicalDevice = cachedInstance->GetDeviceRef().GetPhysicalDevice();
+    VkDevice device = cachedInstance->GetDevice()->GetVkDevice();
+    PhysicalDevice* physicalDevice = cachedInstance->GetDevice()->GetPhysicalDevice();
 
     VkFormat depthStencilFormat = VK_FORMAT_UNDEFINED;
     VkImageTiling depthStencilImageTiling = VK_IMAGE_TILING_OPTIMAL;
@@ -350,7 +350,7 @@ void Window::DestroyDepthStencilImage()
 {
     if (cachedInstance)
     {
-        VkDevice device = cachedInstance->GetDeviceRef().GetVkDevice();
+        VkDevice device = cachedInstance->GetDevice()->GetVkDevice();
 
         depthStencilImageView.Destroy(device);
         depthStencilImageMemory.Free(device);
@@ -410,7 +410,7 @@ void Window::CreateRenderPass()
     });
 
     VK_ASSERT(cachedInstance, "");
-    VkDevice device = cachedInstance->GetDeviceRef().GetVkDevice();
+    VkDevice device = cachedInstance->GetDevice()->GetVkDevice();
     renderPass.Create(device, 0, attachments, subpasses, {});
 }
 
@@ -418,7 +418,7 @@ void Window::DestroyRenderPass()
 {
     if (cachedInstance)
     {
-        VkDevice device = cachedInstance->GetDeviceRef().GetVkDevice();
+        VkDevice device = cachedInstance->GetDevice()->GetVkDevice();
 
         renderPass.Destroy(device);
     }
@@ -435,7 +435,7 @@ void Window::CreateFramebuffer()
         attachments[1] = depthStencilImageView.GetVkImageView();
 
         VK_ASSERT(cachedInstance, "");
-        VkDevice device = cachedInstance->GetDeviceRef().GetVkDevice();
+        VkDevice device = cachedInstance->GetDevice()->GetVkDevice();
 
         framebuffers[i].Create(device, 0, renderPass.GetVkRenderPass(), attachments,
         { windowCreateInfo.surfaceSize.width, windowCreateInfo.surfaceSize.height, 1 });
@@ -446,7 +446,7 @@ void Window::DestroyFramebuffer()
 {
     if (cachedInstance)
     {
-        VkDevice device = cachedInstance->GetDeviceRef().GetVkDevice();
+        VkDevice device = cachedInstance->GetDevice()->GetVkDevice();
 
         for (Framebuffer& framebuffer : framebuffers)
         {
@@ -463,10 +463,10 @@ void Window::CreateSynchronization()
         0
     };
 
-    vkCreateFence(cachedInstance->GetDeviceRef().GetVkDevice(), &fenceCreateInfo, nullptr, &fenceSwapchainImageAvailable);
+    vkCreateFence(cachedInstance->GetDevice()->GetVkDevice(), &fenceCreateInfo, nullptr, &fenceSwapchainImageAvailable);
 }
 
 void Window::DestroySynchronization()
 {
-    vkDestroyFence(cachedInstance->GetDeviceRef().GetVkDevice(), fenceSwapchainImageAvailable, nullptr);
+    vkDestroyFence(cachedInstance->GetDevice()->GetVkDevice(), fenceSwapchainImageAvailable, nullptr);
 }
