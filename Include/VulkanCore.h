@@ -74,7 +74,8 @@ public:
     /**
      * Default destructor.
      */
-    ~VulkanClass() = default;
+    virtual ~VulkanClass()
+    {};
 
     virtual void Init() {};
     virtual void Destroy() {};

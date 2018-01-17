@@ -24,12 +24,12 @@ int main()
     //application->Create("Vulkan Engine Test", 1, VK_MAKE_VERSION(1, 0, 2));
     application->Init();
 
-    Instance& instance = application->GetInstanceRef();
-    VkDevice device = instance.GetDevice()->GetVkDevice();
+    Instance* instance = application->GetInstance();
+    VkDevice device = instance->GetDevice()->GetVkDevice();
 
     CommandPool commandPool;
     commandPool.Create(device, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-        instance.GetDevice()->GetPhysicalDevice()->GetGraphicsQueueFamilyIndex());
+        instance->GetDevice()->GetPhysicalDevice()->GetGraphicsQueueFamilyIndex());
 
     commandPool.AllocateCommandBuffer(device, VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
@@ -47,9 +47,9 @@ int main()
     uint64_t frameCounter = 0;
     uint64_t FPS = 0;
 
-    Window& window = instance.GetWindowRef();
+    Window& window = instance->GetWindowRef();
     CommandBuffer& commandBuffer = commandPool.GetCommandBufferRef();
-    Queue& queue = instance.GetDevice()->GetQueueRef();
+    Queue& queue = instance->GetDevice()->GetQueueRef();
 
     Engine::GetEngine()->UseFixedFrameRate(true);
 
@@ -101,7 +101,7 @@ int main()
 
     commandPool.Destroy(device);
 
-    application->Destroy();
+    //application->Destroy();
 
     return 0;
 }

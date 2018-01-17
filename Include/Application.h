@@ -27,14 +27,14 @@ public:
     /**
      * Default destructor.
      */
-    ~Application() = default;
+    ~Application();
 
     virtual void Init() override;
     virtual void Destroy() override;
 
     //void Create(const char* applicationName, uint32_t applicationVersion, uint32_t apiVersion);
 
-    Instance& GetInstanceRef();
+    Instance* GetInstance();
 
 protected:
     std::unique_ptr<Instance> instance;

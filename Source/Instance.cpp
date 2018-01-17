@@ -12,28 +12,8 @@
 
 VULKAN_NS_USING;
 
-void Instance::Init()
-{
-    CreateDevice();
-    CreateAppWindow();
-}
-
-void Instance::Destroy()
-{
-    window.Destroy();
-    device->Destroy();
-
-    DestroyDebug();
-
-    if (instance)
-    {
-        vkDestroyInstance(instance, nullptr);
-    }
-
-    instance = VK_NULL_HANDLE;
-}
-
-void Instance::Create(VkApplicationInfo applicationInfo, std::vector<const char*> instanceLayers, std::vector<const char*> instaceExtensions)
+Instance::Instance(VkApplicationInfo applicationInfo, std::vector<const char*> instanceLayers,
+    std::vector<const char*> instaceExtensions)
 {
     Engine* engine = Engine::GetEngine();
 
@@ -54,9 +34,70 @@ void Instance::Create(VkApplicationInfo applicationInfo, std::vector<const char*
     };
 
     VK_VERIFY(vkCreateInstance(&instanceCreateInfo, nullptr, &instance));
-
-    SetupDebug();
 }
+
+Instance::~Instance()
+{
+    window.Destroy();
+    device->Destroy();
+
+    DestroyDebug();
+
+    if (instance)
+    {
+        vkDestroyInstance(instance, nullptr);
+    }
+
+    instance = VK_NULL_HANDLE;
+}
+
+void Instance::Init()
+{
+    SetupDebug();
+
+    CreateDevice();
+    CreateAppWindow();
+}
+
+void Instance::Destroy()
+{
+    window.Destroy();
+    device->Destroy();
+
+    DestroyDebug();
+
+    if (instance)
+    {
+        vkDestroyInstance(instance, nullptr);
+    }
+
+    instance = VK_NULL_HANDLE;
+}
+
+//void Instance::Create(VkApplicationInfo applicationInfo, std::vector<const char*> instanceLayers, std::vector<const char*> instaceExtensions)
+//{
+//    Engine* engine = Engine::GetEngine();
+//
+//    if (engine)
+//    {
+//        engine->ValidateInstanceProperties(instanceLayers, instaceExtensions);
+//    }
+//
+//    instanceCreateInfo = {
+//        VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+//        nullptr,
+//        0,
+//        &applicationInfo,
+//        (uint32_t)instanceLayers.size(),
+//        instanceLayers.data(),
+//        (uint32_t)instaceExtensions.size(),
+//        instaceExtensions.data()
+//    };
+//
+//    VK_VERIFY(vkCreateInstance(&instanceCreateInfo, nullptr, &instance));
+//
+//
+//}
 
 void Instance::CreateDevice()
 {
