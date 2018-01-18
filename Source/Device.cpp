@@ -9,19 +9,34 @@
 
 VULKAN_NS_USING;
 
-void Device::Create(PhysicalDevice& physicalDevice, std::vector<const char*> deviceExtensions, VkPhysicalDeviceFeatures requiredFeatures)
+//void Device::Create(PhysicalDevice& physicalDevice, std::vector<const char*> deviceExtensions, VkPhysicalDeviceFeatures requiredFeatures)
+//{
+//    cachedPhysicalDevice = &physicalDevice;
+//    cachedDeviceExtensions = deviceExtensions;
+//    cachedRequiredFeatures = requiredFeatures;
+//
+//    CreateInternal();
+//}
+
+Device::Device(PhysicalDevice* physicalDevice, std::vector<const char*> deviceExtensions,
+    VkPhysicalDeviceFeatures requiredFeatures)
 {
-    cachedPhysicalDevice = &physicalDevice;
+    cachedPhysicalDevice = physicalDevice;
     cachedDeviceExtensions = deviceExtensions;
     cachedRequiredFeatures = requiredFeatures;
 
-    CreateInternal();
+    Init();
+}
+
+Device::~Device()
+{
+    Destroy();
 }
 
 void Device::Reset()
 {
     Destroy();
-    CreateInternal();
+    Init();
 
     cachedPhysicalDevice->SetDirty(false);
 }
@@ -153,7 +168,7 @@ void Device::DestroySemaphore(VkSemaphore semaphore)
     }
 }
 
-void Device::CreateInternal()
+void Device::Init()
 {
     float priorityQueue[]{ 1.f };
 

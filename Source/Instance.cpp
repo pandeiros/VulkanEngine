@@ -15,12 +15,12 @@ VULKAN_NS_USING;
 Instance::Instance(VkApplicationInfo applicationInfo, std::vector<const char*> instanceLayers,
     std::vector<const char*> instaceExtensions)
 {
-    Engine* engine = Engine::GetEngine();
+    //Engine* engine = Engine::GetEngine();
 
-    if (engine)
-    {
-        engine->ValidateInstanceProperties(instanceLayers, instaceExtensions);
-    }
+    //if (engine)
+    //{
+    //    engine->ValidateInstanceProperties(instanceLayers, instaceExtensions);
+    //}
 
     instanceCreateInfo = {
         VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
@@ -51,11 +51,11 @@ Instance::~Instance()
     instance = VK_NULL_HANDLE;
 }
 
-void Instance::Init()
+void Instance::InitDeviceAndWindow(PhysicalDevice* physicalDevice)
 {
     SetupDebug();
 
-    CreateDevice();
+    CreateDevice(physicalDevice);
     CreateAppWindow();
 }
 
@@ -99,19 +99,27 @@ void Instance::Destroy()
 //
 //}
 
-void Instance::CreateDevice()
+void Instance::CreateDevice(PhysicalDevice* physicalDevice)
 {
-    Engine* engine = Engine::GetEngine();
+    std::vector<const char*> deviceExtensions = {
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME
+    };
 
-    if (engine && engine->GetPhysicalDevices().size() > 0)
-    {
-        device = std::make_shared<Device>();
-        device->Create(engine->GetPhysicalDevices()[0],
-        {
-            VK_KHR_SWAPCHAIN_EXTENSION_NAME
-        },
-        {});
-    }
+    device = std::shared_ptr<Device>(new Device(physicalDevice,
+        deviceExtensions, {}));
+
+
+    //Engine* engine = Engine::GetEngine();
+
+    //if (engine && engine->GetPhysicalDevices().size() > 0)
+    //{
+    //    device = std::make_shared<Device>();
+    //    device->Create(engine->GetPhysicalDevices()[0],
+    //    {
+    //        VK_KHR_SWAPCHAIN_EXTENSION_NAME
+    //    },
+    //    {});
+    //}
 }
 
 void Instance::CreateAppWindow()

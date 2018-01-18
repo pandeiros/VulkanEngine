@@ -51,11 +51,11 @@ int main()
     CommandBuffer& commandBuffer = commandPool.GetCommandBufferRef();
     Queue& queue = instance->GetDevice()->GetQueueRef();
 
-    Engine::GetEngine()->UseFixedFrameRate(true);
+    application->GetEngine()->UseFixedFrameRate(true);
 
     while (window.Update())
     {
-        Engine::GetEngine()->Update();
+        application->GetEngine()->Update();
 
         ++frameCounter;
         if (lastTime + std::chrono::seconds(1) < timer.now())
@@ -63,7 +63,7 @@ int main()
             lastTime = timer.now();
             FPS = frameCounter;
             frameCounter = 0;
-            VK_LOG(LogEngine, Debug, "FPS: %.0f", Engine::GetEngine()->GetFPS());
+            VK_LOG(LogEngine, Debug, "FPS: %.0f", application->GetEngine()->GetFPS());
         }
 
         window.BeginRender();

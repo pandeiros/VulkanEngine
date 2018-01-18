@@ -13,7 +13,18 @@ VULKAN_NS_USING;
 
 VK_DECLARE_LOG_CATEGORY(LogRenderer);
 
-void Renderer::CreateDescriptorSetLayout(VkDevice device)
+Renderer::Renderer(std::shared_ptr<Device> device)
+    : VulkanClass(device)
+{
+
+}
+
+Renderer::~Renderer()
+{
+
+}
+
+void Renderer::CreateDescriptorSetLayout()
 {
     std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
 
@@ -50,7 +61,7 @@ void Renderer::CreateDescriptorSetLayout(VkDevice device)
     };
 
     descriptorSetLayouts.resize(VULKAN_DESCRIPTOR_SETS_COUNT);
-    VK_VERIFY(vkCreateDescriptorSetLayout(device, &descriptorSetLayoutCreateInfo, nullptr, descriptorSetLayouts.data()));
+    VK_VERIFY(vkCreateDescriptorSetLayout(device->GetVkDevice(), &descriptorSetLayoutCreateInfo, nullptr, descriptorSetLayouts.data()));
 }
 
 void Renderer::CreatePipelineLayout(VkDevice device)

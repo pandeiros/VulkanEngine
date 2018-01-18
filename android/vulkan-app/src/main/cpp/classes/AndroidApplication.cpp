@@ -30,12 +30,12 @@ void AndroidApplication::Init()
     }
     camera = new vulkan::Camera(fov, aspect, 0.1f, 100.f,
                                 {glm::vec3(-5, 3, -10), glm::vec3(0, 0, 0), glm::vec3(0, -1, 0)}, vulkan::Camera::DEFAULT_CLIP_MATRIX);
-    vulkan::Engine::GetEngine()->GetWorld()->AddCamera(camera);
+    GetEngine()->GetWorld()->AddCamera(camera);
     glm::mat4 vpMatrix = camera->GetViewProjectionMatrix();
 
     glm::mat4 mvpMatrix = vpMatrix * glm::mat4(1.0f);
 
-    vulkan::Renderer* renderer = vulkan::Engine::GetEngine()->GetRenderer();
+    vulkan::Renderer* renderer = GetEngine()->GetRenderer();
 
     vulkan::Buffer& uniformBuffer = renderer->GetUniformBuffer();
     uniformBuffer.CreateExclusive(device->GetVkDevice(), 0, sizeof(mvpMatrix), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
@@ -43,7 +43,7 @@ void AndroidApplication::Init()
     uniformBuffer.Copy(device->GetVkDevice(), &mvpMatrix, 0, sizeof(mvpMatrix));
     uniformBuffer.UpdateDescriptorInfo(0, sizeof(mvpMatrix));
 
-    renderer->CreateDescriptorSetLayout(device->GetVkDevice());
+    renderer->CreateDescriptorSetLayout();
     renderer->CreatePipelineLayout(device->GetVkDevice());
     renderer->InitShaders(device->GetVkDevice(), vulkan::VULKAN_VERTEX_SHADER_TEXT, vulkan::VULKAN_FRAGMENT_SHADER_TEXT);
 
@@ -80,20 +80,20 @@ void AndroidApplication::Tick(float deltaTime)
     vulkan::Window& window = instance->GetWindowRef();
     vulkan::CommandBuffer& commandBuffer = commandPool.GetCommandBufferRef();
     vulkan::Queue& queue = instance->GetDevice()->GetQueueRef();
-    vulkan::Renderer* renderer = vulkan::Engine::GetEngine()->GetRenderer();
+    vulkan::Renderer* renderer = GetEngine()->GetRenderer();
 
     if (window.Update())
     {
-        if (AndroidUtils::controllerApi)
+        if (vulkan::AndroidUtils::controllerApi)
         {
-            controller_state.Update(*AndroidUtils::controllerApi);
+            controller_state.Update(*vulkan::AndroidUtils::controllerApi);
         }
 
         std::chrono::duration<double> diff = std::chrono::duration_cast<std::chrono::duration<double>>(timer.now() - lastTime);
         if (diff.count() >= 1.0)
         {
             lastTime = timer.now();
-            VK_LOG(LogApplication, Debug, "FPS: %.0f", vulkan::Engine::GetEngine()->GetFPS());
+            VK_LOG(LogApplication, Debug, "FPS: %.0f", GetEngine()->GetFPS());
         }
 
         window.BeginRender();

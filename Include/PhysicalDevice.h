@@ -22,17 +22,15 @@ VULKAN_NS_BEGIN
 class PhysicalDevice : public VulkanClass
 {
 public:
-    /**
-     * Default constructor.
-     */
-    PhysicalDevice() = default;
+    PhysicalDevice(VkPhysicalDevice vkPhysicalDevice);
 
     /**
      * Default destructor.
      */
     ~PhysicalDevice() = default;
 
-    void Create(const VkPhysicalDevice physicalDevice);
+    virtual void Init() override;
+    //void Create(const VkPhysicalDevice physicalDevice);
 
     VkPhysicalDevice GetVkPhysicalDevice() const;
 

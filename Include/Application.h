@@ -35,9 +35,11 @@ public:
     //void Create(const char* applicationName, uint32_t applicationVersion, uint32_t apiVersion);
 
     Instance* GetInstance();
+    Engine* GetEngine();
 
 protected:
     std::unique_ptr<Instance> instance;
+    std::unique_ptr<Engine> engine;
 
 private:
     VkApplicationInfo applicationInfo = {};

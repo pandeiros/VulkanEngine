@@ -19,6 +19,7 @@
 #ifdef __ANDROID__
 #include <unordered_map>
 #include "shaderc/shaderc.hpp"
+#include <Application.h>
 
 #else
 //#include "SPIRV/GlslangToSpv.h"
@@ -1104,7 +1105,7 @@ FILE *AndroidFopen(const char *fname, const char *mode) {
 // AndroidUtils static class definitions.
 #ifdef __ANDROID__
 
-std::unique_ptr<vulkan::VulkanClass> AndroidUtils::vulkanApplication(nullptr);
+std::unique_ptr<vulkan::Application> AndroidUtils::vulkanApplication(nullptr);
 android_app* AndroidUtils::nativeApplication = nullptr;
 gvr::ControllerApi* AndroidUtils::controllerApi = nullptr;
 bool AndroidUtils::isPaused = true;
@@ -1129,9 +1130,9 @@ void AndroidUtils::Start()
 
 void AndroidUtils::Update()
 {
-    if (vulkan::Engine::GetEngine() && !isPaused)
+    if (vulkanApplication->GetEngine() && !isPaused)
     {
-        vulkan::Engine::GetEngine()->Update();
+        vulkanApplication->GetEngine()->Update();
     }
 }
 

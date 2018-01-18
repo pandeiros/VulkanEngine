@@ -92,7 +92,7 @@ public:
 protected:
     virtual void Tick(float deltaTime) {};
 
-    VkDevice device;
+    std::shared_ptr<Device> device;
 
 private:
     bool bIsDirty = false;

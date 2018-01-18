@@ -25,8 +25,9 @@ Application::Application(const char* applicationName, uint32_t applicationVersio
 
 Application::~Application()
 {
-    Engine::GetEngine()->DestroyStatic(instance->GetDevice()->GetVkDevice());
+    //Engine::GetEngine()->DestroyStatic();
 
+    engine.release();
     instance->Destroy();
 }
 
@@ -36,21 +37,27 @@ void Application::Init()
     VK_ASSERT(InitVulkan() != 0, "Initialization of Vulkan APIs failed!");
 #endif
 
-    Engine::InitStatic();
-    Engine::GetEngine()->RegisterObject(this);
+    //Engine::InitStatic();
+    //Engine::GetEngine()->RegisterObject(this);
 
-    instance.reset(new Instance(applicationInfo,
-    {
+    engine.reset(new Engine(60, false));
+
+    std::vector<const char*> instanceLayers = {
         "VK_LAYER_GOOGLE_threading",
         "VK_LAYER_LUNARG_object_tracker",
         "VK_LAYER_LUNARG_parameter_validation",
         "VK_LAYER_LUNARG_standard_validation"
-    },
-    {
+    };
+
+    std::vector<const char*> instanceExtensions = {
         VK_KHR_SURFACE_EXTENSION_NAME,
         VULKAN_PLATFORM_SURFACE_EXTENSION_NAME,
         VK_EXT_DEBUG_REPORT_EXTENSION_NAME
-    }));
+    };
+
+    engine->ValidateInstanceProperties(instanceLayers, instanceExtensions);
+
+    instance.reset(new Instance(applicationInfo, instanceLayers, instanceExtensions));
 
     //instance->Create(applicationInfo,
     //{
@@ -65,11 +72,18 @@ void Application::Init()
     //    VK_EXT_DEBUG_REPORT_EXTENSION_NAME
     //});
 
-    Engine::GetEngine()->EnumeratePhysicalDevices(instance->GetVkInstance());
+    engine->InitPhysicalDevices(instance->GetVkInstance());
 
-    instance->Init();
+    //engine->Init(instance->GetDevicePtr(), instance->GetVkInstance());
 
-    Engine::GetEngine()->LogSystemInfo();
+    //Engine::GetEngine()->EnumeratePhysicalDevices(instance->GetVkInstance());
+
+    instance->InitDeviceAndWindow(engine->GetPhysicalDevice(0));
+
+    engine->Init(instance->GetDevicePtr());
+
+    engine->LogSystemInfo();
+    //Engine::GetEngine()->LogSystemInfo();
 }
 
 //void Application::Destroy()
@@ -95,4 +109,9 @@ void Application::Init()
 Instance* Application::GetInstance()
 {
     return instance.get();
+}
+
+Engine* Application::GetEngine()
+{
+    return engine.get();
 }

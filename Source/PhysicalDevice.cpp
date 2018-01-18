@@ -11,10 +11,14 @@ VULKAN_NS_USING;
 
 VK_DECLARE_LOG_CATEGORY(LogPhysicalDevice);
 
-void PhysicalDevice::Create(const VkPhysicalDevice physicalDevice)
+PhysicalDevice::PhysicalDevice(VkPhysicalDevice vkPhysicalDevice)
+    : physicalDevice(vkPhysicalDevice)
 {
-    this->physicalDevice = physicalDevice;
+    Init();
+}
 
+void PhysicalDevice::Init()
+{
     vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
     vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memoryProperties);
     vkGetPhysicalDeviceFeatures(physicalDevice, &supportedFeatures);

@@ -10,6 +10,7 @@
 
 #include "Object.h"
 #include "Camera.h"
+#include "Device.h"
 
 #include <chrono>
 #include <set>
@@ -43,17 +44,11 @@ public:
 class World : public VulkanClass
 {
 public:
-    /**
-     * Default constructor.
-     */
-    World() = default;
+    World(DevicePtr device);
 
-    /**
-     * Default destructor.
-     */
-    ~World() = default;
+    ~World();
 
-    void Destroy() override;
+    //void Destroy() override;
 
     //////////////////////////////////////////////////////////////////////////
     // World management

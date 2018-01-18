@@ -33,22 +33,14 @@ VULKAN_NS_BEGIN
 
 /*
  * @class Renderer
- * #TODO Find an elegant way to store VkDevice
  */
 class Renderer : public VulkanClass
 {
 public:
-    /**
-     * Default constructor.
-     */
-    Renderer() = default;
+    Renderer(std::shared_ptr<Device> device);
+    ~Renderer();
 
-    /**
-     * Default destructor.
-     */
-    ~Renderer() = default;
-
-    void CreateDescriptorSetLayout(VkDevice device);
+    void CreateDescriptorSetLayout();
     void CreatePipelineLayout(VkDevice device);
 
     void InitShaders(VkDevice device, const char* vertexShaderText, const char* fragmentShaderText);
@@ -113,7 +105,6 @@ protected:
     std::vector<VkVertexInputAttributeDescription> vertexInputAttributes;
 
 private:
-    VkDevice device;
 
     bool bTextureEnabled = false;
     bool bIncludeVertexInput = true;

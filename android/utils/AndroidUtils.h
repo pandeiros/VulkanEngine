@@ -31,6 +31,11 @@ extern "C" {
         (JNIEnv *env, jobject obj, jobject asset_mgr, jlong gvrContextPtr);
 }
 
+VULKAN_NS_BEGIN
+
+// Forward declaration.
+class Application;
+
 class AndroidUtils
 {
 public:
@@ -45,13 +50,15 @@ public:
 
     static void Clean();
 
-    static std::unique_ptr<vulkan::VulkanClass> vulkanApplication;
+    static std::unique_ptr<Application> vulkanApplication;
     static android_app* nativeApplication;
     static gvr::ControllerApi* controllerApi;
 
 private:
     static bool isPaused;
 };
+
+VULKAN_NS_END
 
 #endif //__ANDROID__
 

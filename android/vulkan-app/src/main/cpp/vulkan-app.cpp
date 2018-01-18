@@ -53,12 +53,12 @@ static const char *fragShaderText =
 
 int vulkan_android_main(int argc, char *argv[]) //, vulkan_android_app* androidApp)
 {
-    if (!AndroidUtils::nativeApplication)
+    if (!vulkan::AndroidUtils::nativeApplication)
     {
         return VK_NOT_READY;
     }
 
-    AndroidUtils::vulkanApplication.reset(new AndroidApplication());
+    vulkan::AndroidUtils::vulkanApplication.reset(new AndroidApplication());
 
     return 0;
 

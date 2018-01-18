@@ -21,14 +21,19 @@ VULKAN_NS_BEGIN
 /**
  * @class Device
  */
-class Device
+class Device : public VulkanClass
 {
 public:
-    void Create(PhysicalDevice& physicalDevice, std::vector<const char*> deviceExtensions = {},
+    Device(PhysicalDevice* physicalDevice, std::vector<const char*> deviceExtensions = {},
         VkPhysicalDeviceFeatures requiredFeatures = {});
 
+    ~Device();
+
+    //void Create(PhysicalDevice& physicalDevice, std::vector<const char*> deviceExtensions = {},
+    //    VkPhysicalDeviceFeatures requiredFeatures = {});
+
     void Reset();
-    void Destroy();
+    virtual void Destroy() override;
     void CheckPhysicalDeviceDirty();
 
     VkDevice GetVkDevice();
@@ -49,7 +54,7 @@ public:
     void DestroySemaphore(VkSemaphore semaphore);
 
 private:
-    void CreateInternal();
+    void Init() override;
 
     VkDevice device = VK_NULL_HANDLE;
 

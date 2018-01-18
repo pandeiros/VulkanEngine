@@ -13,36 +13,37 @@
 
 VULKAN_NS_USING;
 
-Engine* Engine::engine = nullptr;
+//Engine* Engine::engine = nullptr;
 
-void Engine::InitStatic()
-{
-    if (engine)
-    {
-        delete engine;
-    }
+//void Engine::InitStatic(DevicePtr device)
+//{
+//    if (engine)
+//    {
+//        engine.release();
+//    }
+//
+//    engine.reset(new Engine(device));
+//    //engine->Init();
+//}
+//
+//void Engine::DestroyStatic()
+//{
+//    //engine->Destroy(device);
+//
+//    engine.release();
+//}
 
-    engine = new Engine;
-    engine->Init();
-}
+//Engine* Engine::GetEngine()
+//{
+//    return engine..get();
+//}
 
-void Engine::DestroyStatic(VkDevice device)
-{
-    engine->Destroy(device);
-
-    delete engine;
-}
-
-Engine* Engine::GetEngine()
-{
-    return engine;
-}
-
-void Engine::Init()
+Engine::Engine(uint32_t frameRate, bool useFixedFrameRate /*= false*/)
 {
     InitInstanceProperties();
 
-    SetFrameRate(60);
+    SetFrameRate(frameRate);
+    UseFixedFrameRate(useFixedFrameRate);
 
     timer = std::chrono::steady_clock();
     lastFrameTime = startTime = timer.now();
@@ -50,13 +51,46 @@ void Engine::Init()
     bEnabled = true;
 }
 
-void Engine::Destroy(VkDevice device)
+//Engine::Engine(DevicePtr device)
+//    : device(device)
+//{
+//    Init();
+//}
+
+Engine::~Engine()
 {
     bEnabled = false;
 
-    world.Destroy();
-    renderer.Destroy();
+    world.release(); // Destroy();
+    renderer.release(); // Destroy();
+
 }
+
+void Engine::Init(DevicePtr device)
+{
+    this->device = device;
+
+    renderer.reset(new Renderer(device));
+    world.reset(new World(device));
+}
+
+//void VULKAN_NS_NAME::Engine::Init(DevicePtr device, VkInstance instance)
+//{
+//    EnumeratePhysicalDevices(instance);
+//
+//    this->device = device;
+//
+//    renderer.reset(new Renderer(device));
+//    world.reset(new World(device));
+//}
+
+//void Engine::Destroy()
+//{
+//    bEnabled = false;
+//
+//    world.release(); // Destroy();
+//    renderer.release(); // Destroy();
+//}
 
 void Engine::Update()
 {
@@ -167,7 +201,7 @@ void Engine::UpdateInternal(float deltaTime)
         }
     }
 
-    world.Update(deltaTime);
+    world->Update(deltaTime);
 }
 
 float Engine::GetMinDeltaTime() const
@@ -185,12 +219,12 @@ void Engine::RegisterObject(VulkanClass* object)
 
 World* Engine::GetWorld()
 {
-    return &world;
+    return world.get();
 }
 
 Renderer* Engine::GetRenderer()
 {
-    return &renderer;
+    return renderer.get();
 }
 
 void Engine::LogSystemInfo()
@@ -217,9 +251,9 @@ void Engine::LogSystemInfo()
     }
 
     VK_LOG(LogEngine, Debug, "Physical devices:");
-    for (PhysicalDevice& physicalDevice : physicalDevices)
+    for (auto& physicalDevice : physicalDevices)
     {
-        physicalDevice.LogInfo();
+        physicalDevice->LogInfo();
     }
 }
 
@@ -305,7 +339,7 @@ void Engine::ValidateInstanceProperties(std::vector<const char*>& instanceLayers
     }
 }
 
-void Engine::EnumeratePhysicalDevices(VkInstance instance)
+void Engine::InitPhysicalDevices(VkInstance instance)
 {
     std::vector<VkPhysicalDevice> vkPhysicalDevices;
 
@@ -316,17 +350,27 @@ void Engine::EnumeratePhysicalDevices(VkInstance instance)
 
     for (VkPhysicalDevice vkPhysicalDevice : vkPhysicalDevices)
     {
-        PhysicalDevice physicalDevice;
-        physicalDevice.Create(vkPhysicalDevice);
+        std::unique_ptr<PhysicalDevice> physicalDevice(new PhysicalDevice(vkPhysicalDevice));
+        //PhysicalDevice physicalDevice;
+        //physicalDevice.Create(vkPhysicalDevice);
 
-        physicalDevices.push_back(physicalDevice);
+        physicalDevices.push_back(std::move(physicalDevice));
     }
+
+    VK_ASSERT(physicalDevices.size() > 0, "No viable physical device found on the system!");
 }
 
-std::vector<PhysicalDevice>& Engine::GetPhysicalDevices()
+PhysicalDevice* VULKAN_NS_NAME::Engine::GetPhysicalDevice(uint32_t deviceIndex)
 {
-    return physicalDevices;
+    VK_ASSERT(deviceIndex < physicalDevices.size(), "Invalid physical device index.");
+
+    return physicalDevices[deviceIndex].get();
 }
+
+//std::vector<PhysicalDevice>& Engine::GetPhysicalDevices()
+//{
+//    return physicalDevices;
+//}
 
 VkResult Engine::EnumerateInstanceLayers()
 {

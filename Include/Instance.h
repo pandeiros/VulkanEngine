@@ -27,12 +27,12 @@ public:
 
     ~Instance();
 
-    virtual void Init() override;
+    void InitDeviceAndWindow(PhysicalDevice* physicalDevice);
     virtual void Destroy() override;
 
     //void Create(VkApplicationInfo applicationInfo, std::vector<const char*> instanceLayers, std::vector<const char*> instaceExtensions);
 
-    void CreateDevice();
+    void CreateDevice(PhysicalDevice* physicalDevice);
     void CreateAppWindow();
 
     VkInstance GetVkInstance();

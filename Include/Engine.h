@@ -41,16 +41,23 @@ class Engine
     //////////////////////////////////////////////////////////////////////////
 
 public:
-    static void InitStatic();
-    static void DestroyStatic(VkDevice device);
+    //static void InitStatic(DevicePtr device);
+    //static void DestroyStatic();
 
-    static Engine* GetEngine();
+    //static Engine* GetEngine();
+
+//private:
+    Engine(uint32_t frameRate, bool useFixedFrameRate = false);
+    //Engine(DevicePtr device);
+    ~Engine();
+
+    void Init(DevicePtr device);
+    //void Destroy();
 
 private:
-    void Init();
-    void Destroy(VkDevice device);
+    DevicePtr device;
 
-    static Engine* engine;
+    //static std::unique_ptr<Engine> engine;
 
     //////////////////////////////////////////////////////////////////////////
     // Update and frame rate
@@ -105,7 +112,7 @@ public:
     World* GetWorld();
 
 private:
-    World world;
+    std::unique_ptr<World> world;
 
     //////////////////////////////////////////////////////////////////////////
     // Rendering
@@ -115,7 +122,7 @@ public:
     Renderer* GetRenderer();
 
 private:
-    Renderer renderer;
+    std::unique_ptr<Renderer> renderer;
 
     //////////////////////////////////////////////////////////////////////////
     // System properties
@@ -123,8 +130,12 @@ private:
 
 public:
     void ValidateInstanceProperties(std::vector<const char*>& instanceLayers, std::vector<const char*>& instaceExtensions);
-    void EnumeratePhysicalDevices(VkInstance instance);
-    std::vector<PhysicalDevice>& GetPhysicalDevices();
+    //void EnumeratePhysicalDevices(VkInstance instance);
+    void InitPhysicalDevices(VkInstance instance);
+
+    PhysicalDevice* GetPhysicalDevice(uint32_t deviceIndex);
+
+    //std::vector<PhysicalDevice>& GetPhysicalDevices();
 
     void LogSystemInfo();
 
@@ -137,7 +148,7 @@ private:
     std::vector<LayerProperties> instanceProperties;
     std::vector<VkExtensionProperties> globalInstanceExtensions;
 
-    std::vector<PhysicalDevice> physicalDevices;
+    std::vector<std::unique_ptr<PhysicalDevice>> physicalDevices;
 };
 
 VULKAN_NS_END
