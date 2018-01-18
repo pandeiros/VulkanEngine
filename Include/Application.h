@@ -30,7 +30,7 @@ public:
     ~Application();
 
     virtual void Init() override;
-    virtual void Destroy() override;
+    //virtual void Destroy() override;
 
     //void Create(const char* applicationName, uint32_t applicationVersion, uint32_t apiVersion);
 

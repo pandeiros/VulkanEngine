@@ -38,7 +38,7 @@ public:
 
     void Destroy(VkDevice device);
 
-    void Allocate(Device& device, const VkMemoryPropertyFlags requiredProperties);
+    void Allocate(Device* device, const VkMemoryPropertyFlags requiredProperties);
     void Copy(VkDevice device, void* sourceData, uint32_t offset, uint32_t size);
 
     Memory& GetMemory();

@@ -12,8 +12,14 @@
 class AndroidApplication : public vulkan::Application
 {
 public:
+    AndroidApplication()
+            : Application("Vulkan Engine App Test", 1, VK_MAKE_VERSION(1, 0, 2))
+    {}
+
+    ~AndroidApplication();
+
     virtual void Init() override;
-    virtual void Destroy() override;
+//    virtual void Destroy() override;
 
 protected:
     virtual void Tick(float deltaTime) override;

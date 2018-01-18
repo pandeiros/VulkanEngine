@@ -1104,7 +1104,7 @@ FILE *AndroidFopen(const char *fname, const char *mode) {
 // AndroidUtils static class definitions.
 #ifdef __ANDROID__
 
-vulkan::VulkanClass* AndroidUtils::vulkanApplication = nullptr;
+std::unique_ptr<vulkan::VulkanClass> AndroidUtils::vulkanApplication(nullptr);
 android_app* AndroidUtils::nativeApplication = nullptr;
 gvr::ControllerApi* AndroidUtils::controllerApi = nullptr;
 bool AndroidUtils::isPaused = true;
@@ -1149,12 +1149,12 @@ void AndroidUtils::Clean()
 {
     isPaused = true;
 
-    if (vulkanApplication)
-    {
-        vulkanApplication->Destroy();
-    }
+//    if (vulkanApplication)
+//    {
+//        vulkanApplication->Destroy();
+//    }
 
-    delete vulkanApplication;
+    vulkanApplication.release();
 }
 
 #endif

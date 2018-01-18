@@ -14,6 +14,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <memory>
 
 #include "VulkanCore.h"
 #include "AndroidCore.h"
@@ -44,7 +45,7 @@ public:
 
     static void Clean();
 
-    static vulkan::VulkanClass* vulkanApplication;
+    static std::unique_ptr<vulkan::VulkanClass> vulkanApplication;
     static android_app* nativeApplication;
     static gvr::ControllerApi* controllerApi;
 

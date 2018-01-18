@@ -46,15 +46,15 @@ void Buffer::Destroy(VkDevice device)
     vkDestroyBuffer(device, buffer, nullptr);
 }
 
-void Buffer::Allocate(Device& device, const VkMemoryPropertyFlags requiredProperties)
+void Buffer::Allocate(Device* device, const VkMemoryPropertyFlags requiredProperties)
 {
-    VkMemoryRequirements requirements = GetMemoryRequirements(device.GetVkDevice());
-    uint32_t memoryTypeIndex = device.GetPhysicalDevice()->GetMemoryTypeIndex(&requirements,
+    VkMemoryRequirements requirements = GetMemoryRequirements(device->GetVkDevice());
+    uint32_t memoryTypeIndex = device->GetPhysicalDevice()->GetMemoryTypeIndex(&requirements,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-    memory.Allocate(device.GetVkDevice(), requirements.size, memoryTypeIndex);
+    memory.Allocate(device->GetVkDevice(), requirements.size, memoryTypeIndex);
 
-    device.BindBufferMemory(buffer, memory.GetVkMemory(), requirements.size);
+    device->BindBufferMemory(buffer, memory.GetVkMemory(), requirements.size);
 }
 
 void Buffer::Copy(VkDevice device, void* sourceData, uint32_t offset, uint32_t size)

@@ -14,16 +14,16 @@ void AndroidApplication::Init()
 {
     vulkan::Application::Init();
 
-    vulkan::Device& device = instance.GetDeviceRef();
+    vulkan::Device* device = instance->GetDevice();
 
-    commandPool.Create(device.GetVkDevice(), VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-                       instance.GetDeviceRef().GetPhysicalDevice()->GetGraphicsQueueFamilyIndex());
-    commandPool.AllocateCommandBuffer(device.GetVkDevice(), VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+    commandPool.Create(device->GetVkDevice(), VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+                       instance->GetDevice()->GetPhysicalDevice()->GetGraphicsQueueFamilyIndex());
+    commandPool.AllocateCommandBuffer(device->GetVkDevice(), VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
-    device.CreateSemaphore(&semaphoreRenderComplete);
+    device->CreateSemaphore(&semaphoreRenderComplete);
 
     float fov = 45.f;
-    float aspect = instance.GetWindowRef().GetSurfaceSize().width / instance.GetWindowRef().GetSurfaceSize().height;
+    float aspect = instance->GetWindowRef().GetSurfaceSize().width / instance->GetWindowRef().GetSurfaceSize().height;
     if (aspect > 1.f)
     {
         fov *= 1.f / aspect;
@@ -38,23 +38,23 @@ void AndroidApplication::Init()
     vulkan::Renderer* renderer = vulkan::Engine::GetEngine()->GetRenderer();
 
     vulkan::Buffer& uniformBuffer = renderer->GetUniformBuffer();
-    uniformBuffer.CreateExclusive(device.GetVkDevice(), 0, sizeof(mvpMatrix), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+    uniformBuffer.CreateExclusive(device->GetVkDevice(), 0, sizeof(mvpMatrix), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
     uniformBuffer.Allocate(device, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    uniformBuffer.Copy(device.GetVkDevice(), &mvpMatrix, 0, sizeof(mvpMatrix));
+    uniformBuffer.Copy(device->GetVkDevice(), &mvpMatrix, 0, sizeof(mvpMatrix));
     uniformBuffer.UpdateDescriptorInfo(0, sizeof(mvpMatrix));
 
-    renderer->CreateDescriptorSetLayout(device.GetVkDevice());
-    renderer->CreatePipelineLayout(device.GetVkDevice());
-    renderer->InitShaders(device.GetVkDevice(), vulkan::VULKAN_VERTEX_SHADER_TEXT, vulkan::VULKAN_FRAGMENT_SHADER_TEXT);
+    renderer->CreateDescriptorSetLayout(device->GetVkDevice());
+    renderer->CreatePipelineLayout(device->GetVkDevice());
+    renderer->InitShaders(device->GetVkDevice(), vulkan::VULKAN_VERTEX_SHADER_TEXT, vulkan::VULKAN_FRAGMENT_SHADER_TEXT);
 
     vulkan::Cube cube {1.f};
     uint32_t size, stride;
     void* data = cube.GetData(size, stride);
 
     vulkan::Buffer& vertexBuffer = renderer->GetVertexBuffer();
-    vertexBuffer.CreateExclusive(device.GetVkDevice(), 0, size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+    vertexBuffer.CreateExclusive(device->GetVkDevice(), 0, size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
     vertexBuffer.Allocate(device, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    vertexBuffer.Copy(device.GetVkDevice(), data, 0, size);
+    vertexBuffer.Copy(device->GetVkDevice(), data, 0, size);
     vertexBuffer.UpdateDescriptorInfo(0, size);
 
     renderer->AddVertexInputBinding(0, stride, VK_VERTEX_INPUT_RATE_VERTEX);
@@ -62,10 +62,10 @@ void AndroidApplication::Init()
     // #TODO Change format when using texture.
     renderer->AddVertexInputAttribute(0, 1, VK_FORMAT_R32G32B32A32_SFLOAT, 16);
 
-    renderer->InitDescriptorPool(device.GetVkDevice());
-    renderer->InitDescriptorSet(device.GetVkDevice());
-    renderer->InitPipelineCache(device.GetVkDevice());
-    renderer->InitPipeline(device.GetVkDevice(), instance.GetWindowRef().GetSurfaceSize(), instance.GetWindowRef().GetRenderPass());
+    renderer->InitDescriptorPool(device->GetVkDevice());
+    renderer->InitDescriptorSet(device->GetVkDevice());
+    renderer->InitPipelineCache(device->GetVkDevice());
+    renderer->InitPipeline(device->GetVkDevice(), instance->GetWindowRef().GetSurfaceSize(), instance->GetWindowRef().GetRenderPass());
 
     timer = std::chrono::steady_clock();
     lastTime = timer.now();
@@ -77,9 +77,9 @@ void AndroidApplication::Init()
 
 void AndroidApplication::Tick(float deltaTime)
 {
-    vulkan::Window& window = instance.GetWindowRef();
+    vulkan::Window& window = instance->GetWindowRef();
     vulkan::CommandBuffer& commandBuffer = commandPool.GetCommandBufferRef();
-    vulkan::Queue& queue = instance.GetDeviceRef().GetQueueRef();
+    vulkan::Queue& queue = instance->GetDevice()->GetQueueRef();
     vulkan::Renderer* renderer = vulkan::Engine::GetEngine()->GetRenderer();
 
     if (window.Update())
@@ -148,17 +148,31 @@ void AndroidApplication::Tick(float deltaTime)
     queue.WaitIdle();
 }
 
-void AndroidApplication::Destroy()
+//void AndroidApplication::Destroy()
+//{
+//    vulkan::Queue& queue = instance->GetDevice()->GetQueueRef();
+//    queue.WaitIdle();
+//
+//    delete camera;
+//
+//    vulkan::Device* device = instance->GetDevice();
+//    device->DestroySemaphore(semaphoreRenderComplete);
+//
+//    commandPool.Destroy(device->GetVkDevice());
+//
+//    vulkan::Application::Destroy();
+//}
+
+AndroidApplication::~AndroidApplication()
 {
-    vulkan::Queue& queue = instance.GetDeviceRef().GetQueueRef();
+    vulkan::Queue& queue = instance->GetDevice()->GetQueueRef();
     queue.WaitIdle();
 
     delete camera;
 
-    vulkan::Device& device = instance.GetDeviceRef();
-    device.DestroySemaphore(semaphoreRenderComplete);
+    vulkan::Device* device = instance->GetDevice();
+    device->DestroySemaphore(semaphoreRenderComplete);
 
-    commandPool.Destroy(device.GetVkDevice());
-
-    vulkan::Application::Destroy();
+    commandPool.Destroy(device->GetVkDevice());
 }
+
