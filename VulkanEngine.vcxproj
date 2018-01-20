@@ -190,7 +190,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)android/utils;%VULKAN_SDK%\Include;$(VULKAN_SDK)\shaderc\third_party\glslang;%VULKAN_SDK%\Third-Party\Include;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)android/utils;%VULKAN_SDK%\Include;$(VULKAN_SDK)\shaderc\third_party\glslang;%VULKAN_SDK%\Third-Party\Include;$(ProjectDir)include;$(ProjectDir)tests;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -203,7 +203,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)android/utils;%VULKAN_SDK%\Include;$(VULKAN_SDK)\shaderc\third_party\glslang;%VULKAN_SDK%\Third-Party\Include;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)android/utils;%VULKAN_SDK%\Include;$(VULKAN_SDK)\shaderc\third_party\glslang;%VULKAN_SDK%\Third-Party\Include;$(ProjectDir)include;$(ProjectDir)tests;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/DVULKAN_DEV %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
@@ -247,7 +247,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)android/utils;%VULKAN_SDK%\Include;$(VULKAN_SDK)\shaderc\third_party\glslang;%VULKAN_SDK%\Third-Party\Include;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)android/utils;%VULKAN_SDK%\Include;$(VULKAN_SDK)\shaderc\third_party\glslang;%VULKAN_SDK%\Third-Party\Include;$(ProjectDir)include;$(ProjectDir)tests;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -355,6 +355,10 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="source\World.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="tests\TestApplication.cpp">
       <SubType>
       </SubType>
     </ClCompile>
@@ -472,6 +476,10 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="include\World.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="tests\TestApplication.h">
       <SubType>
       </SubType>
     </ClInclude>

@@ -61,9 +61,17 @@ Engine::~Engine()
 {
     bEnabled = false;
 
-    world.release(); // Destroy();
-    renderer.release(); // Destroy();
+    World *pWorld = world.release();
+    if (pWorld)
+    {
+        delete pWorld;
+    }
 
+    Renderer* pRenderer = renderer.release();
+    if (pRenderer)
+    {
+        delete pRenderer;
+    }
 }
 
 void Engine::Init(DevicePtr device)

@@ -17,8 +17,18 @@ VULKAN_NS_USING;
 
 #ifndef __ANDROID__
 
+#include "TestApplication.h"
+
 int main()
 {
+    std::unique_ptr<TestApplication> testApplication(new TestApplication());
+
+    testApplication->Init();
+
+    return 0;
+
+    //////////////////////////////////////////////////////////////////////////
+
     std::unique_ptr<Application> application(new Application("Vulkan Engine", 1, VK_MAKE_VERSION(1, 0, 2)));
 
     //application->Create("Vulkan Engine Test", 1, VK_MAKE_VERSION(1, 0, 2));

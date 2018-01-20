@@ -21,7 +21,25 @@ Renderer::Renderer(std::shared_ptr<Device> device)
 
 Renderer::~Renderer()
 {
+    vkDestroyPipeline(device->GetVkDevice(), pipeline, nullptr);
+    vkDestroyPipelineCache(device->GetVkDevice(), pipelineCache, nullptr);
+    vkDestroyDescriptorPool(device->GetVkDevice(), descriptorPool, nullptr);
 
+    vertexBuffer.Destroy(device->GetVkDevice());
+
+    for (VkPipelineShaderStageCreateInfo& shaderStage : pipelineShaderStageCreateInfo)
+    {
+        vkDestroyShaderModule(device->GetVkDevice(), shaderStage.module, nullptr);
+    }
+
+    for (VkDescriptorSetLayout& descriptorSetLayout : descriptorSetLayouts)
+    {
+        vkDestroyDescriptorSetLayout(device->GetVkDevice(), descriptorSetLayout, nullptr);
+    }
+
+    vkDestroyPipelineLayout(device->GetVkDevice(), pipelineLayout, nullptr);
+
+    uniformBuffer.Destroy(device->GetVkDevice());
 }
 
 void Renderer::CreateDescriptorSetLayout()

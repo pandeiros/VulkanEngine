@@ -39,7 +39,9 @@ Instance::Instance(VkApplicationInfo applicationInfo, std::vector<const char*> i
 Instance::~Instance()
 {
     window.Destroy();
-    device->Destroy();
+
+    VK_ASSERT(device.use_count() == 1, "Device shared_ptr reference count should equal 1 when destroying instance!");
+    device.reset();
 
     DestroyDebug();
 
@@ -59,20 +61,20 @@ void Instance::InitDeviceAndWindow(PhysicalDevice* physicalDevice)
     CreateAppWindow();
 }
 
-void Instance::Destroy()
-{
-    window.Destroy();
-    device->Destroy();
-
-    DestroyDebug();
-
-    if (instance)
-    {
-        vkDestroyInstance(instance, nullptr);
-    }
-
-    instance = VK_NULL_HANDLE;
-}
+//void Instance::Destroy()
+//{
+//    window.Destroy();
+//    //device->Destroy();
+//
+//    DestroyDebug();
+//
+//    if (instance)
+//    {
+//        vkDestroyInstance(instance, nullptr);
+//    }
+//
+//    instance = VK_NULL_HANDLE;
+//}
 
 //void Instance::Create(VkApplicationInfo applicationInfo, std::vector<const char*> instanceLayers, std::vector<const char*> instaceExtensions)
 //{

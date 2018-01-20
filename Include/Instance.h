@@ -28,7 +28,7 @@ public:
     ~Instance();
 
     void InitDeviceAndWindow(PhysicalDevice* physicalDevice);
-    virtual void Destroy() override;
+    //virtual void Destroy() override;
 
     //void Create(VkApplicationInfo applicationInfo, std::vector<const char*> instanceLayers, std::vector<const char*> instaceExtensions);
 

@@ -44,6 +44,8 @@ void Buffer::CreateConcurrent(VkDevice device, VkBufferCreateFlags flags, VkDevi
 void Buffer::Destroy(VkDevice device)
 {
     vkDestroyBuffer(device, buffer, nullptr);
+
+    memory.Free(device);
 }
 
 void Buffer::Allocate(Device* device, const VkMemoryPropertyFlags requiredProperties)

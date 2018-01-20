@@ -27,8 +27,13 @@ Application::~Application()
 {
     //Engine::GetEngine()->DestroyStatic();
 
-    engine.release();
-    instance->Destroy();
+    Engine* pEngine = engine.release();
+    if (pEngine)
+    {
+        delete pEngine;
+    }
+
+    //instance->Destroy();
 }
 
 void Application::Init()

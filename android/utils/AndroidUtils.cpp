@@ -1155,7 +1155,11 @@ void AndroidUtils::Clean()
 //        vulkanApplication->Destroy();
 //    }
 
-    vulkanApplication.release();
+    Application* application = vulkanApplication.release();
+    if (application)
+    {
+        delete application;
+    }
 }
 
 #endif
