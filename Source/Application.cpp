@@ -25,15 +25,11 @@ Application::Application(const char* applicationName, uint32_t applicationVersio
 
 Application::~Application()
 {
-    //Engine::GetEngine()->DestroyStatic();
-
     Engine* pEngine = engine.release();
     if (pEngine)
     {
         delete pEngine;
     }
-
-    //instance->Destroy();
 }
 
 void Application::Init()
@@ -42,17 +38,20 @@ void Application::Init()
     VK_ASSERT(InitVulkan() != 0, "Initialization of Vulkan APIs failed!");
 #endif
 
-    //Engine::InitStatic();
-    //Engine::GetEngine()->RegisterObject(this);
-
     engine.reset(new Engine(60, false));
+    engine->RegisterObject(this);
 
     std::vector<const char*> instanceLayers = {
         "VK_LAYER_GOOGLE_threading",
         "VK_LAYER_LUNARG_object_tracker",
-        "VK_LAYER_LUNARG_parameter_validation",
-        "VK_LAYER_LUNARG_standard_validation"
+        "VK_LAYER_LUNARG_parameter_validation"
+        //"VK_LAYER_LUNARG_core_validation"
+        //"VK_LAYER_GOOGLE_unique_objects"
     };
+
+#ifndef __ANDROID__
+    instanceLayers.push_back("VK_LAYER_LUNARG_standard_validation");
+#endif
 
     std::vector<const char*> instanceExtensions = {
         VK_KHR_SURFACE_EXTENSION_NAME,
@@ -64,52 +63,15 @@ void Application::Init()
 
     instance.reset(new Instance(applicationInfo, instanceLayers, instanceExtensions));
 
-    //instance->Create(applicationInfo,
-    //{
-    //    "VK_LAYER_GOOGLE_threading",
-    //    "VK_LAYER_LUNARG_object_tracker",
-    //    "VK_LAYER_LUNARG_parameter_validation",
-    //    "VK_LAYER_LUNARG_standard_validation"
-    //},
-    //{
-    //    VK_KHR_SURFACE_EXTENSION_NAME,
-    //    VULKAN_PLATFORM_SURFACE_EXTENSION_NAME,
-    //    VK_EXT_DEBUG_REPORT_EXTENSION_NAME
-    //});
-
     engine->InitPhysicalDevices(instance->GetVkInstance());
-
-    //engine->Init(instance->GetDevicePtr(), instance->GetVkInstance());
-
-    //Engine::GetEngine()->EnumeratePhysicalDevices(instance->GetVkInstance());
+    engine->LogDeviceProperties();
+    engine->LogInstanceProperties();
 
     instance->InitDeviceAndWindow(engine->GetPhysicalDevice(0));
 
     engine->Init(instance->GetDevicePtr());
-
-    engine->LogSystemInfo();
-    //Engine::GetEngine()->LogSystemInfo();
+    //engine->LogDeviceProperties();
 }
-
-//void Application::Destroy()
-//{
-//    Engine::GetEngine()->DestroyStatic(instance->GetDevice()->GetVkDevice());
-//
-//    instance->Destroy();
-//}
-
-//void Application::Create(const char* applicationName, uint32_t applicationVersion, uint32_t apiVersion)
-//{
-//    applicationInfo = {
-//        VK_STRUCTURE_TYPE_APPLICATION_INFO,
-//        nullptr,
-//        applicationName,
-//        applicationVersion,
-//        VULKAN_ENGINE_NAME,
-//        VULKAN_ENGINE_VERSION,
-//        apiVersion
-//    };
-//}
 
 Instance* Application::GetInstance()
 {

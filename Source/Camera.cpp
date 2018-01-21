@@ -14,12 +14,10 @@ const glm::mat4 Camera::DEFAULT_CLIP_MATRIX = glm::mat4(
     0.0f, 0.0f, 0.5f, 0.0f,
     0.0f, 0.0f, 0.5f, 1.0f);
 
-Camera::Camera(float yFovDegrees, float aspectRatio, float zNear, float zFar, CameraTransform transform,
+Camera::Camera(float yFovRadians, float aspectRatio, float zNear, float zFar, CameraTransform transform,
     const glm::mat4 clipMatrix /*= DEFAULT_CLIP_MATRIX*/)
-    : zNear(zNear), zFar(zFar), aspectRatio(aspectRatio), transform(transform), clipMatrix(clipMatrix)
+    : yFOV(yFovRadians), zNear(zNear), zFar(zFar), aspectRatio(aspectRatio), transform(transform), clipMatrix(clipMatrix)
 {
-    yFOV = glm::radians(yFovDegrees);
-
     UpdateMatrices();
 }
 
@@ -31,7 +29,7 @@ glm::mat4 Camera::GetViewProjectionMatrix() const
 void Camera::UpdateMatrices()
 {
     projectionMatrix = glm::perspective(yFOV, aspectRatio, zNear, zFar);
-    viewMatrix = glm::lookAt(transform.eye, transform.origin, transform.up);
+    viewMatrix = glm::lookAt(transform.eye, transform.direction, transform.up);
 
     viewProjectionClipMatrix = clipMatrix * projectionMatrix * viewMatrix;
 }

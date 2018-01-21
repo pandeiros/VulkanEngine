@@ -9,22 +9,27 @@
 
 VULKAN_NS_USING;
 
+VkCommandBuffer CommandBuffer::GetVkCommandBuffer()
+{
+    return commandBuffer;
+}
+
 VkCommandBuffer& CommandBuffer::GetVkCommandBufferRef()
 {
     return commandBuffer;
 }
 
-void CommandBuffer::Begin(VkCommandBufferUsageFlags flags, const VkCommandBufferInheritanceInfo inheritanceInfo)
-{
-    const VkCommandBufferBeginInfo commandBufferBeginInfo = {
-        VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-        nullptr,
-        flags,
-        &inheritanceInfo
-    };
-
-    VK_VERIFY(vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo));
-}
+//void CommandBuffer::Begin(VkCommandBufferUsageFlags flags, const VkCommandBufferInheritanceInfo inheritanceInfo)
+//{
+//    const VkCommandBufferBeginInfo commandBufferBeginInfo = {
+//        VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+//        nullptr,
+//        flags,
+//        &inheritanceInfo
+//    };
+//
+//    VK_VERIFY(vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo));
+//}
 
 void CommandBuffer::Begin(VkCommandBufferUsageFlags flags, const VkCommandBufferInheritanceInfo* inheritanceInfo)
 {

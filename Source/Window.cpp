@@ -10,14 +10,13 @@
 
 #include <array>
 #include <string>
+#include <algorithm>
 
 VULKAN_NS_USING;
 
-void Window::Create(Instance* instance, const WindowCreateInfo& windowCreateInfo)
+Window::Window(DevicePtr device, VkInstance instance, const WindowCreateInfo& windowCreateInfo)
+    : VulkanClass(device), instance(instance), windowCreateInfo(windowCreateInfo)
 {
-    cachedInstance = instance;
-    this->windowCreateInfo = windowCreateInfo;
-
     CreateOSWindow();
     CreateSurface();
     CreateSwapchain();
@@ -28,11 +27,11 @@ void Window::Create(Instance* instance, const WindowCreateInfo& windowCreateInfo
     CreateSynchronization();
 }
 
-void Window::Destroy()
+Window::~Window()
 {
-    if (cachedInstance)
+    if (instance)
     {
-        cachedInstance->GetDevice()->GetQueueRef().WaitIdle();
+        device->GetQueueRef().WaitIdle();
 
         DestroySynchronization();
         DestroyFramebuffer();
@@ -44,33 +43,70 @@ void Window::Destroy()
         DestroyOSWindow();
     }
 
-    cachedInstance = VK_NULL_HANDLE;
-    bIsValid = false;
+    instance = VK_NULL_HANDLE;
+
+    SetPendingKill(true);
 }
+
+//void Window::Create(Instance* instance, const WindowCreateInfo& windowCreateInfo)
+//{
+//    instance = instance;
+//    this->windowCreateInfo = windowCreateInfo;
+//
+//    CreateOSWindow();
+//    CreateSurface();
+//    CreateSwapchain();
+//    CreateSwapchainImages();
+//    CreateDepthStencilImage();
+//    CreateRenderPass();
+//    CreateFramebuffer();
+//    CreateSynchronization();
+//}
+
+//void Window::Destroy()
+//{
+//    if (instance)
+//    {
+//        device->GetQueueRef().WaitIdle();
+//
+//        DestroySynchronization();
+//        DestroyFramebuffer();
+//        DestroyRenderPass();
+//        DestroyDepthStencilImage();
+//        DestroySwapchainImages();
+//        DestroySwapchain();
+//        DestroySurface();
+//        DestroyOSWindow();
+//    }
+//
+//    instance = VK_NULL_HANDLE;
+//    bPendingKill = false;
+//}
 
 bool Window::Update()
 {
     UpdateOSWindow();
 
-    return bIsValid;
+    return !IsPendingKill();
 }
 
 void Window::Close()
 {
-    bIsValid = false;
+    SetPendingKill(true);
 }
 
 void Window::BeginRender()
 {
-    VkDevice device = cachedInstance->GetDevice()->GetVkDevice();
+    VK_VERIFY(vkAcquireNextImageKHR(device->GetVkDevice(), swapchain.GetVkSwapchain(), UINT64_MAX, semaphoreImageAcquired,
+        VK_NULL_HANDLE, &activeSwapchainImageID));
+//    VK_VERIFY(vkWaitForFences(device, 1, &fenceDraw, VK_TRUE, UINT64_MAX));
+//    VK_VERIFY(vkResetFences(device, 1, &fenceDraw));
 
-    VK_VERIFY(vkAcquireNextImageKHR(device, swapchain.GetVkSwapchain(), UINT64_MAX, VK_NULL_HANDLE, fenceSwapchainImageAvailable, &activeSwapchainImageID));
-    VK_VERIFY(vkWaitForFences(device, 1, &fenceSwapchainImageAvailable, VK_TRUE, UINT64_MAX));
-    VK_VERIFY(vkResetFences(device, 1, &fenceSwapchainImageAvailable));
-    VK_VERIFY(vkQueueWaitIdle(cachedInstance->GetDevice()->GetQueueRef().GetVkQueueRef()));
+    device->GetQueueRef().WaitIdle();
+    //VK_VERIFY(vkQueueWaitIdle(cacheddevice->GetQueueRef().GetVkQueueRef()));
 }
 
-void Window::EndRender(std::vector<VkSemaphore> waitSemaphores)
+void Window::EndRender(std::vector<VkSemaphore> waitSemaphores, std::vector<VkFence> waitFences)
 {
     VkResult presentResult = VkResult::VK_RESULT_MAX_ENUM;
 
@@ -85,7 +121,13 @@ void Window::EndRender(std::vector<VkSemaphore> waitSemaphores)
         &presentResult
     };
 
-    VK_VERIFY(vkQueuePresentKHR(cachedInstance->GetDevice()->GetQueueRef().GetVkQueueRef(), &presentInfo));
+    VkResult result;
+    do
+    {
+        result = vkWaitForFences(device->GetVkDevice(), (uint32_t)waitFences.size(), waitFences.data(), VK_TRUE, UINT64_MAX);
+    } while (result == VK_TIMEOUT);
+
+    VK_VERIFY(vkQueuePresentKHR(device->GetQueueRef().GetVkQueueRef(), &presentInfo));
     VK_VERIFY(presentResult);
 }
 
@@ -108,18 +150,11 @@ void Window::CreateSurface()
 {
     CreateOSSurface();
 
-    VkPhysicalDevice physicalDevice = cachedInstance->GetDevice()->GetPhysicalDevice()->GetVkPhysicalDevice();
-    uint32_t presentQueueFamilyIndex = cachedInstance->GetDevice()->GetPhysicalDevice()->GetPresentQueueFamilyIndex(surface);
+    VkPhysicalDevice physicalDevice = device->GetPhysicalDevice()->GetVkPhysicalDevice();
+    uint32_t presentQueueFamilyIndex = device->GetPhysicalDevice()->GetPresentQueueFamilyIndex(surface);
 
     // Graphics family index may be changed to one supporting presenting and thus device should be reset.
-    cachedInstance->GetDevice()->CheckPhysicalDeviceDirty();
-
-    VK_VERIFY(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &surfaceCapabilities));
-
-    if (surfaceCapabilities.currentExtent.width < UINT32_MAX)
-    {
-        windowCreateInfo.surfaceSize = surfaceCapabilities.currentExtent;
-    }
+    device->CheckPhysicalDeviceDirty();
 
     uint32_t formatCount = 0;
     VK_VERIFY(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, nullptr));
@@ -127,7 +162,7 @@ void Window::CreateSurface()
 
     std::vector<VkSurfaceFormatKHR> surfaceFormats(formatCount);
     vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, surfaceFormats.data());
-    if (surfaceFormats[0].format == VK_FORMAT_UNDEFINED)
+    if (formatCount == 1 && surfaceFormats[0].format == VK_FORMAT_UNDEFINED)
     {
         surfaceFormat.format = VK_FORMAT_B8G8R8A8_UNORM;
         surfaceFormat.colorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
@@ -142,36 +177,46 @@ void Window::CreateSurface()
 
 void Window::DestroySurface()
 {
-    vkDestroySurfaceKHR(cachedInstance->GetVkInstance(), surface, nullptr);
+    vkDestroySurfaceKHR(instance, surface, nullptr);
 }
 
 void Window::CreateSwapchain()
 {
-    // Image count
-    uint32_t desiredSwapchainImageCount = 2;
-    if (desiredSwapchainImageCount < surfaceCapabilities.minImageCount)
+    VkPhysicalDevice physicalDevice = device->GetPhysicalDevice()->GetVkPhysicalDevice();
+
+    VK_VERIFY(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &surfaceCapabilities));
+
+    //uint32_t presentModeCount = 0;
+    //VK_VERIFY(vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, nullptr));
+    //std::vector<VkPresentModeKHR> presentModes(presentModeCount);
+    //VK_VERIFY(vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, presentModes.data()));
+
+    if (surfaceCapabilities.currentExtent.width < UINT32_MAX)
     {
-        desiredSwapchainImageCount = surfaceCapabilities.minImageCount;
+        windowCreateInfo.surfaceSize = surfaceCapabilities.currentExtent;
+    }
+    else
+    {
+        windowCreateInfo.surfaceSize.width = Math::Clamp(windowCreateInfo.surfaceSize.width,
+            surfaceCapabilities.minImageExtent.width, surfaceCapabilities.maxImageExtent.width);
+
+        windowCreateInfo.surfaceSize.height = Math::Clamp(windowCreateInfo.surfaceSize.height,
+            surfaceCapabilities.minImageExtent.height, surfaceCapabilities.maxImageExtent.height);
     }
 
-    if (surfaceCapabilities.maxImageCount > 0)
-    {
-        if (desiredSwapchainImageCount > surfaceCapabilities.maxImageCount)
-        {
-            desiredSwapchainImageCount = surfaceCapabilities.maxImageCount;
-        }
-    }
+    // Image count
+    uint32_t desiredSwapchainImageCount = Math::Clamp(2u, surfaceCapabilities.minImageCount, surfaceCapabilities.maxImageCount);
 
     // Present mode
-    VkPhysicalDevice physicalDevice = cachedInstance->GetDevice()->GetPhysicalDevice()->GetVkPhysicalDevice();
     VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
 
+    // #SUPPORT Current Android driver supports only FIFO mode.
+#ifndef __ANDROID__
     uint32_t presentModeCount = 0;
     VK_VERIFY(vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, nullptr));
     std::vector<VkPresentModeKHR> presentModes(presentModeCount);
     VK_VERIFY(vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, presentModes.data()));
 
-    // #TODO Maybe pass required modes as arguments to Create function?
     for (VkPresentModeKHR& mode : presentModes)
     {
         if (mode == VK_PRESENT_MODE_MAILBOX_KHR)
@@ -179,6 +224,7 @@ void Window::CreateSwapchain()
             presentMode = mode;
         }
     }
+#endif
 
     // Pre-transform.
     VkSurfaceTransformFlagBitsKHR preTransform;
@@ -213,24 +259,26 @@ void Window::CreateSwapchain()
     // Clipped
     VkBool32 isClipped = VK_TRUE;
 
+    // #SUPPORT
 #ifdef __ANDROID__
     isClipped = VK_FALSE;
 #endif
 
-    uint32_t imageArrayLayers = 1;
-    VkDevice device = cachedInstance->GetDevice()->GetVkDevice();
+    // #TODO Handle scenario with graphics queue different than present queue.
 
-    swapchain.Create(device,
+    uint32_t imageArrayLayers = 1;
+
+    swapchain.Create(
+        device->GetVkDevice(),
         0,
         surface,
         desiredSwapchainImageCount,
         {
             surfaceFormat.format,
-//            surfaceFormat.colorSpace,
-            VK_COLORSPACE_SRGB_NONLINEAR_KHR,
+            surfaceFormat.colorSpace,
             windowCreateInfo.surfaceSize,
             imageArrayLayers,
-            VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, // | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
+            VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
             VK_SHARING_MODE_EXCLUSIVE
         },
         {},
@@ -245,22 +293,18 @@ void Window::CreateSwapchain()
 
 void Window::DestroySwapchain()
 {
-    if (cachedInstance)
+    if (instance)
     {
-        VkDevice device = cachedInstance->GetDevice()->GetVkDevice();
-
-        swapchain.Destroy(device);
+        swapchain.Destroy(device->GetVkDevice());
     }
 }
 
 void Window::CreateSwapchainImages()
 {
-    VkDevice device = cachedInstance->GetDevice()->GetVkDevice();
-
     swapchainImages.resize(swapchainImageCount);
     swapchainImageViews.resize(swapchainImageCount);
 
-    VK_VERIFY(vkGetSwapchainImagesKHR(device, swapchain.GetVkSwapchain(), &swapchainImageCount, swapchainImages.data()));
+    VK_VERIFY(vkGetSwapchainImagesKHR(device->GetVkDevice(), swapchain.GetVkSwapchain(), &swapchainImageCount, swapchainImages.data()));
 
     for (uint32_t i = 0; i < swapchainImageCount; ++i)
     {
@@ -269,10 +313,8 @@ void Window::CreateSwapchainImages()
             0, 1, 0, 1
         };
 
-        //ImageView imageView;
-
-        swapchainImageViews[i].Create(device, 0, swapchainImages[i], VK_IMAGE_VIEW_TYPE_2D, surfaceFormat.format,
-            Image::GetIdentityComponentMapping(), subresourceRange);
+        swapchainImageViews[i].Create(device->GetVkDevice(), 0, swapchainImages[i], VK_IMAGE_VIEW_TYPE_2D, surfaceFormat.format,
+            Image::GetRGBAComponentMapping(), subresourceRange);
     }
 }
 
@@ -280,7 +322,7 @@ void Window::DestroySwapchainImages()
 {
     for (ImageView& view : swapchainImageViews)
     {
-        vkDestroyImageView(cachedInstance->GetDevice()->GetVkDevice(), view.GetVkImageView(), nullptr);
+        vkDestroyImageView(device->GetVkDevice(), view.GetVkImageView(), nullptr);
     }
 }
 
@@ -294,16 +336,15 @@ void Window::CreateDepthStencilImage()
 #else
     std::vector<VkFormat> desiredFormats
     {
+        VK_FORMAT_D16_UNORM,
         VK_FORMAT_D32_SFLOAT_S8_UINT,
         VK_FORMAT_D24_UNORM_S8_UINT,
         VK_FORMAT_D16_UNORM_S8_UINT,
-        VK_FORMAT_D32_SFLOAT,
-        VK_FORMAT_D16_UNORM
+        VK_FORMAT_D32_SFLOAT
     };
 #endif
 
-    VkDevice device = cachedInstance->GetDevice()->GetVkDevice();
-    PhysicalDevice* physicalDevice = cachedInstance->GetDevice()->GetPhysicalDevice();
+    PhysicalDevice* physicalDevice = device->GetPhysicalDevice();
 
     VkFormat depthStencilFormat = VK_FORMAT_UNDEFINED;
     VkImageTiling depthStencilImageTiling = VK_IMAGE_TILING_OPTIMAL;
@@ -328,33 +369,33 @@ void Window::CreateDepthStencilImage()
     bStencilAvailable = IsOfEnum<VkFormat>(depthStencilFormat, {
         VK_FORMAT_D32_SFLOAT_S8_UINT,
         VK_FORMAT_D24_UNORM_S8_UINT,
-        VK_FORMAT_D16_UNORM_S8_UINT,
-        VK_FORMAT_S8_UINT });
+        VK_FORMAT_D16_UNORM_S8_UINT
+    });
 
-    depthStencilImage.Create(device, 0, VK_IMAGE_TYPE_2D, depthStencilFormat,
+    depthStencilImage.Create(device->GetVkDevice(), 0, VK_IMAGE_TYPE_2D, depthStencilFormat,
         { windowCreateInfo.surfaceSize.width, windowCreateInfo.surfaceSize.height, 1 },
-        1, 1, VULKAN_SAMPLE_COUNT, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+        1, 1, VULKAN_SAMPLE_COUNT, depthStencilImageTiling, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
         VK_SHARING_MODE_EXCLUSIVE, {}, VK_IMAGE_LAYOUT_UNDEFINED);
 
-    VkMemoryRequirements imageMemoryRequirements = depthStencilImage.GetMemoryRequirements(device);
+    VkMemoryRequirements imageMemoryRequirements = depthStencilImage.GetMemoryRequirements(device->GetVkDevice());
 
-    uint32_t memoryIndex = physicalDevice->GetMemoryTypeIndex(&imageMemoryRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-    depthStencilImageMemory.Allocate(device, imageMemoryRequirements.size, memoryIndex);
-    depthStencilImageMemory.BindImageMemory(device, depthStencilImage.GetVkImage(), 0);
+    //uint32_t memoryIndex = physicalDevice->GetMemoryTypeIndex(&imageMemoryRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+    uint32_t memoryIndex = physicalDevice->GetMemoryTypeIndex(&imageMemoryRequirements, 0);
+    depthStencilImageMemory.Allocate(device->GetVkDevice(), imageMemoryRequirements.size, memoryIndex);
+    depthStencilImageMemory.BindImageMemory(device->GetVkDevice(), depthStencilImage.GetVkImage(), 0);
 
-    depthStencilImageView.Create(device, 0, depthStencilImage.GetVkImage(), VK_IMAGE_VIEW_TYPE_2D, depthStencilFormat, Image::GetIdentityComponentMapping(),
+    depthStencilImageView.Create(device->GetVkDevice(), 0, depthStencilImage.GetVkImage(), VK_IMAGE_VIEW_TYPE_2D, depthStencilFormat,
+        Image::GetRGBAComponentMapping(),
         { VK_IMAGE_ASPECT_DEPTH_BIT | (bStencilAvailable ? VK_IMAGE_ASPECT_STENCIL_BIT : 0u), 0, 1, 0, 1 });
 }
 
 void Window::DestroyDepthStencilImage()
 {
-    if (cachedInstance)
+    if (instance)
     {
-        VkDevice device = cachedInstance->GetDevice()->GetVkDevice();
-
-        depthStencilImageView.Destroy(device);
-        depthStencilImageMemory.Free(device);
-        depthStencilImage.Destroy(device);
+        depthStencilImageView.Destroy(device->GetVkDevice());
+        depthStencilImageMemory.Free(device->GetVkDevice());
+        depthStencilImage.Destroy(device->GetVkDevice());
     }
 }
 
@@ -365,7 +406,7 @@ void Window::CreateRenderPass()
         {
             0,
             surfaceFormat.format,
-            VK_SAMPLE_COUNT_1_BIT,
+            VULKAN_SAMPLE_COUNT,
             VK_ATTACHMENT_LOAD_OP_CLEAR,
             VK_ATTACHMENT_STORE_OP_STORE,
             VK_ATTACHMENT_LOAD_OP_DONT_CARE,
@@ -377,10 +418,10 @@ void Window::CreateRenderPass()
         {
             0,
             depthStencilImage.GetVkFormat(),
-            VK_SAMPLE_COUNT_1_BIT,
+            VULKAN_SAMPLE_COUNT,
             VK_ATTACHMENT_LOAD_OP_CLEAR,
-            VK_ATTACHMENT_STORE_OP_DONT_CARE,
-            VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+            VK_ATTACHMENT_STORE_OP_STORE,
+            VK_ATTACHMENT_LOAD_OP_LOAD,
             VK_ATTACHMENT_STORE_OP_STORE,
             VK_IMAGE_LAYOUT_UNDEFINED,
             VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
@@ -409,18 +450,14 @@ void Window::CreateRenderPass()
         nullptr
     });
 
-    VK_ASSERT(cachedInstance, "");
-    VkDevice device = cachedInstance->GetDevice()->GetVkDevice();
-    renderPass.Create(device, 0, attachments, subpasses, {});
+    renderPass.Create(device->GetVkDevice(), 0, attachments, subpasses, {});
 }
 
 void Window::DestroyRenderPass()
 {
-    if (cachedInstance)
+    if (instance)
     {
-        VkDevice device = cachedInstance->GetDevice()->GetVkDevice();
-
-        renderPass.Destroy(device);
+        renderPass.Destroy(device->GetVkDevice());
     }
 }
 
@@ -434,23 +471,18 @@ void Window::CreateFramebuffer()
         attachments[0] = swapchainImageViews[i].GetVkImageView();
         attachments[1] = depthStencilImageView.GetVkImageView();
 
-        VK_ASSERT(cachedInstance, "");
-        VkDevice device = cachedInstance->GetDevice()->GetVkDevice();
-
-        framebuffers[i].Create(device, 0, renderPass.GetVkRenderPass(), attachments,
+        framebuffers[i].Create(device->GetVkDevice(), 0, renderPass.GetVkRenderPass(), attachments,
         { windowCreateInfo.surfaceSize.width, windowCreateInfo.surfaceSize.height, 1 });
     }
 }
 
 void Window::DestroyFramebuffer()
 {
-    if (cachedInstance)
+    if (instance)
     {
-        VkDevice device = cachedInstance->GetDevice()->GetVkDevice();
-
         for (Framebuffer& framebuffer : framebuffers)
         {
-            framebuffer.Destroy(device);
+            framebuffer.Destroy(device->GetVkDevice());
         }
     }
 }
@@ -463,10 +495,19 @@ void Window::CreateSynchronization()
         0
     };
 
-    vkCreateFence(cachedInstance->GetDevice()->GetVkDevice(), &fenceCreateInfo, nullptr, &fenceSwapchainImageAvailable);
+    VK_VERIFY(vkCreateFence(device->GetVkDevice(), &fenceCreateInfo, nullptr, &fenceDraw));
+
+    VkSemaphoreCreateInfo semaphoreCreateInfo = {
+        VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+        nullptr,
+        0
+    };
+
+    VK_VERIFY(vkCreateSemaphore(device->GetVkDevice(), &semaphoreCreateInfo, nullptr, &semaphoreImageAcquired));
 }
 
 void Window::DestroySynchronization()
 {
-    vkDestroyFence(cachedInstance->GetDevice()->GetVkDevice(), fenceSwapchainImageAvailable, nullptr);
+    vkDestroyFence(device->GetVkDevice(), fenceDraw, nullptr);
+    vkDestroySemaphore(device->GetVkDevice(), semaphoreImageAcquired, nullptr);
 }

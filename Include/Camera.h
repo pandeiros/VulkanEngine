@@ -22,7 +22,7 @@ VULKAN_NS_BEGIN
 struct CameraTransform
 {
     glm::vec3 eye;
-    glm::vec3 origin;
+    glm::vec3 direction;
     glm::vec3 up;
 };
 
@@ -45,7 +45,7 @@ public:
     ~Camera() = default;
 
     /** yFOV in degrees. */
-    Camera(float yFovDegrees, float aspectRatio, float zNear, float zFar, CameraTransform transform,
+    Camera(float yFovRadians, float aspectRatio, float zNear, float zFar, CameraTransform transform,
         const glm::mat4 clipMatrix = DEFAULT_CLIP_MATRIX);
 
     glm::mat4 GetViewProjectionMatrix() const;

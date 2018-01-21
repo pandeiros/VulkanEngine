@@ -17,32 +17,22 @@ void Window::CreateOSWindow()
 
 void Window::CreateOSSurface()
 {
-    VULKAN_GET_INSTANCE_PROC_ADDR(cachedInstance->GetVkInstance(), CreateAndroidSurfaceKHR);
+    VULKAN_GET_INSTANCE_PROC_ADDR(instance, CreateAndroidSurfaceKHR);
 
-    VkAndroidSurfaceCreateInfoKHR surfaceCreateInfo;
-    surfaceCreateInfo.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
-    surfaceCreateInfo.pNext = nullptr;
-    surfaceCreateInfo.flags = 0;
-    surfaceCreateInfo.window = AndroidGetApplicationWindow();
+    VkAndroidSurfaceCreateInfoKHR surfaceCreateInfo = {
+        VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR,
+        nullptr,
+        0,
+        AndroidGetApplicationWindow()
+    };
 
-    VK_VERIFY(fvkCreateAndroidSurfaceKHR(cachedInstance->GetVkInstance(), &surfaceCreateInfo, nullptr, &surface));
+    VK_VERIFY(vkCreateAndroidSurfaceKHR(instance, &surfaceCreateInfo, nullptr, &surface));
 }
 
 void Window::UpdateOSWindow()
-{
-    //MSG msg;
-    //if (PeekMessage(&msg, win32Window, 0, 0, PM_REMOVE))
-    //{
-    //    TranslateMessage(&msg);
-    //    DispatchMessage(&msg);
-    //}
-}
+{}
 
 void Window::DestroyOSWindow()
-{
-    //DestroyWindow(win32Window);
-    //UnregisterClass(win32ClassName.c_str(), win32Instance);
-    //win32Window = nullptr;
-}
+{}
 
 #endif // __ANDROID__

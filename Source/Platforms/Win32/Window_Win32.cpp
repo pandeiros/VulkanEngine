@@ -5,7 +5,6 @@
  */
 
 #include "Platforms/Win32/Window_Win32.h"
-//#include "Rendering/Windows_old.h"  // #TODO Delete
 #include "Window.h"
 #include "Instance.h"
 #include "Rendering/Renderer.h"
@@ -31,7 +30,7 @@ LRESULT CALLBACK WindowsEventHandler(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
         case WM_SIZE:
             // We get here if the window has changed size, we should rebuild most
             // of our window resources before rendering to this window again
-            // (no need for this if our window sizing by hand is disabled ).
+            // (no need for this if our window sizing by hand is disabled).
             break;
         default:
             return (DefWindowProc(hWnd, uMsg, wParam, lParam));
@@ -43,25 +42,26 @@ uint64_t Window::win32ClassIdCounter = 0;
 
 void Window::CreateOSWindow()
 {
-    PhysicalDevice* physicalDevice = cachedInstance->GetDevice()->GetPhysicalDevice();
-    VK_ASSERT(vkGetPhysicalDeviceWin32PresentationSupportKHR(physicalDevice->GetVkPhysicalDevice(), physicalDevice->GetGraphicsQueueFamilyIndex()), "Queue family does not support presentation.");
+    PhysicalDevice* physicalDevice = device->GetPhysicalDevice();
+    VK_ASSERT(vkGetPhysicalDeviceWin32PresentationSupportKHR(physicalDevice->GetVkPhysicalDevice(),
+        physicalDevice->GetGraphicsQueueFamilyIndex()), "Queue family does not support presentation.");
 
     WNDCLASSEX win_class {};
 
-    VK_ASSERT(windowCreateInfo.surfaceSize.width > 0, "Surface width is equal to or less than 0!");
-    VK_ASSERT(windowCreateInfo.surfaceSize.height > 0, "Surface height is equal to or less than 0!");
+    VK_ASSERT(windowCreateInfo.surfaceSize.width > 0, "Surface width is equal to 0!");
+    VK_ASSERT(windowCreateInfo.surfaceSize.height > 0, "Surface height is equal to 0!");
 
     win32Instance = GetModuleHandle(nullptr);
     win32ClassName = windowCreateInfo.windowName + "_" + std::to_string(win32ClassIdCounter);
     ++win32ClassIdCounter;
 
-    // Initialize the window class structure:
+    // Initialize the window class structure.
     win_class.cbSize = sizeof(WNDCLASSEX);
     win_class.style = CS_HREDRAW | CS_VREDRAW;
     win_class.lpfnWndProc = WindowsEventHandler;
     win_class.cbClsExtra = 0;
     win_class.cbWndExtra = 0;
-    win_class.hInstance = win32Instance; // hInstance
+    win_class.hInstance = win32Instance;
     win_class.hIcon = LoadIcon(NULL, IDI_APPLICATION);
     win_class.hCursor = LoadCursor(NULL, IDC_ARROW);
     win_class.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
@@ -69,15 +69,8 @@ void Window::CreateOSWindow()
     win_class.lpszClassName = win32ClassName.c_str();
     win_class.hIconSm = LoadIcon(NULL, IDI_WINLOGO);
 
-    // Register window class:
-    if (!RegisterClassEx(&win_class))
-    {
-        // #TODO assert with DebugTools
-        // It didn't work, so try to give a useful error:
-        assert(0 && "Cannot create a window in which to draw!\n");
-        fflush(stdout);
-        exit(-1);
-    }
+    // Register window class.
+    VK_ASSERT(RegisterClassEx(&win_class), "Cannot register window class.");
 
     DWORD ex_style = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
     DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX; // | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
@@ -95,16 +88,10 @@ void Window::CreateOSWindow()
         NULL,							        // handle to parent
         NULL,							        // handle to menu
         win32Instance,				            // hInstance
-        NULL);							        // no extra parameters
+        NULL                                    // no extra parameters
+    );
 
-    if (!win32Window)
-    {
-        // #TODO assert with DebugTools
-        // It didn't work, so try to give a useful error:
-        assert(1 && "Cannot create a window in which to draw!\n");
-        fflush(stdout);
-        exit(-1);
-    }
+    VK_ASSERT(win32Window, "Cannot create window.");
 
     SetWindowLongPtr(win32Window, GWLP_USERDATA, (LONG_PTR)this);
 
@@ -123,7 +110,7 @@ void Window::CreateOSSurface()
         win32Window
     };
 
-    VK_VERIFY(vkCreateWin32SurfaceKHR(cachedInstance->GetVkInstance(), &surfaceCreateInfo, nullptr, &surface));
+    VK_VERIFY(vkCreateWin32SurfaceKHR(instance, &surfaceCreateInfo, nullptr, &surface));
 }
 
 void Window::UpdateOSWindow()

@@ -82,7 +82,22 @@ VkMemoryRequirements Image::GetMemoryRequirements(VkDevice device) const
 
 VkComponentMapping Image::GetIdentityComponentMapping()
 {
-    return { VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY };
+    return {
+        VK_COMPONENT_SWIZZLE_IDENTITY,
+        VK_COMPONENT_SWIZZLE_IDENTITY,
+        VK_COMPONENT_SWIZZLE_IDENTITY,
+        VK_COMPONENT_SWIZZLE_IDENTITY
+    };
+}
+
+VkComponentMapping Image::GetRGBAComponentMapping()
+{
+    return {
+        VK_COMPONENT_SWIZZLE_R,
+        VK_COMPONENT_SWIZZLE_G,
+        VK_COMPONENT_SWIZZLE_B,
+        VK_COMPONENT_SWIZZLE_A
+    };
 }
 
 void Image::CheckExtent(VkImageType type, VkExtent3D& outExtent)

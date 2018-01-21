@@ -51,8 +51,7 @@ void Buffer::Destroy(VkDevice device)
 void Buffer::Allocate(Device* device, const VkMemoryPropertyFlags requiredProperties)
 {
     VkMemoryRequirements requirements = GetMemoryRequirements(device->GetVkDevice());
-    uint32_t memoryTypeIndex = device->GetPhysicalDevice()->GetMemoryTypeIndex(&requirements,
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    uint32_t memoryTypeIndex = device->GetPhysicalDevice()->GetMemoryTypeIndex(&requirements, requiredProperties);
 
     memory.Allocate(device->GetVkDevice(), requirements.size, memoryTypeIndex);
 

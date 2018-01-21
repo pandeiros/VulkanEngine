@@ -12,6 +12,13 @@
 #include "Buffer.h"
 #include "CommandPool.h"
 
+#ifdef __ANDROID__
+#include "gvr.h"
+#include "gvr_controller.h"
+#endif
+
+#include <chrono>
+
 /**
  * @file TestApplication.h
  */
@@ -24,20 +31,28 @@ VULKAN_NS_BEGIN
 class TestApplication : public Application
 {
 public:
-    TestApplication()
-        : Application("Vulkan Engine App Test", 1, VK_MAKE_VERSION(1, 0, 2))
-    {}
+    TestApplication();
 
     ~TestApplication();
 
-
     void Init() override;
+
+protected:
     void Tick(float deltaTime) override;
 
 private:
     CommandPool commandPool;
-    VkSemaphore semaphoreRenderComplete;
     Camera* camera;
+
+    // Test variables.
+    float colorRotator = 0.f;
+    std::chrono::steady_clock timer;
+    std::chrono::steady_clock::time_point lastTime;
+
+#ifdef __ANDROID__
+    // GVR Controller
+    gvr::ControllerState controller_state;
+#endif
 };
 
 VULKAN_NS_END

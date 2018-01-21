@@ -45,6 +45,11 @@ VARARG_BODY(void, Logger::Logf, const char*,
         if (verbosity == LogVerbosity::Error)
         {
             MessageBox(NULL, buffer, "Error", 0);
+
+#ifdef VULKAN_ASSERT_ON_ERRORS
+            VK_ASSERT(0, buffer);
+#endif
+
         }
 #elif __ANDROID__
         __android_log_print(GetPlatformVerbosity(verbosity), VULKAN_ANDROID_TAG, "%s%s%s", category, (strlen(category) == 0 ? "" : ": "), buffer);

@@ -29,9 +29,6 @@ public:
 
     ~Device();
 
-    //void Create(PhysicalDevice& physicalDevice, std::vector<const char*> deviceExtensions = {},
-    //    VkPhysicalDeviceFeatures requiredFeatures = {});
-
     void Reset();
     virtual void Destroy() override;
     void CheckPhysicalDeviceDirty();
@@ -60,14 +57,14 @@ private:
 
     Queue queue;
 
-    PhysicalDevice* cachedPhysicalDevice;
+    PhysicalDevice* physicalDevice;
 
     VkDeviceCreateInfo deviceCreateInfo = {};
     VkDeviceQueueCreateInfo deviceQueueCreateInfo = {};
 
     // Properties used to initialize VkDevice.
-    std::vector<const char*> cachedDeviceExtensions;
-    VkPhysicalDeviceFeatures cachedRequiredFeatures;
+    std::vector<const char*> deviceExtensions;
+    VkPhysicalDeviceFeatures requiredFeatures;
 };
 
 typedef std::shared_ptr<Device> DevicePtr;

@@ -15,13 +15,6 @@ VULKAN_NS_USING;
 Instance::Instance(VkApplicationInfo applicationInfo, std::vector<const char*> instanceLayers,
     std::vector<const char*> instaceExtensions)
 {
-    //Engine* engine = Engine::GetEngine();
-
-    //if (engine)
-    //{
-    //    engine->ValidateInstanceProperties(instanceLayers, instaceExtensions);
-    //}
-
     instanceCreateInfo = {
         VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
         nullptr,
@@ -34,11 +27,17 @@ Instance::Instance(VkApplicationInfo applicationInfo, std::vector<const char*> i
     };
 
     VK_VERIFY(vkCreateInstance(&instanceCreateInfo, nullptr, &instance));
+
+    SetupDebug();
 }
 
 Instance::~Instance()
 {
-    window.Destroy();
+    Window* pWindow = window.release();
+    if (pWindow)
+    {
+        delete pWindow;
+    }
 
     VK_ASSERT(device.use_count() == 1, "Device shared_ptr reference count should equal 1 when destroying instance!");
     device.reset();
@@ -55,54 +54,7 @@ Instance::~Instance()
 
 void Instance::InitDeviceAndWindow(PhysicalDevice* physicalDevice)
 {
-    SetupDebug();
-
-    CreateDevice(physicalDevice);
-    CreateAppWindow();
-}
-
-//void Instance::Destroy()
-//{
-//    window.Destroy();
-//    //device->Destroy();
-//
-//    DestroyDebug();
-//
-//    if (instance)
-//    {
-//        vkDestroyInstance(instance, nullptr);
-//    }
-//
-//    instance = VK_NULL_HANDLE;
-//}
-
-//void Instance::Create(VkApplicationInfo applicationInfo, std::vector<const char*> instanceLayers, std::vector<const char*> instaceExtensions)
-//{
-//    Engine* engine = Engine::GetEngine();
-//
-//    if (engine)
-//    {
-//        engine->ValidateInstanceProperties(instanceLayers, instaceExtensions);
-//    }
-//
-//    instanceCreateInfo = {
-//        VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-//        nullptr,
-//        0,
-//        &applicationInfo,
-//        (uint32_t)instanceLayers.size(),
-//        instanceLayers.data(),
-//        (uint32_t)instaceExtensions.size(),
-//        instaceExtensions.data()
-//    };
-//
-//    VK_VERIFY(vkCreateInstance(&instanceCreateInfo, nullptr, &instance));
-//
-//
-//}
-
-void Instance::CreateDevice(PhysicalDevice* physicalDevice)
-{
+    // Device
     std::vector<const char*> deviceExtensions = {
         VK_KHR_SWAPCHAIN_EXTENSION_NAME
     };
@@ -110,33 +62,19 @@ void Instance::CreateDevice(PhysicalDevice* physicalDevice)
     device = std::shared_ptr<Device>(new Device(physicalDevice,
         deviceExtensions, {}));
 
-
-    //Engine* engine = Engine::GetEngine();
-
-    //if (engine && engine->GetPhysicalDevices().size() > 0)
-    //{
-    //    device = std::make_shared<Device>();
-    //    device->Create(engine->GetPhysicalDevices()[0],
-    //    {
-    //        VK_KHR_SWAPCHAIN_EXTENSION_NAME
-    //    },
-    //    {});
-    //}
-}
-
-void Instance::CreateAppWindow()
-{
+    // Window
     int32_t height = 0, width = 0;
 
 #ifdef __ANDROID__
     AndroidGetWindowSize(width, height);
     VK_ASSERT(width > 0 && height > 0, "Invalid window size.");
 #elif _WIN32
-    height = 1080;
-    width = 1920;
+    height = 500;
+    width = 500;
 #endif
 
-    window.Create(this, { "Vulkan Engine", { (uint32_t)width, (uint32_t)height } });
+    window.reset(new Window(device, instance, { "Vulkan Engine", { (uint32_t)width, (uint32_t)height } }));
+
 }
 
 VkInstance Instance::GetVkInstance()
@@ -154,19 +92,19 @@ Device* Instance::GetDevice()
     return device.get();
 }
 
-//Device& Instance::GetDeviceRef()
-//{
-//    return device;
-//}
-
-Window& Instance::GetWindowRef()
+Window* Instance::GetWindow()
 {
-    return window;
+    return window.get();
 }
+
+//Window& Instance::GetWindowRef()
+//{
+//    return window;
+//}
 
 #if VULKAN_ENABLE_DEBUG
 
-VKAPI_ATTR VkBool32 VKAPI_CALL
+static VKAPI_ATTR VkBool32 VKAPI_CALL
 VulkanDebugCallback(VkDebugReportFlagsEXT MsgFlags, VkDebugReportObjectTypeEXT ObjectType, uint64_t SourceObject,
     size_t Location, int32_t MsgCode, const char* LayerPrefix, const char* Msg, void* UserData)
 {
@@ -181,24 +119,21 @@ void Instance::SetupDebug()
         VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT,
         nullptr,
         DebugTools::GetVulkanDebugFlagsEnabled(),
-        VulkanDebugCallback,
+        (PFN_vkDebugReportCallbackEXT)VulkanDebugCallback,
         nullptr
     };
 
     VULKAN_GET_INSTANCE_PROC_ADDR(instance, CreateDebugReportCallbackEXT);
     VULKAN_GET_INSTANCE_PROC_ADDR(instance, DestroyDebugReportCallbackEXT);
 
-    // #TODO Remove after fixing VULKAN_GET_INSTANCE_PROC_ADDR in VulkanMisc)
-    //VK_ASSERT(fvkCreateDebugReportCallbackEXT && fvkDestroyDebugReportCallbackEXT, "Cannot fetch debug function pointers.");
-
-    VK_VERIFY(fvkCreateDebugReportCallbackEXT(instance, &debugCallbackCreateInfo, nullptr, &debugReport));
+    VK_VERIFY(vkCreateDebugReportCallbackEXT(instance, &debugCallbackCreateInfo, nullptr, &debugReport));
 }
 
 void Instance::DestroyDebug()
 {
     if (instance && debugReport)
     {
-        fvkDestroyDebugReportCallbackEXT(instance, debugReport, nullptr);
+        vkDestroyDebugReportCallbackEXT(instance, debugReport, nullptr);
     }
 
     debugReport = VK_NULL_HANDLE;

@@ -30,9 +30,10 @@ public:
      */
     ~CommandBuffer() = default;
 
+    VkCommandBuffer GetVkCommandBuffer();
     VkCommandBuffer& GetVkCommandBufferRef();
 
-    void Begin(VkCommandBufferUsageFlags flags, const VkCommandBufferInheritanceInfo inheritanceInfo);
+    //void Begin(VkCommandBufferUsageFlags flags, const VkCommandBufferInheritanceInfo inheritanceInfo);
     void Begin(VkCommandBufferUsageFlags flags, const VkCommandBufferInheritanceInfo* inheritanceInfo);
     void Reset(VkCommandBufferResetFlags flags);
     void End();

@@ -6,12 +6,22 @@
 
 #include "TestApplication.h"
 
-#include <Core.h>
-#include <World.h>
-#include <Primitive.h>
-#include <Rendering/ShaderTools.h>
+#include "Core.h"
+#include "World.h"
+#include "Primitive.h"
+#include "Rendering/ShaderTools.h"
+
+#ifdef __ANDROID__
+#include "AndroidUtils.h"
+#endif
+
+VK_DECLARE_LOG_CATEGORY(LogTestApplication);
 
 VULKAN_NS_USING;
+
+TestApplication::TestApplication()
+    : Application("Vulkan Engine App Test", 1, VK_MAKE_VERSION(1, 0, 2))
+{}
 
 TestApplication::~TestApplication()
 {
@@ -21,7 +31,6 @@ TestApplication::~TestApplication()
     delete camera;
 
     Device* device = instance->GetDevice();
-    device->DestroySemaphore(semaphoreRenderComplete);
 
     commandPool.Destroy(device->GetVkDevice());
 }
@@ -30,28 +39,26 @@ void TestApplication::Init()
 {
     Application::Init();
 
-    Device* device = GetInstance()->GetDevice();
+    Device* device = instance->GetDevice();
 
-    commandPool.Create(device->GetVkDevice(), VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-        GetInstance()->GetDevice()->GetPhysicalDevice()->GetGraphicsQueueFamilyIndex());
+    commandPool.Create(device->GetVkDevice(), VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+        instance->GetDevice()->GetPhysicalDevice()->GetGraphicsQueueFamilyIndex());
     commandPool.AllocateCommandBuffer(device->GetVkDevice(), VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
-    device->CreateSemaphore(&semaphoreRenderComplete);
-
-    float fov = 45.f;
-    float aspect = (float)GetInstance()->GetWindowRef().GetSurfaceSize().width / (float)GetInstance()->GetWindowRef().GetSurfaceSize().height;
+    float fov = glm::radians(45.f);
+    float aspect = (float)instance->GetWindow()->GetSurfaceSize().width / (float)instance->GetWindow()->GetSurfaceSize().height;
     if (aspect > 1.f)
     {
         fov *= 1.f / aspect;
     }
     camera = new Camera(fov, aspect, 0.1f, 100.f,
     { glm::vec3(-5, 3, -10), glm::vec3(0, 0, 0), glm::vec3(0, -1, 0) }, Camera::DEFAULT_CLIP_MATRIX);
-    GetEngine()->GetWorld()->AddCamera(camera);
+    engine->GetWorld()->AddCamera(camera);
+
     glm::mat4 vpMatrix = camera->GetViewProjectionMatrix();
+    glm::mat4 mvpMatrix = vpMatrix *glm::mat4(1.0f);
 
-    glm::mat4 mvpMatrix = vpMatrix * glm::mat4(1.0f);
-
-    Renderer* renderer = GetEngine()->GetRenderer();
+    Renderer* renderer = engine->GetRenderer();
 
     Buffer& uniformBuffer = renderer->GetUniformBuffer();
     uniformBuffer.CreateExclusive(device->GetVkDevice(), 0, sizeof(mvpMatrix), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
@@ -81,60 +88,68 @@ void TestApplication::Init()
     renderer->InitDescriptorPool(device->GetVkDevice());
     renderer->InitDescriptorSet(device->GetVkDevice());
     renderer->InitPipelineCache(device->GetVkDevice());
-    renderer->InitPipeline(device->GetVkDevice(), instance->GetWindowRef().GetSurfaceSize(), instance->GetWindowRef().GetRenderPass());
+    renderer->InitPipeline(device->GetVkDevice(), instance->GetWindow()->GetSurfaceSize(), instance->GetWindow()->GetRenderPass());
 
-    //timer = std::chrono::steady_clock();
-    //lastTime = timer.now();
+    timer = std::chrono::steady_clock();
+    lastTime = timer.now();
 
     SetUpdateEnabled(true);
+
+    VK_LOG(LogTestApplication, Info, "VULKAN APP INITIALIZED");
 }
 
 void TestApplication::Tick(float deltaTime)
 {
-    Window& window = instance->GetWindowRef();
+    Window* window = instance->GetWindow();
     CommandBuffer& commandBuffer = commandPool.GetCommandBufferRef();
     Queue& queue = instance->GetDevice()->GetQueueRef();
     Renderer* renderer = GetEngine()->GetRenderer();
 
-    if (window.Update())
+    if (window->Update())
     {
-        //if (AndroidUtils::controllerApi)
-        //{
-        //    controller_state.Update(*AndroidUtils::controllerApi);
-        //}
+        // #TODO Make Input class to handle this.
+#ifdef __ANDROID__
+        if (AndroidUtils::controllerApi)
+        {
+            controller_state.Update(*AndroidUtils::controllerApi);
+        }
+#endif
 
-        //std::chrono::duration<double> diff = std::chrono::duration_cast<std::chrono::duration<double>>(timer.now() - lastTime);
-        //if (diff.count() >= 1.0)
-        //{
-        //    lastTime = timer.now();
-        //    VK_LOG(LogApplication, Debug, "FPS: %.0f", GetEngine()->GetFPS());
-        //}
+        std::chrono::duration<double> diff = std::chrono::duration_cast<std::chrono::duration<double>>(timer.now() - lastTime);
+        if (diff.count() >= 1.0)
+        {
+            lastTime = timer.now();
+            VK_LOG(LogTestApplication, Debug, "FPS: %.0f", GetEngine()->GetFPS());
+        }
 
-        window.BeginRender();
-        commandBuffer.Begin(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT, nullptr);
+        window->BeginRender();
+
+        commandBuffer.Reset(0);
+        //commandBuffer.Begin(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT, nullptr);
+        commandBuffer.Begin(0, nullptr);
 
         VkRect2D renderArea{};
         renderArea.offset.x = 0;
         renderArea.offset.y = 0;
-        renderArea.extent = window.GetSurfaceSize();
+        renderArea.extent = window->GetSurfaceSize();
 
         std::vector<VkClearValue> clearValues = std::vector<VkClearValue>(2);
 
-        clearValues[0].color.float32[0] = 1.f;
-        clearValues[0].color.float32[1] = 0.f;
-        clearValues[0].color.float32[2] = 1.f;
-        clearValues[0].color.float32[3] = 1.f;
+        clearValues[0].color.float32[0] = 0.2f;
+        clearValues[0].color.float32[1] = 0.2f;
+        clearValues[0].color.float32[2] = std::sin(colorRotator + (float)PI / 2.f) * 0.5f + 0.5f;
+        clearValues[0].color.float32[3] = 0.2f;
 
-        clearValues[1].depthStencil.depth = 0.f;
+        clearValues[1].depthStencil.depth = 1.f;
         clearValues[1].depthStencil.stencil = 0;
 
-        commandBuffer.BeginRenderPass(window.GetRenderPass(), window.GetActiveFramebuffer(), renderArea, clearValues, VK_SUBPASS_CONTENTS_INLINE);
+        commandBuffer.BeginRenderPass(window->GetRenderPass(), window->GetActiveFramebuffer(), renderArea, clearValues, VK_SUBPASS_CONTENTS_INLINE);
 
         renderer->BindPipeline(commandBuffer.GetVkCommandBufferRef(), VK_PIPELINE_BIND_POINT_GRAPHICS);
         renderer->BindDescriptorSets(commandBuffer.GetVkCommandBufferRef(), VK_PIPELINE_BIND_POINT_GRAPHICS);
         renderer->BindVertexBuffers(commandBuffer.GetVkCommandBufferRef(), { 0 });
-        renderer->CommandSetViewports(commandBuffer.GetVkCommandBufferRef());
-        renderer->CommandSetScissors(commandBuffer.GetVkCommandBufferRef());
+        renderer->CommandSetViewports(commandBuffer.GetVkCommandBuffer());
+        renderer->CommandSetScissors(commandBuffer.GetVkCommandBuffer());
 
         // #REFACTOR
         vkCmdDraw(commandBuffer.GetVkCommandBufferRef(), 12 * 3, 1, 0, 0);
@@ -142,12 +157,21 @@ void TestApplication::Tick(float deltaTime)
         commandBuffer.EndRenderPass();
         commandBuffer.End();
 
+        // #TODO Clean this up
+        VkFence fence = window->GetFence();
+        vkResetFences(instance->GetDevice()->GetVkDevice(), 1, &fence);
 
+        std::vector<VkCommandBuffer> commandBuffers = { commandBuffer.GetVkCommandBuffer() };
+        std::vector<VkSemaphore> waitSemaphores = { window->GetSemaphore() };
 
         VkPipelineStageFlags pipelineStageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        queue.Submit(&pipelineStageFlags, {}, { commandBuffer.GetVkCommandBufferRef() }, { semaphoreRenderComplete }, VK_NULL_HANDLE);
+        queue.Submit(&pipelineStageFlags, waitSemaphores, commandBuffers,
+        {}, window->GetFence());
+        //        queue.Submit(&pipelineStageFlags, {}, { commandBuffer.GetVkCommandBufferRef() }, {semaphoreRenderComplete}, VK_NULL_HANDLE);
 
-        window.EndRender({ semaphoreRenderComplete });
+        window->EndRender({}, { window->GetFence() });
+
+        colorRotator += deltaTime;
     }
     else
     {
@@ -156,5 +180,4 @@ void TestApplication::Tick(float deltaTime)
     }
 
     queue.WaitIdle();
-
 }

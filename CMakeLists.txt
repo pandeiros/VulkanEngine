@@ -1,13 +1,15 @@
-file(GLOB VULKAN_ENGINE_SOURCE1 source/Utils/*.cpp)
-file(GLOB VULKAN_ENGINE_SOURCE2 source/Platforms/Android/*.cpp)
-file(GLOB VULKAN_ENGINE_SOURCE3 source/Rendering/*.cpp)
-file(GLOB VULKAN_ENGINE_SOURCE4 source/*.cpp)
+file(GLOB VULKAN_ENGINE_UTILS_SOURCE source/Utils/*.cpp)
+file(GLOB VULKAN_ENGINE_PLATFORM_SOURCE source/Platforms/Android/*.cpp)
+file(GLOB VULKAN_ENGINE_RENDERING_SOURCE source/Rendering/*.cpp)
+file(GLOB VULKAN_ENGINE_SOURCE source/*.cpp)
+file(GLOB VULKAN_ENGINE_TEST_SOURCE tests/*.cpp)
 file(GLOB VULKAN_ENGINE_ANDROID_SOURCE android/utils/*.cpp)
 
-set(INCLUDE_DATA_DIR ${INCLUDE_DATA_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/include") # ${CMAKE_CURRENT_SOURCE_DIR}/include/Rendering ${CMAKE_CURRENT_SOURCE_DIR}/include/Platforms ${CMAKE_CURRENT_SOURCE_DIR}/include/Utils")
+set(INCLUDE_DIR ${INCLUDE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/include") # ${CMAKE_CURRENT_SOURCE_DIR}/include/Rendering ${CMAKE_CURRENT_SOURCE_DIR}/include/Platforms ${CMAKE_CURRENT_SOURCE_DIR}/include/Utils")
+set(TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests")
 
 if (ANDROID)
-    set(ANDROID_INCLUDE_DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android/utils")
+    set(ANDROID_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android/utils")
 endif()
 
 set(SAMPLES_DATA_DIR ${SAMPLES_DATA_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/data")
@@ -23,7 +25,7 @@ else()
     include_directories( ${SAMPLES_DATA_DIR} ${GLMINC_PREFIX} ${GLSLANG_SPIRV_INCLUDE_DIR})
 endif()
 
-# Import shaderc library in NDK
+# Import shaderc, gvr and vulkan layer libraries in NDK
 add_library(shaderc_lib STATIC IMPORTED)
 set_target_properties(shaderc_lib PROPERTIES IMPORTED_LOCATION
                       ${SHADERC_SRC}/libs/${ANDROID_STL}/${ANDROID_ABI}/libshaderc.a)
@@ -49,16 +51,16 @@ else()
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-sign-compare")
 endif()
 
-add_library(${VULKAN_ENGINE_NAME} STATIC ${VULKAN_ENGINE_SOURCE1} ${VULKAN_ENGINE_SOURCE2} ${VULKAN_ENGINE_SOURCE3}
-                                        ${VULKAN_ENGINE_SOURCE4} ${VULKAN_ENGINE_ANDROID_SOURCE})
+add_library(${VULKAN_ENGINE_NAME} STATIC ${VULKAN_ENGINE_UTILS_SOURCE} ${VULKAN_ENGINE_PLATFORM_SOURCE} ${VULKAN_ENGINE_RENDERING_SOURCE}
+                                        ${VULKAN_ENGINE_SOURCE} ${VULKAN_ENGINE_ANDROID_SOURCE})
 
 if (ANDROID)
     add_library(native_app_glue STATIC
                ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c)
 
     target_include_directories(${VULKAN_ENGINE_NAME} PRIVATE
-                                ${INCLUDE_DATA_DIR}
-                                ${ANDROID_INCLUDE_DATA_DIR}
+                                ${INCLUDE_DIR}
+                                ${ANDROID_INCLUDE_DIR}
                                 ${ANDROID_NDK}/sources/android/native_app_glue
                                 ${CMAKE_CURRENT_SOURCE_DIR}/android/vulkan_wrapper
                                 ${CMAKE_CURRENT_SOURCE_DIR}/data

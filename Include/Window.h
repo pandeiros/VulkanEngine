@@ -8,7 +8,7 @@
 
 #include "VulkanCore.h"
 
-#include "PhysicalDevice.h"
+#include "Device.h"
 #include "Image.h"
 #include "ImageView.h"
 #include "Memory.h"
@@ -33,37 +33,41 @@ struct WindowCreateInfo
 /**
  * @class Window
  */
-class Window
+class Window : public VulkanClass
 {
 public:
-    /**
-     * Default constructor.
-     */
-    Window() = default;
+    Window(DevicePtr device, VkInstance instance, const WindowCreateInfo& windowCreateInfo);
 
-    /**
-     * Default destructor.
-     */
-    ~Window() = default;
+    ~Window();
 
-    void Create(Instance* instance, const WindowCreateInfo& windowCreateInfo);
-    void Destroy();
+    //void Init() override;
+    //void Create(Instance* instance, const WindowCreateInfo& windowCreateInfo);
+    //void Destroy();
 
     bool Update();
     void Close();
 
     void BeginRender();
-    void EndRender(std::vector<VkSemaphore> WaitSemaphores);
+    // #TODO Maybe rename this to Present or sth
+    void EndRender(std::vector<VkSemaphore> WaitSemaphores, std::vector<VkFence> waitFences);
 
     VkExtent2D GetSurfaceSize();
     VkRenderPass GetRenderPass();
     VkFramebuffer GetActiveFramebuffer();
 
+    // #TODO Clean this up
+    VkSemaphore GetSemaphore()
+    {
+        return semaphoreImageAcquired;
+    }
+    VkFence GetFence()
+    {
+        return fenceDraw;
+    }
+
 private:
     WindowCreateInfo windowCreateInfo = {};
-    Instance* cachedInstance = VK_NULL_HANDLE;
-
-    bool bIsValid = true;
+    VkInstance instance = VK_NULL_HANDLE;
 
     //////////////////////////////////////////////////////////////////////////
     // Surface
@@ -132,7 +136,9 @@ private:
     void CreateSynchronization();
     void DestroySynchronization();
 
-    VkFence fenceSwapchainImageAvailable = VK_NULL_HANDLE;
+    VkFence fenceDraw = VK_NULL_HANDLE;
+    //VkFence fenceSwapchainImageAvailable = VK_NULL_HANDLE;
+    VkSemaphore semaphoreImageAcquired = VK_NULL_HANDLE;
 
     //////////////////////////////////////////////////////////////////////////
     // OS specific methods
@@ -153,7 +159,7 @@ private:
     std::string win32ClassName;
     static uint64_t win32ClassIdCounter;
 #elif __ANDROID__
-    PFN_vkCreateAndroidSurfaceKHR fvkCreateAndroidSurfaceKHR;
+    //PFN_vkCreateAndroidSurfaceKHR vkCreateAndroidSurfaceKHR;
 #endif
 };
 

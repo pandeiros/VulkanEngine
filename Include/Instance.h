@@ -23,24 +23,27 @@ VULKAN_NS_BEGIN
 class Instance : public VulkanClass
 {
 public:
-    Instance(VkApplicationInfo applicationInfo, std::vector<const char*> instanceLayers, std::vector<const char*> instaceExtensions);
+    Instance(VkApplicationInfo applicationInfo, std::vector<const char*> instanceLayers,
+        std::vector<const char*> instaceExtensions);
 
     ~Instance();
 
     void InitDeviceAndWindow(PhysicalDevice* physicalDevice);
-    //virtual void Destroy() override;
-
-    //void Create(VkApplicationInfo applicationInfo, std::vector<const char*> instanceLayers, std::vector<const char*> instaceExtensions);
-
-    void CreateDevice(PhysicalDevice* physicalDevice);
-    void CreateAppWindow();
 
     VkInstance GetVkInstance();
 
     std::shared_ptr<Device> GetDevicePtr();
     Device* GetDevice();
-    //Device& GetDeviceRef();
-    Window& GetWindowRef();
+    Window* GetWindow();
+    //Window& GetWindowRef();
+
+private:
+    VkInstance instance = VK_NULL_HANDLE;
+
+    std::shared_ptr<Device> device;
+    std::unique_ptr<Window> window;
+
+    VkInstanceCreateInfo instanceCreateInfo = {};
 
     //////////////////////////////////////////////////////////////////////////
     // Debug
@@ -49,23 +52,13 @@ public:
     void SetupDebug();
     void DestroyDebug();
 
-private:
-    VkInstance instance = VK_NULL_HANDLE;
-
-    std::shared_ptr<Device> device;
-    Window window;
-
-    VkInstanceCreateInfo instanceCreateInfo = {};
-
-    //////////////////////////////////////////////////////////////////////////
-    // Debug
-    //////////////////////////////////////////////////////////////////////////
-
     VkDebugReportCallbackEXT debugReport = VK_NULL_HANDLE;
     VkDebugReportCallbackCreateInfoEXT debugCallbackCreateInfo = {};
 
-    PFN_vkCreateDebugReportCallbackEXT fvkCreateDebugReportCallbackEXT = nullptr;
-    PFN_vkDestroyDebugReportCallbackEXT fvkDestroyDebugReportCallbackEXT = nullptr;
+#ifndef __ANDROID__
+    PFN_vkCreateDebugReportCallbackEXT vkCreateDebugReportCallbackEXT = nullptr;
+    PFN_vkDestroyDebugReportCallbackEXT vkDestroyDebugReportCallbackEXT = nullptr;
+#endif
 };
 
 VULKAN_NS_END

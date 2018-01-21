@@ -43,6 +43,7 @@ public:
     VkMemoryRequirements GetMemoryRequirements(VkDevice device) const;
 
     static VkComponentMapping GetIdentityComponentMapping();
+    static VkComponentMapping GetRGBAComponentMapping();
 
 protected:
     VkImage image = VK_NULL_HANDLE;

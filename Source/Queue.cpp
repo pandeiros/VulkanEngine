@@ -19,7 +19,8 @@ void Queue::Submit(std::vector<VkSubmitInfo> submits, VkFence fence)
     VK_VERIFY(vkQueueSubmit(queue, (uint32_t)submits.size(), submits.data(), fence));
 }
 
-void Queue::Submit(const VkPipelineStageFlags* waitDstStageMask, const std::vector<VkSemaphore>& waitSemaphores, const std::vector<VkCommandBuffer>& commandBuffers, const std::vector<VkSemaphore>& signalSemaphores, VkFence fence)
+void Queue::Submit(const VkPipelineStageFlags* waitDstStageMask, const std::vector<VkSemaphore>& waitSemaphores,
+    const std::vector<VkCommandBuffer>& commandBuffers, const std::vector<VkSemaphore>& signalSemaphores, VkFence fence)
 {
     VkSubmitInfo submitInfo = {
         VK_STRUCTURE_TYPE_SUBMIT_INFO,

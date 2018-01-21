@@ -10,7 +10,7 @@
 
 #define GLM_FORCE_RADIANS
 #include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <algorithm>
 
@@ -34,6 +34,8 @@ public:
     template<typename T>
     static std::vector<T> Diff(const std::vector<T>& a, const std::vector<T>& b);
 
+    template<typename T>
+    static T Clamp(const T& Value, const T&Min, const T&Max);
 private:
 
 };
@@ -71,6 +73,21 @@ inline std::vector<const char*> Math::Diff<const char*>(const std::vector<const 
     }
 
     return diff;
+}
+
+template<typename T>
+T Math::Clamp(const T& Value, const T&Min, const T&Max)
+{
+    if (Value < Min)
+    {
+        return Min;
+    }
+    else if (Value > Max)
+    {
+        return Max;
+    }
+
+    return Value;
 }
 
 VULKAN_NS_END

@@ -101,6 +101,11 @@ uint32_t PhysicalDevice::GetGraphicsQueueFamilyIndex() const
 
 uint32_t PhysicalDevice::GetPresentQueueFamilyIndex(VkSurfaceKHR surface)
 {
+    if (presentQueueFamilyIndex != UINT32_MAX)
+    {
+        return presentQueueFamilyIndex;
+    }
+
     VkBool32 bPresentSupported = false;
     uint32_t tempGraphicsIndex = UINT32_MAX;
 

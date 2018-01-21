@@ -9,22 +9,10 @@
 
 VULKAN_NS_USING;
 
-//void Device::Create(PhysicalDevice& physicalDevice, std::vector<const char*> deviceExtensions, VkPhysicalDeviceFeatures requiredFeatures)
-//{
-//    cachedPhysicalDevice = &physicalDevice;
-//    cachedDeviceExtensions = deviceExtensions;
-//    cachedRequiredFeatures = requiredFeatures;
-//
-//    CreateInternal();
-//}
 
-Device::Device(PhysicalDevice* physicalDevice, std::vector<const char*> deviceExtensions,
-    VkPhysicalDeviceFeatures requiredFeatures)
+Device::Device(PhysicalDevice* physicalDevice, std::vector<const char*> deviceExtensions, VkPhysicalDeviceFeatures requiredFeatures)
+    : physicalDevice(physicalDevice), deviceExtensions(deviceExtensions), requiredFeatures(requiredFeatures)
 {
-    cachedPhysicalDevice = physicalDevice;
-    cachedDeviceExtensions = deviceExtensions;
-    cachedRequiredFeatures = requiredFeatures;
-
     Init();
 }
 
@@ -38,7 +26,7 @@ void Device::Reset()
     Destroy();
     Init();
 
-    cachedPhysicalDevice->SetDirty(false);
+    physicalDevice->SetDirty(false);
 }
 
 void Device::Destroy()
@@ -53,7 +41,7 @@ void Device::Destroy()
 
 void Device::CheckPhysicalDeviceDirty()
 {
-    if (cachedPhysicalDevice && cachedPhysicalDevice->IsDirty())
+    if (physicalDevice && physicalDevice->IsDirty())
     {
         Reset();
     }
@@ -71,7 +59,7 @@ Queue& Device::GetQueueRef()
 
 PhysicalDevice* Device::GetPhysicalDevice()
 {
-    return cachedPhysicalDevice;
+    return physicalDevice;
 }
 
 void Device::FlushMappedMemoryRanges(std::vector<VkMappedMemoryRange> memoryRanges)
@@ -89,9 +77,9 @@ uint32_t Device::GetMemoryTypeForImage(const VkMemoryRequirements memoryRequirem
     uint32_t selectedType = ~0u;
     VkPhysicalDeviceMemoryProperties deviceProperties = {};
 
-    if (cachedPhysicalDevice)
+    if (physicalDevice)
     {
-        deviceProperties = cachedPhysicalDevice->GetPhysicalDeviceMemoryProperties();
+        deviceProperties = physicalDevice->GetPhysicalDeviceMemoryProperties();
     }
     else
     {
@@ -170,13 +158,13 @@ void Device::DestroySemaphore(VkSemaphore semaphore)
 
 void Device::Init()
 {
-    float priorityQueue[]{ 1.f };
+    float priorityQueue[]{ 0.f };
 
     deviceQueueCreateInfo = {
         VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
         nullptr,
         0,
-        cachedPhysicalDevice->GetGraphicsQueueFamilyIndex(),
+        physicalDevice->GetGraphicsQueueFamilyIndex(),
         1,
         priorityQueue
     };
@@ -189,14 +177,14 @@ void Device::Init()
         &deviceQueueCreateInfo,
         0,
         nullptr,
-        (uint32_t)cachedDeviceExtensions.size(),
-        cachedDeviceExtensions.data(),
-        &cachedRequiredFeatures
+        (uint32_t)deviceExtensions.size(),
+        deviceExtensions.data(),
+        &requiredFeatures
     };
 
-    if (VK_VERIFY(vkCreateDevice(cachedPhysicalDevice->GetVkPhysicalDevice(), &deviceCreateInfo, nullptr, &device)) == VK_SUCCESS)
+    if (VK_VERIFY(vkCreateDevice(physicalDevice->GetVkPhysicalDevice(), &deviceCreateInfo, nullptr, &device)) == VK_SUCCESS)
     {
-        vkGetDeviceQueue(device, cachedPhysicalDevice->GetGraphicsQueueFamilyIndex(), 0, &queue.GetVkQueueRef());
+        vkGetDeviceQueue(device, physicalDevice->GetGraphicsQueueFamilyIndex(), 0, &queue.GetVkQueueRef());
     }
 
 }

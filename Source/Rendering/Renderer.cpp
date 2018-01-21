@@ -16,7 +16,7 @@ VK_DECLARE_LOG_CATEGORY(LogRenderer);
 Renderer::Renderer(std::shared_ptr<Device> device)
     : VulkanClass(device)
 {
-
+    bIncludeVertexInput = true;
 }
 
 Renderer::~Renderer()
@@ -73,7 +73,7 @@ void Renderer::CreateDescriptorSetLayout()
     descriptorSetLayoutCreateInfo = {
         VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
         nullptr,
-        1,
+        0,
         bindingCount,
         layoutBindings.data()
     };
@@ -88,7 +88,7 @@ void Renderer::CreatePipelineLayout(VkDevice device)
         VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
         nullptr,
         0,
-        (uint32_t)VULKAN_DESCRIPTOR_SETS_COUNT,
+        (uint32_t)descriptorSetLayouts.size(),
         descriptorSetLayouts.data(),
         0,
         nullptr
@@ -292,7 +292,7 @@ void Renderer::InitPipeline(VkDevice device, VkExtent2D size, VkRenderPass rende
         VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
         nullptr,
         0,
-        VK_FALSE,
+        VK_TRUE,
         VK_FALSE,
         VK_POLYGON_MODE_FILL,
         VK_CULL_MODE_BACK_BIT,
@@ -336,12 +336,6 @@ void Renderer::InitPipeline(VkDevice device, VkExtent2D size, VkRenderPass rende
         nullptr
     };
 
-#ifndef __ANDROID__
-    dynamicStates[dynamicStateCreateInfo.dynamicStateCount++] = VK_DYNAMIC_STATE_VIEWPORT;
-    dynamicStates[dynamicStateCreateInfo.dynamicStateCount++] = VK_DYNAMIC_STATE_SCISSOR;
-#else
-    // Some Android drivers do not support dynamic viewports and scissors.
-
     viewports.push_back({
         0.f, 0.f,
         (float)size.width, (float)size.height,
@@ -349,14 +343,25 @@ void Renderer::InitPipeline(VkDevice device, VkExtent2D size, VkRenderPass rende
     });
 
     scissors.push_back({
-        {0, 0},
-        {size.width, size.height}
+        { 0, 0 },
+        { size.width, size.height }
     });
 
-    pipelineViewportStateCreateInfo.scissorCount = (uint32_t)scissors.size();
-    pipelineViewportStateCreateInfo.pScissors = scissors.data();
-    pipelineViewportStateCreateInfo.viewportCount = (uint32_t)viewports.size();
-    pipelineViewportStateCreateInfo.pViewports = viewports.data();
+    // #TODO Clean
+#ifndef __ANDROID__
+    dynamicStates[dynamicStateCreateInfo.dynamicStateCount++] = VK_DYNAMIC_STATE_VIEWPORT;
+    dynamicStates[dynamicStateCreateInfo.dynamicStateCount++] = VK_DYNAMIC_STATE_SCISSOR;
+#else
+    // Some Android drivers do not support dynamic viewports and scissors.
+
+    //pipelineViewportStateCreateInfo.scissorCount = (uint32_t)scissors.size();
+    //pipelineViewportStateCreateInfo.pScissors = scissors.data();
+    //pipelineViewportStateCreateInfo.viewportCount = (uint32_t)viewports.size();
+    //pipelineViewportStateCreateInfo.pViewports = viewports.data();
+
+    dynamicStates[dynamicStateCreateInfo.dynamicStateCount++] = VK_DYNAMIC_STATE_VIEWPORT;
+    dynamicStates[dynamicStateCreateInfo.dynamicStateCount++] = VK_DYNAMIC_STATE_SCISSOR;
+
 #endif
 
     VkStencilOpState stencilOpState = {
@@ -439,16 +444,16 @@ void Renderer::BindVertexBuffers(VkCommandBuffer commandBuffer, std::vector<VkDe
 
 void Renderer::CommandSetViewports(VkCommandBuffer commandBuffer)
 {
-#ifndef __ANDROID__
+//#ifndef __ANDROID__
     vkCmdSetViewport(commandBuffer, 0, (uint32_t)viewports.size(), viewports.data());
-#endif
+//#endif
 }
 
 void Renderer::CommandSetScissors(VkCommandBuffer commandBuffer)
 {
-#ifndef __ANDROID__
+//#ifndef __ANDROID__
     vkCmdSetScissor(commandBuffer, 0, (uint32_t)scissors.size(), scissors.data());
-#endif
+//#endif
 }
 
 Buffer& Renderer::GetUniformBuffer()

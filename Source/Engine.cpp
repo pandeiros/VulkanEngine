@@ -13,31 +13,6 @@
 
 VULKAN_NS_USING;
 
-//Engine* Engine::engine = nullptr;
-
-//void Engine::InitStatic(DevicePtr device)
-//{
-//    if (engine)
-//    {
-//        engine.release();
-//    }
-//
-//    engine.reset(new Engine(device));
-//    //engine->Init();
-//}
-//
-//void Engine::DestroyStatic()
-//{
-//    //engine->Destroy(device);
-//
-//    engine.release();
-//}
-
-//Engine* Engine::GetEngine()
-//{
-//    return engine..get();
-//}
-
 Engine::Engine(uint32_t frameRate, bool useFixedFrameRate /*= false*/)
 {
     InitInstanceProperties();
@@ -50,12 +25,6 @@ Engine::Engine(uint32_t frameRate, bool useFixedFrameRate /*= false*/)
 
     bEnabled = true;
 }
-
-//Engine::Engine(DevicePtr device)
-//    : device(device)
-//{
-//    Init();
-//}
 
 Engine::~Engine()
 {
@@ -81,24 +50,6 @@ void Engine::Init(DevicePtr device)
     renderer.reset(new Renderer(device));
     world.reset(new World(device));
 }
-
-//void VULKAN_NS_NAME::Engine::Init(DevicePtr device, VkInstance instance)
-//{
-//    EnumeratePhysicalDevices(instance);
-//
-//    this->device = device;
-//
-//    renderer.reset(new Renderer(device));
-//    world.reset(new World(device));
-//}
-
-//void Engine::Destroy()
-//{
-//    bEnabled = false;
-//
-//    world.release(); // Destroy();
-//    renderer.release(); // Destroy();
-//}
 
 void Engine::Update()
 {
@@ -235,7 +186,7 @@ Renderer* Engine::GetRenderer()
     return renderer.get();
 }
 
-void Engine::LogSystemInfo()
+void Engine::LogInstanceProperties()
 {
     if (instanceProperties.size())
     {
@@ -257,7 +208,10 @@ void Engine::LogSystemInfo()
     {
         VK_LOG(LogEngine, Debug, "  %s", extension.extensionName);
     }
+}
 
+void Engine::LogDeviceProperties()
+{
     VK_LOG(LogEngine, Debug, "Physical devices:");
     for (auto& physicalDevice : physicalDevices)
     {
@@ -277,13 +231,12 @@ void Engine::InitInstanceProperties()
 
         if (globalExtensionCount == 0)
         {
-            return ;
+            return;
         }
 
         globalInstanceExtensions.resize(globalExtensionCount);
         result = vkEnumerateInstanceExtensionProperties(nullptr, &globalExtensionCount, globalInstanceExtensions.data());
     } while (result == VK_INCOMPLETE);
-
 }
 
 void Engine::ValidateInstanceProperties(std::vector<const char*>& instanceLayers, std::vector<const char*>& instanceExtensions)
@@ -359,8 +312,6 @@ void Engine::InitPhysicalDevices(VkInstance instance)
     for (VkPhysicalDevice vkPhysicalDevice : vkPhysicalDevices)
     {
         std::unique_ptr<PhysicalDevice> physicalDevice(new PhysicalDevice(vkPhysicalDevice));
-        //PhysicalDevice physicalDevice;
-        //physicalDevice.Create(vkPhysicalDevice);
 
         physicalDevices.push_back(std::move(physicalDevice));
     }
@@ -374,11 +325,6 @@ PhysicalDevice* VULKAN_NS_NAME::Engine::GetPhysicalDevice(uint32_t deviceIndex)
 
     return physicalDevices[deviceIndex].get();
 }
-
-//std::vector<PhysicalDevice>& Engine::GetPhysicalDevices()
-//{
-//    return physicalDevices;
-//}
 
 VkResult Engine::EnumerateInstanceLayers()
 {

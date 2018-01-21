@@ -36,28 +36,14 @@ struct LayerProperties
  */
 class Engine
 {
-    //////////////////////////////////////////////////////////////////////////
-    // Engine instance
-    //////////////////////////////////////////////////////////////////////////
-
 public:
-    //static void InitStatic(DevicePtr device);
-    //static void DestroyStatic();
-
-    //static Engine* GetEngine();
-
-//private:
     Engine(uint32_t frameRate, bool useFixedFrameRate = false);
-    //Engine(DevicePtr device);
     ~Engine();
 
     void Init(DevicePtr device);
-    //void Destroy();
 
 private:
     DevicePtr device;
-
-    //static std::unique_ptr<Engine> engine;
 
     //////////////////////////////////////////////////////////////////////////
     // Update and frame rate
@@ -130,14 +116,13 @@ private:
 
 public:
     void ValidateInstanceProperties(std::vector<const char*>& instanceLayers, std::vector<const char*>& instaceExtensions);
-    //void EnumeratePhysicalDevices(VkInstance instance);
     void InitPhysicalDevices(VkInstance instance);
 
     PhysicalDevice* GetPhysicalDevice(uint32_t deviceIndex);
 
-    //std::vector<PhysicalDevice>& GetPhysicalDevices();
 
-    void LogSystemInfo();
+    void LogInstanceProperties();
+    void LogDeviceProperties();
 
 private:
     void InitInstanceProperties();

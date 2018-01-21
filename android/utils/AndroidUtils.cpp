@@ -6,8 +6,8 @@
 
 #include "AndroidUtils.h"
 
-#include <Engine.h>
-#include <Core.h>
+#include "Engine.h"
+#include "Core.h"
 
 #include <stdio.h>
 #include <assert.h>
@@ -19,7 +19,7 @@
 #ifdef __ANDROID__
 #include <unordered_map>
 #include "shaderc/shaderc.hpp"
-#include <Application.h>
+#include "Application.h"
 
 #else
 //#include "SPIRV/GlslangToSpv.h"
@@ -1149,11 +1149,6 @@ void AndroidUtils::Resume()
 void AndroidUtils::Clean()
 {
     isPaused = true;
-
-//    if (vulkanApplication)
-//    {
-//        vulkanApplication->Destroy();
-//    }
 
     Application* application = vulkanApplication.release();
     if (application)

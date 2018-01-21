@@ -22,8 +22,8 @@ VULKAN_NS_BEGIN
 
 #define VULKAN_GET_INSTANCE_PROC_ADDR(INSTANCE, ENTRY_POINT)                                            \
     {                                                                                                   \
-        fvk##ENTRY_POINT = (PFN_vk##ENTRY_POINT)vkGetInstanceProcAddr(INSTANCE, "vk" #ENTRY_POINT);     \
-        if (fvk##ENTRY_POINT == NULL)                                                                   \
+        vk##ENTRY_POINT = (PFN_vk##ENTRY_POINT)vkGetInstanceProcAddr(INSTANCE, "vk" #ENTRY_POINT);      \
+        if (! vk##ENTRY_POINT)                                                                          \
         {                                                                                               \
             VK_LOG(LogEngine, Fatal, "vkGetInstanceProcAddr failed to find vk" #ENTRY_POINT);           \
         }                                                                                               \

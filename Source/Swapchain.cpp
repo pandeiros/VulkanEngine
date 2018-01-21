@@ -16,7 +16,7 @@ void Swapchain::Create(VkDevice device, VkSwapchainCreateFlagsKHR flags, VkSurfa
     swapchainCreateInfo = {
         VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
         nullptr,
-        0,
+        flags,
         surface,
         desiredImageCount,
         imageinfo.imageFormat,
