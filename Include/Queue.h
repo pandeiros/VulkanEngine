@@ -30,7 +30,8 @@ public:
      */
     ~Queue() = default;
 
-    VkQueue& GetVkQueueRef();
+    VkQueue GetVkQueue();
+    VkQueue* GetVkQueuePtr();
 
     void Submit(std::vector<VkSubmitInfo> submits, VkFence fence);
 

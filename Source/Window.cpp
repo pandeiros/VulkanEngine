@@ -127,7 +127,7 @@ void Window::EndRender(std::vector<VkSemaphore> waitSemaphores, std::vector<VkFe
         result = vkWaitForFences(device->GetVkDevice(), (uint32_t)waitFences.size(), waitFences.data(), VK_TRUE, UINT64_MAX);
     } while (result == VK_TIMEOUT);
 
-    VK_VERIFY(vkQueuePresentKHR(device->GetQueueRef().GetVkQueueRef(), &presentInfo));
+    VK_VERIFY(vkQueuePresentKHR(device->GetQueueRef().GetVkQueue(), &presentInfo));
     VK_VERIFY(presentResult);
 }
 

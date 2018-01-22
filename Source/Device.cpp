@@ -120,11 +120,13 @@ uint32_t Device::GetMemoryTypeForImage(const VkMemoryRequirements memoryRequirem
 
 void Device::BindBufferMemory(VkBuffer buffer, VkDeviceMemory memory, VkDeviceSize size)
 {
-    VK_VERIFY(vkBindBufferMemory(device, buffer, memory, size));
+    // #TODO FIX 0 to offset
+    VK_VERIFY(vkBindBufferMemory(device, buffer, memory, 0));
 }
 
 void Device::BindImageMemory(VkImage image, VkDeviceMemory memory, VkDeviceSize size)
 {
+    // #TODO FIX size to offset
     VK_VERIFY(vkBindImageMemory(device, image, memory, size));
 }
 
@@ -184,7 +186,7 @@ void Device::Init()
 
     if (VK_VERIFY(vkCreateDevice(physicalDevice->GetVkPhysicalDevice(), &deviceCreateInfo, nullptr, &device)) == VK_SUCCESS)
     {
-        vkGetDeviceQueue(device, physicalDevice->GetGraphicsQueueFamilyIndex(), 0, &queue.GetVkQueueRef());
+        vkGetDeviceQueue(device, physicalDevice->GetGraphicsQueueFamilyIndex(), 0, queue.GetVkQueuePtr());
     }
 
 }

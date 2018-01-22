@@ -292,7 +292,7 @@ void Renderer::InitPipeline(VkDevice device, VkExtent2D size, VkRenderPass rende
         VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
         nullptr,
         0,
-        VK_TRUE,
+        VK_FALSE,
         VK_FALSE,
         VK_POLYGON_MODE_FILL,
         VK_CULL_MODE_BACK_BIT,

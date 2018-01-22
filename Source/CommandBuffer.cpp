@@ -14,10 +14,15 @@ VkCommandBuffer CommandBuffer::GetVkCommandBuffer()
     return commandBuffer;
 }
 
-VkCommandBuffer& CommandBuffer::GetVkCommandBufferRef()
+VkCommandBuffer* VULKAN_NS_NAME::CommandBuffer::GetVkCommandBufferPtr()
 {
-    return commandBuffer;
+    return &commandBuffer;
 }
+
+//VkCommandBuffer& CommandBuffer::GetVkCommandBuffer()
+//{
+//    return commandBuffer;
+//}
 
 //void CommandBuffer::Begin(VkCommandBufferUsageFlags flags, const VkCommandBufferInheritanceInfo inheritanceInfo)
 //{

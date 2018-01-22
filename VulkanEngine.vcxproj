@@ -191,11 +191,11 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)android/utils;$(ProjectDir)tests;$(VULKAN_SDK)\Include;$(VULKAN_SDK)\spirv-tools\include;$(VULKAN_SDK)\glslang;$(VULKAN_SDK)\shaderc\third_party\glslang;$(VULKAN_SDK)\Third-Party\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalOptions>/DVULKAN_ENABLE_DEBUG %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>vulkan-1.lib;D:\Users\milordpanda\Dev\Vulkan\1.0.42.1\glslang\build\glslang\Debug\glslangd.lib;D:\Users\milordpanda\Dev\Vulkan\1.0.42.1\glslang\build\OGLCompilersDLL\Debug\OGLCompilerd.lib;D:\Users\milordpanda\Dev\Vulkan\1.0.42.1\glslang\build\glslang\OSDependent\Windows\Debug\OSDependentd.lib;D:\Users\milordpanda\Dev\Vulkan\1.0.42.1\glslang\build\hlsl\Debug\HLSLd.lib;D:\Users\milordpanda\Dev\Vulkan\1.0.42.1\glslang\build\SPIRV\Debug\SPIRVd.lib;D:\Users\milordpanda\Dev\Vulkan\1.0.42.1\spirv-tools\build\source\Debug\SPIRV-Tools.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>vulkan-1.lib;shaderc_combined.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(VULKAN_SDK)\shaderc\build\libshaderc\Debug;$(VULKAN_SDK)\glslang\build;$(VULKAN_SDK)\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>

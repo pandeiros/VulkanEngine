@@ -83,7 +83,7 @@ void TestApplication::Init()
     renderer->AddVertexInputBinding(0, stride, VK_VERTEX_INPUT_RATE_VERTEX);
     renderer->AddVertexInputAttribute(0, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 0);
     // #TODO Change format when using texture.
-    renderer->AddVertexInputAttribute(0, 1, VK_FORMAT_R32G32B32A32_SFLOAT, 16);
+    renderer->AddVertexInputAttribute(1, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 16);
 
     renderer->InitDescriptorPool(device->GetVkDevice());
     renderer->InitDescriptorSet(device->GetVkDevice());
@@ -104,6 +104,7 @@ void TestApplication::Tick(float deltaTime)
     CommandBuffer& commandBuffer = commandPool.GetCommandBufferRef();
     Queue& queue = instance->GetDevice()->GetQueueRef();
     Renderer* renderer = GetEngine()->GetRenderer();
+    Device* device = instance->GetDevice();
 
     if (window->Update())
     {
@@ -121,6 +122,15 @@ void TestApplication::Tick(float deltaTime)
             lastTime = timer.now();
             VK_LOG(LogTestApplication, Debug, "FPS: %.0f", GetEngine()->GetFPS());
         }
+
+        camera->Move(glm::vec3(deltaTime * std::sin(colorRotator) * 10.f, 0.f, 0.f));
+
+        glm::mat4 vpMatrix = camera->GetViewProjectionMatrix();
+        glm::mat4 mvpMatrix = vpMatrix * glm::mat4(1.0f);
+        Renderer* renderer = engine->GetRenderer();
+
+        Buffer& uniformBuffer = renderer->GetUniformBuffer();
+        uniformBuffer.Copy(device->GetVkDevice(), &mvpMatrix, 0, sizeof(mvpMatrix));
 
         window->BeginRender();
 
@@ -145,14 +155,14 @@ void TestApplication::Tick(float deltaTime)
 
         commandBuffer.BeginRenderPass(window->GetRenderPass(), window->GetActiveFramebuffer(), renderArea, clearValues, VK_SUBPASS_CONTENTS_INLINE);
 
-        renderer->BindPipeline(commandBuffer.GetVkCommandBufferRef(), VK_PIPELINE_BIND_POINT_GRAPHICS);
-        renderer->BindDescriptorSets(commandBuffer.GetVkCommandBufferRef(), VK_PIPELINE_BIND_POINT_GRAPHICS);
-        renderer->BindVertexBuffers(commandBuffer.GetVkCommandBufferRef(), { 0 });
+        renderer->BindPipeline(commandBuffer.GetVkCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS);
+        renderer->BindDescriptorSets(commandBuffer.GetVkCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS);
+        renderer->BindVertexBuffers(commandBuffer.GetVkCommandBuffer(), { 0 });
         renderer->CommandSetViewports(commandBuffer.GetVkCommandBuffer());
         renderer->CommandSetScissors(commandBuffer.GetVkCommandBuffer());
 
         // #REFACTOR
-        vkCmdDraw(commandBuffer.GetVkCommandBufferRef(), 12 * 3, 1, 0, 0);
+        vkCmdDraw(commandBuffer.GetVkCommandBuffer(), 12 * 3, 1, 0, 0);
 
         commandBuffer.EndRenderPass();
         commandBuffer.End();
@@ -167,7 +177,6 @@ void TestApplication::Tick(float deltaTime)
         VkPipelineStageFlags pipelineStageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
         queue.Submit(&pipelineStageFlags, waitSemaphores, commandBuffers,
         {}, window->GetFence());
-        //        queue.Submit(&pipelineStageFlags, {}, { commandBuffer.GetVkCommandBufferRef() }, {semaphoreRenderComplete}, VK_NULL_HANDLE);
 
         window->EndRender({}, { window->GetFence() });
 

@@ -50,6 +50,8 @@ public:
 
     glm::mat4 GetViewProjectionMatrix() const;
 
+    void Move(glm::vec3 positionDelta);
+
 private:
     void UpdateMatrices();
 

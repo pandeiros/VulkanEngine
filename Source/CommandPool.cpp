@@ -47,13 +47,13 @@ void CommandPool::AllocateCommandBuffer(VkDevice device, VkCommandBufferLevel le
             1
         };
 
-        VK_VERIFY(vkAllocateCommandBuffers(device, &commandBufferAllocateInfo, &commandBuffer.GetVkCommandBufferRef()));
+        VK_VERIFY(vkAllocateCommandBuffers(device, &commandBufferAllocateInfo, commandBuffer.GetVkCommandBufferPtr()));
     }
 }
 
 void CommandPool::FreeCommandBuffer(VkDevice device, VkCommandPool commandPool)
 {
-    vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer.GetVkCommandBufferRef());
+    vkFreeCommandBuffers(device, commandPool, 1, commandBuffer.GetVkCommandBufferPtr());
 }
 
 CommandBuffer& CommandPool::GetCommandBufferRef()

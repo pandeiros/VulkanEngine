@@ -4,6 +4,9 @@ utils/*
 ## Third-party libraries
 third-party/*
 
+## Android libraries
+android/vulkan-app/src/main/jniLibs/*
+
 ## Doxygen generated files.
 doc/html/*
 doc/latex/*

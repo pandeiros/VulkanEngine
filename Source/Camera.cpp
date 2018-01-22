@@ -26,6 +26,12 @@ glm::mat4 Camera::GetViewProjectionMatrix() const
     return viewProjectionClipMatrix;
 }
 
+void Camera::Move(glm::vec3 positionDelta)
+{
+    transform.eye += positionDelta;
+    UpdateMatrices();
+}
+
 void Camera::UpdateMatrices()
 {
     projectionMatrix = glm::perspective(yFOV, aspectRatio, zNear, zFar);

@@ -31,7 +31,7 @@ public:
     ~CommandBuffer() = default;
 
     VkCommandBuffer GetVkCommandBuffer();
-    VkCommandBuffer& GetVkCommandBufferRef();
+    VkCommandBuffer* GetVkCommandBufferPtr();
 
     //void Begin(VkCommandBufferUsageFlags flags, const VkCommandBufferInheritanceInfo inheritanceInfo);
     void Begin(VkCommandBufferUsageFlags flags, const VkCommandBufferInheritanceInfo* inheritanceInfo);

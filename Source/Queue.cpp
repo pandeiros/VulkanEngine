@@ -9,9 +9,19 @@
 
 VULKAN_NS_USING;
 
-VkQueue& Queue::GetVkQueueRef()
+VkQueue Queue::GetVkQueue()
 {
     return queue;
+}
+
+//VkQueue& Queue::GetVkQueueRef()
+//{
+//    return queue;
+//}
+
+VkQueue* Queue::GetVkQueuePtr()
+{
+    return &queue;
 }
 
 void Queue::Submit(std::vector<VkSubmitInfo> submits, VkFence fence)
