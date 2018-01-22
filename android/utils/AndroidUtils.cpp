@@ -1132,6 +1132,7 @@ void AndroidUtils::Update()
 {
     if (vulkanApplication->GetEngine() && !isPaused)
     {
+        vulkanApplication->GetEngine()->GetInputManager()->UpdateGVRControllerState(*controllerApi);
         vulkanApplication->GetEngine()->Update();
     }
 }

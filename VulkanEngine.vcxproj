@@ -297,6 +297,10 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="source\InputManager.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="source\Instance.cpp">
       <SubType>
       </SubType>
@@ -406,6 +410,10 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="include\ImageView.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\InputManager.h">
       <SubType>
       </SubType>
     </ClInclude>

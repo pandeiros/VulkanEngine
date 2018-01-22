@@ -22,6 +22,11 @@ constexpr double PI = 3.14159265359;
 
 VULKAN_NS_BEGIN
 
+struct Vector2D
+{
+    float x, y;
+};
+
 /**
  * @class Math
  */

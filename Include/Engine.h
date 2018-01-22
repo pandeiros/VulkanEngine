@@ -12,6 +12,7 @@
 #include "PhysicalDevice.h"
 #include "World.h"
 #include "Rendering/Renderer.h"
+#include "InputManager.h"
 
 #include <vector>
 #include <queue>
@@ -109,6 +110,16 @@ public:
 
 private:
     std::unique_ptr<Renderer> renderer;
+
+    //////////////////////////////////////////////////////////////////////////
+    // Input
+    //////////////////////////////////////////////////////////////////////////
+
+public:
+    InputManager* GetInputManager();
+
+private:
+    std::unique_ptr<InputManager> inputManager;
 
     //////////////////////////////////////////////////////////////////////////
     // System properties

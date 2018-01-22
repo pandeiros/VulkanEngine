@@ -49,6 +49,7 @@ void Engine::Init(DevicePtr device)
 
     renderer.reset(new Renderer(device));
     world.reset(new World(device));
+    inputManager.reset(new InputManager);
 }
 
 void Engine::Update()
@@ -184,6 +185,11 @@ World* Engine::GetWorld()
 Renderer* Engine::GetRenderer()
 {
     return renderer.get();
+}
+
+InputManager* Engine::GetInputManager()
+{
+    return inputManager.get();
 }
 
 void Engine::LogInstanceProperties()

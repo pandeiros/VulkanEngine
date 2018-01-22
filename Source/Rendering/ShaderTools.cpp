@@ -15,7 +15,7 @@
 VULKAN_NS_USING;
 
 #ifndef __ANDROID__
-void ShaderTools::InitResources(TBuiltInResource &Resources)
+void ShaderTools::InitResources(TBuiltInResource& Resources)
 {
     Resources.maxLights = 32;
     Resources.maxClipPlanes = 6;

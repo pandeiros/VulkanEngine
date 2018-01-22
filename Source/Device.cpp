@@ -9,7 +9,6 @@
 
 VULKAN_NS_USING;
 
-
 Device::Device(PhysicalDevice* physicalDevice, std::vector<const char*> deviceExtensions, VkPhysicalDeviceFeatures requiredFeatures)
     : physicalDevice(physicalDevice), deviceExtensions(deviceExtensions), requiredFeatures(requiredFeatures)
 {
