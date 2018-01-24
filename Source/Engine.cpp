@@ -54,6 +54,11 @@ void Engine::Init(DevicePtr device)
 
 void Engine::Update()
 {
+    DebugTools::LogPerformanceData();
+    DebugTools::ClearPerformanceData();
+
+    VK_PERFORMANCE_DATA("Engine");
+
     std::chrono::duration<float> frameTimeDiff = std::chrono::duration_cast<std::chrono::duration<float>>(timer.now() - lastFrameTime);
     lastFrameTime = timer.now();
 
@@ -143,6 +148,8 @@ float Engine::GetTimeFromStart() const
 
 void Engine::UpdateInternal(float deltaTime)
 {
+    VK_PERFORMANCE_SECTION("Update");
+
     if (!bEnabled)
     {
         return;

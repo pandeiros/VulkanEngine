@@ -100,6 +100,8 @@ void TestApplication::Init()
 
 void TestApplication::Tick(float deltaTime)
 {
+    VK_PERFORMANCE_SECTION("Test application");
+
     Window* window = instance->GetWindow();
     CommandBuffer& commandBuffer = commandPool.GetCommandBufferRef();
     Queue& queue = instance->GetDevice()->GetQueueRef();
@@ -153,16 +155,21 @@ void TestApplication::Tick(float deltaTime)
         clearValues[1].depthStencil.depth = 1.f;
         clearValues[1].depthStencil.stencil = 0;
 
-        commandBuffer.BeginRenderPass(window->GetRenderPass(), window->GetActiveFramebuffer(), renderArea, clearValues, VK_SUBPASS_CONTENTS_INLINE);
-
-        renderer->BindPipeline(commandBuffer.GetVkCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS);
-        renderer->BindDescriptorSets(commandBuffer.GetVkCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS);
-        renderer->BindVertexBuffers(commandBuffer.GetVkCommandBuffer(), { 0 });
-        renderer->CommandSetViewports(commandBuffer.GetVkCommandBuffer());
-        renderer->CommandSetScissors(commandBuffer.GetVkCommandBuffer());
+        {
+            VK_PERFORMANCE_SECTION("Render initialization");
+            commandBuffer.BeginRenderPass(window->GetRenderPass(), window->GetActiveFramebuffer(), renderArea, clearValues, VK_SUBPASS_CONTENTS_INLINE);
+            renderer->BindPipeline(commandBuffer.GetVkCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS);
+            renderer->BindDescriptorSets(commandBuffer.GetVkCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS);
+            renderer->BindVertexBuffers(commandBuffer.GetVkCommandBuffer(), { 0 });
+            renderer->CommandSetViewports(commandBuffer.GetVkCommandBuffer());
+            renderer->CommandSetScissors(commandBuffer.GetVkCommandBuffer());
+        }
 
         // #REFACTOR
-        vkCmdDraw(commandBuffer.GetVkCommandBuffer(), 12 * 3, 1, 0, 0);
+        {
+            VK_PERFORMANCE_SECTION("Draw");
+            vkCmdDraw(commandBuffer.GetVkCommandBuffer(), 12 * 3, 1, 0, 0);
+        }
 
         commandBuffer.EndRenderPass();
         commandBuffer.End();

@@ -13,6 +13,138 @@ VULKAN_NS_USING;
 
 VK_DECLARE_LOG_CATEGORY(LogDebug);
 
+PerformanceSection::PerformanceSection(std::string name)
+    : name(name), bActive(true)
+{
+    DebugTools::BeginPerformanceSection(*this);
+}
+
+PerformanceSection::~PerformanceSection()
+{
+    DebugTools::EndPerformanceSection(*this);
+}
+
+void PerformanceSection::Add(PerformanceSection& section)
+{
+    bool bFound = false;
+    for (PerformanceSection& section : performanceSections)
+    {
+        if (section.bActive)
+        {
+            section.Add(section);
+            bFound = true;
+            break;
+        }
+    }
+
+    if (!bFound)
+    {
+        performanceSections.push_back(section);
+    }
+}
+
+void PerformanceSection::End(PerformanceSection& section, std::chrono::steady_clock* timer)
+{
+    if (section == *this)
+    {
+        EndInternal(timer);
+    }
+    else
+    {
+        for (PerformanceSection& section : performanceSections)
+        {
+            if (section.bActive)
+            {
+                section.End(section, timer);
+                break;
+            }
+        }
+    }
+}
+
+
+void PerformanceSection::EndInternal(std::chrono::steady_clock* timer)
+{
+    bActive = false;
+    endTime = timer->now();
+
+    for (PerformanceSection& section : performanceSections)
+    {
+        if (section.bActive)
+        {
+            section.EndInternal(timer);
+            break;
+        }
+    }
+}
+
+void PerformanceSection::Log(uint32_t level, std::chrono::steady_clock* timer)
+{
+    VK_LOG(LogDebug, Debug, "|%.*s%8.2f ms [%s]", level * 2, "                       ",
+        std::chrono::duration_cast<std::chrono::duration<float>>(endTime - startTime).count() * 1000.f, name.c_str());
+
+    for (PerformanceSection& section : performanceSections)
+    {
+        section.Log(level + 1, timer);
+    }
+}
+
+
+void PerformanceData::Log()
+{
+    VK_LOG(LogDebug, Debug, "|%8.2f ms [%s]", std::chrono::duration_cast<std::chrono::duration<float>>(endTime - startTime).count() * 1000.f, name.c_str());
+
+    for (PerformanceSection& section : performanceSections)
+    {
+        section.Log(1, &timer);
+    }
+}
+
+PerformanceData::PerformanceData(std::string name)
+    : name(name), timer(std::chrono::steady_clock()), bActive(true)
+{
+    startTime = timer.now();
+    DebugTools::BeginPerformanceData(*this);
+}
+
+PerformanceData::~PerformanceData()
+{
+    DebugTools::EndPerformanceData(*this);
+}
+
+void PerformanceData::AddSection(PerformanceSection& section)
+{
+    bool bAdded = false;
+    for (PerformanceSection& section : performanceSections)
+    {
+        if (section.bActive)
+        {
+            section.Add(section);
+            bAdded = true;
+            break;
+        }
+    }
+
+    if (!bAdded)
+    {
+        performanceSections.push_back(section);
+    }
+}
+
+void PerformanceData::EndSection(PerformanceSection& section)
+{
+    for (PerformanceSection& section : performanceSections)
+    {
+        if (section.bActive)
+        {
+            section.End(section, &timer);
+        }
+    }
+}
+
+
+std::vector<PerformanceData> DebugTools::performanceData = std::vector<PerformanceData>();
+
 VARARG_BODY(void, DebugTools::Assert, const char*,
     VARARG_EXTRA(const char* file) VARARG_EXTRA(int line)
     VARARG_EXTRA(bool condition))
@@ -43,7 +175,7 @@ VARARG_BODY(void, DebugTools::Assert, const char*,
 
 VkResult DebugTools::Verify(VkResult result)
 {
-#if VULKAN_ENABLE_RUNTIME_DEBUG
+#ifdef VULKAN_ENABLE_RUNTIME_DEBUG
     if (result < 0)
     {
         switch (result)
@@ -127,3 +259,62 @@ VkDebugReportFlagsEXT DebugTools::GetVulkanDebugFlagsEnabled()
         VK_DEBUG_REPORT_DEBUG_BIT_EXT |
         0;
 }
+
+void DebugTools::BeginPerformanceData(PerformanceData& data)
+{
+    performanceData.push_back(data);
+}
+
+void DebugTools::EndPerformanceData(PerformanceData& data)
+{
+    auto iterator = std::find(performanceData.begin(), performanceData.end(), data);
+
+    if (iterator != performanceData.end())
+    {
+        iterator->endTime = iterator->timer.now();
+        iterator->bActive = false;
+    }
+    else
+    {
+        // #TODO Error;
+    }
+}
+
+void DebugTools::BeginPerformanceSection(PerformanceSection& section)
+{
+    for (size_t i = 0; i < performanceData.size(); ++i)
+    {
+        if (performanceData[i].bActive)
+        {
+            section.startTime = performanceData[i].timer.now();
+            performanceData[i].AddSection(section);
+            break;
+        }
+    }
+}
+
+void DebugTools::EndPerformanceSection(PerformanceSection& section)
+{
+    for (size_t i = 0; i < performanceData.size(); ++i)
+    {
+        if (performanceData[i].bActive)
+        {
+            performanceData[i].EndSection(section);
+            break;
+        }
+    }
+}
+
+void DebugTools::ClearPerformanceData()
+{
+    performanceData.clear();
+}
+
+void DebugTools::LogPerformanceData()
+{
+    for (PerformanceData& data : performanceData)
+    {
+        data.Log();
+    }
+}
+

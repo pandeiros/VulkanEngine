@@ -30,7 +30,7 @@ World::~World()
 
 void World::Tick(float deltaTime)
 {
-
+    VK_PERFORMANCE_SECTION("World tick");
 }
 
 void World::AddCamera(Camera* camera)
