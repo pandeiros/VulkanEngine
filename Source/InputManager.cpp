@@ -17,6 +17,21 @@ InputManager::InputManager()
     InitInputs();
 }
 
+glm::mat4 InputManager::GetHeadMatrix()
+{
+    return headMatrix;
+}
+
+glm::mat4 InputManager::GetLeftEyeMatrix()
+{
+    return leftEyeMatrix;
+}
+
+glm::mat4 InputManager::GetRightEyeMatrix()
+{
+    return rightEyeMatrix;
+}
+
 void InputManager::InitInputs()
 {
 #ifdef __ANDROID__
@@ -51,16 +66,24 @@ void InputManager::UpdateButtonMapping(InputCodes inputCode, InputState newState
 
 #ifdef __ANDROID__
 
-void InputManager::UpdateGVRControllerState(const gvr::ControllerApi& api)
+void InputManager::UpdateGVRControllerState(gvr::ControllerApi* controllerApi)
 {
-    controllerState.Update(api);
+    controllerState.Update(*controllerApi);
 
     UpdateButtonMapping(InputCodes::GVR_BUTTON_APP, MapToInputState(controllerState.GetButtonState(gvr::kControllerButtonApp)));
     UpdateButtonMapping(InputCodes::GVR_BUTTON_CLICK, MapToInputState(controllerState.GetButtonState(gvr::kControllerButtonClick)));
 
-//    buttonMappings.at(InputCodes::GVR_BUTTON_APP) = controllerState.GetButtonState(gvr::kControllerButtonApp);
-//    buttonMappings.at(InputCodes::GVR_BUTTON_APP) = controllerState.GetButtonState(gvr::kControllerButtonApp);
     //vector2DMappings
+}
+
+void InputManager::UpdateGVRHeadPose(gvr::GvrApi* gvrApi)
+{
+    // Obtain the latest, predicted head pose.
+    gvr::ClockTimePoint timePoint = gvrApi->GetTimePointNow();
+
+    headMatrix = Math::Transpose(gvrApi->GetHeadSpaceFromStartSpaceRotation(timePoint));
+    leftEyeMatrix = 10.f * Math::Transpose(gvrApi->GetEyeFromHeadMatrix(GVR_LEFT_EYE)) * headMatrix;
+    rightEyeMatrix = Math::Transpose(gvrApi->GetEyeFromHeadMatrix(GVR_RIGHT_EYE)) * headMatrix;
 }
 
 void InputManager::InitGVRInput()

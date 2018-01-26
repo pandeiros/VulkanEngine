@@ -8,6 +8,7 @@
 #include "Utils/Logger.h"
 
 #include <cassert>
+#include <algorithm>
 
 VULKAN_NS_USING;
 
@@ -24,14 +25,14 @@ PerformanceSection::~PerformanceSection()
     DebugTools::EndPerformanceSection(*this);
 }
 
-void PerformanceSection::Add(PerformanceSection& section)
+void PerformanceSection::Add(PerformanceSection& performanceSection)
 {
     bool bFound = false;
     for (PerformanceSection& section : performanceSections)
     {
         if (section.bActive)
         {
-            section.Add(section);
+            section.Add(performanceSection);
             bFound = true;
             break;
         }
@@ -39,13 +40,13 @@ void PerformanceSection::Add(PerformanceSection& section)
 
     if (!bFound)
     {
-        performanceSections.push_back(section);
+        performanceSections.push_back(performanceSection);
     }
 }
 
-void PerformanceSection::End(PerformanceSection& section, std::chrono::steady_clock* timer)
+void PerformanceSection::End(PerformanceSection& performanceSection, std::chrono::steady_clock* timer)
 {
-    if (section == *this)
+    if (performanceSection == *this)
     {
         EndInternal(timer);
     }
@@ -55,7 +56,7 @@ void PerformanceSection::End(PerformanceSection& section, std::chrono::steady_cl
         {
             if (section.bActive)
             {
-                section.End(section, timer);
+                section.End(performanceSection, timer);
                 break;
             }
         }
@@ -112,14 +113,14 @@ PerformanceData::~PerformanceData()
     DebugTools::EndPerformanceData(*this);
 }
 
-void PerformanceData::AddSection(PerformanceSection& section)
+void PerformanceData::AddSection(PerformanceSection& performanceSection)
 {
     bool bAdded = false;
     for (PerformanceSection& section : performanceSections)
     {
         if (section.bActive)
         {
-            section.Add(section);
+            section.Add(performanceSection);
             bAdded = true;
             break;
         }
@@ -127,17 +128,17 @@ void PerformanceData::AddSection(PerformanceSection& section)
 
     if (!bAdded)
     {
-        performanceSections.push_back(section);
+        performanceSections.push_back(performanceSection);
     }
 }
 
-void PerformanceData::EndSection(PerformanceSection& section)
+void PerformanceData::EndSection(PerformanceSection& performanceSection)
 {
     for (PerformanceSection& section : performanceSections)
     {
         if (section.bActive)
         {
-            section.End(section, &timer);
+            section.End(performanceSection, &timer);
         }
     }
 }

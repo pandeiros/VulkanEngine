@@ -901,6 +901,8 @@ NATIVE_METHOD(void, nativeOnCreate)
     jlong j_native_gvr_context = gvr_context_ptr;
     gvr_context *context = reinterpret_cast<gvr_context *>(j_native_gvr_context);
 
+    AndroidUtils::gvrApi = gvr::GvrApi::WrapNonOwned(context);
+
     int32_t options = gvr::ControllerApi::DefaultOptions();
 
     // If you need accelerometer and gyro, enable them (they are not on
@@ -922,26 +924,17 @@ NATIVE_METHOD(void, nativeOnCreate)
         return;
     }
 
-    // Create a persistent controller state object. You must call Update() on
-    // this each frame to get the current controller state.
-    gvr::ControllerState controller_state;
-
     // If your app is in the resumed state (the Activity got onResume()), resume
     // the controller API now (if not, wait until you get onResume()).
     controller_api->Resume();
 
-    controller_state.Update(*controller_api);
-
-    LOGI("CONTROLLER INIT");
-    //LOGE("%s", gvr::ControllerApi::ToString(controller_state.GetBatteryLevel()));
+    VK_LOG(LogAndroid, Debug, "GVR CONTROLLER INITIALIZED");
 }
 
 //static gvr::ControllerState controller_state;
 
 void android_main(struct android_app *app)
 {
-    LOGI("============ ANDROID_MAIN ============");
-
     // Set static variables.
     AndroidUtils::nativeApplication = app;
 
@@ -1108,6 +1101,8 @@ FILE *AndroidFopen(const char *fname, const char *mode) {
 std::unique_ptr<vulkan::Application> AndroidUtils::vulkanApplication(nullptr);
 android_app* AndroidUtils::nativeApplication = nullptr;
 gvr::ControllerApi* AndroidUtils::controllerApi = nullptr;
+std::unique_ptr<gvr::GvrApi> AndroidUtils::gvrApi(nullptr);
+
 bool AndroidUtils::isPaused = true;
 
 void AndroidUtils::Init()
@@ -1132,7 +1127,8 @@ void AndroidUtils::Update()
 {
     if (vulkanApplication->GetEngine() && !isPaused)
     {
-        vulkanApplication->GetEngine()->GetInputManager()->UpdateGVRControllerState(*controllerApi);
+        vulkanApplication->GetEngine()->GetInputManager()->UpdateGVRControllerState(controllerApi);
+        vulkanApplication->GetEngine()->GetInputManager()->UpdateGVRHeadPose(gvrApi.get());
         vulkanApplication->GetEngine()->Update();
     }
 }

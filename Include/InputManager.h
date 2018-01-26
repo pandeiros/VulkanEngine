@@ -16,6 +16,7 @@
 #endif
 
 #include <map>
+#include <chrono>
 
 /**
  * @file InputManager.h
@@ -47,6 +48,7 @@ enum InputEvent
     ON_DOWN,
     ON_UP,
     ON_PRESSED,
+    ON_LONG_PRESSED,
     ON_CHANGE
 };
 
@@ -73,6 +75,7 @@ class InputStorage
     T value;
     InputState state;
     InputType type;
+    std::chrono::steady_clock::time_point startTime;
 };
 
 /**
@@ -83,7 +86,10 @@ class InputManager
 public:
     InputManager();
 
-protected:
+    // #TODO Change this so that camera registers a delegate that pass view matrices to it.
+    glm::mat4 GetHeadMatrix();
+    glm::mat4 GetLeftEyeMatrix();
+    glm::mat4 GetRightEyeMatrix();
 
 private:
     void InitInputs();
@@ -92,9 +98,16 @@ private:
     std::map<InputCodes, InputState> buttonMappings;
     std::map<InputCodes, InputStorage<Vector2D>> vector2DMappings;
 
+    glm::mat4 headMatrix;
+    glm::mat4 leftEyeMatrix;
+    glm::mat4 rightEyeMatrix;
+
+    std::chrono::steady_clock timer;
+
 #ifdef __ANDROID__
 public:
-    void UpdateGVRControllerState(const gvr::ControllerApi& api);
+    void UpdateGVRControllerState(gvr::ControllerApi* controllerApi);
+    void UpdateGVRHeadPose(gvr::GvrApi* gvrApi);
 
 private:
     void InitGVRInput();

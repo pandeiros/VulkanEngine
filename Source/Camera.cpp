@@ -26,6 +26,21 @@ glm::mat4 Camera::GetViewProjectionMatrix() const
     return viewProjectionClipMatrix;
 }
 
+glm::mat4 Camera::GetViewMatrix() const
+{
+    return viewMatrix;
+}
+
+glm::mat4 Camera::GetProjectionMatrix() const
+{
+    return projectionMatrix;
+}
+
+glm::mat4 Camera::GetClipMatrix() const
+{
+    return clipMatrix;
+}
+
 void Camera::Move(glm::vec3 positionDelta)
 {
     transform.eye += positionDelta;

@@ -53,6 +53,7 @@ public:
     static std::unique_ptr<Application> vulkanApplication;
     static android_app* nativeApplication;
     static gvr::ControllerApi* controllerApi;
+    static std::unique_ptr<gvr::GvrApi> gvrApi;
 
 private:
     static bool isPaused;
@@ -78,26 +79,6 @@ VK_DECLARE_LOG_CATEGORY(LogAndroid);
 
  /* Amount of time, in nanoseconds, to wait for a command buffer to complete */
 #define FENCE_TIMEOUT 100000000
-
-//#define GET_INSTANCE_PROC_ADDR(INSTANCE, entrypoint)                               \
-//    {                                                                          \
-//        fp##entrypoint =                                                  \
-//            (PFN_vk##entrypoint)vkGetInstanceProcAddr(INSTANCE, "vk" #entrypoint); \
-//        if (fp##entrypoint == NULL) {                                     \
-//            std::cout << "vkGetDeviceProcAddr failed to find vk" #entrypoint;  \
-//            exit(-1);                                                          \
-//        }                                                                      \
-//    }
-
-//#define GET_DEVICE_PROC_ADDR(dev, entrypoint)                                  \
-//    {                                                                          \
-//        info.fp##entrypoint =                                                  \
-//            (PFN_vk##entrypoint)vkGetDeviceProcAddr(dev, "vk" #entrypoint);    \
-//        if (info.fp##entrypoint == NULL) {                                     \
-//            std::cout << "vkGetDeviceProcAddr failed to find vk" #entrypoint;  \
-//            exit(-1);                                                          \
-//        }                                                                      \
-//    }
 
 #if defined(NDEBUG) && defined(__GNUC__)
 #define U_ASSERT_ONLY __attribute__((unused))

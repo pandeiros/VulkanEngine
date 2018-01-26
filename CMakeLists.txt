@@ -5,19 +5,13 @@ file(GLOB VULKAN_ENGINE_SOURCE source/*.cpp)
 file(GLOB VULKAN_ENGINE_TEST_SOURCE tests/*.cpp)
 file(GLOB VULKAN_ENGINE_ANDROID_SOURCE android/utils/*.cpp)
 
-set(INCLUDE_DIR ${INCLUDE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/include") # ${CMAKE_CURRENT_SOURCE_DIR}/include/Rendering ${CMAKE_CURRENT_SOURCE_DIR}/include/Platforms ${CMAKE_CURRENT_SOURCE_DIR}/include/Utils")
+set(INCLUDE_DIR ${INCLUDE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests")
 
-if (ANDROID)
-    set(ANDROID_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android/utils")
-endif()
+set(ANDROID_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android/utils")
 
 set(SAMPLES_DATA_DIR ${SAMPLES_DATA_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/data")
 set(GLSLANG_SPIRV_INCLUDE_DIR ${SHADERC_SRC}/third_party/glslang)
-
-# get_filename_component(GLMINC_PREFIX
-#                         "${CMAKE_CURRENT_SOURCE_DIR}/third-party/glm"
-#                         ABSOLUTE)
 
 if(SDK_INCLUDE_PATH)
     include_directories( ${SAMPLES_DATA_DIR} ${GLMINC_PREFIX} ${GLSLANG_SPIRV_INCLUDE_DIR} ${SDK_INCLUDE_PATH} )
@@ -34,22 +28,7 @@ add_library(lib_gvr SHARED IMPORTED)
 set_target_properties(lib_gvr PROPERTIES IMPORTED_LOCATION
                       ${CMAKE_CURRENT_SOURCE_DIR}/android/libraries/jni/${ANDROID_ABI}/libgvr.so)
 
-if (ANDROID)
-    # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11  -Werror -DVK_USE_PLATFORM_ANDROID_KHR ${GVR_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11  -Werror -D__ANDROID__ -DVK_USE_PLATFORM_ANDROID_KHR ${GVR_FLAGS}")
-elseif(WIN32)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_CRT_SECURE_NO_WARNINGS -D_USE_MATH_DEFINES")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_CRT_SECURE_NO_WARNINGS -D_USE_MATH_DEFINES -DVK_USE_PLATFORM_WIN32_KHR")
-
-    # If MSVC, disable some signed/unsigned mismatch warnings.
-    if (MSVC)
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /wd4267")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4267")
-    endif()
-else()
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-sign-compare")
-endif()
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11  -Werror -D__ANDROID__ -DVK_USE_PLATFORM_ANDROID_KHR -DVULKAN_ENABLE_DEBUG ${GVR_FLAGS}")
 
 add_library(${VULKAN_ENGINE_NAME} STATIC ${VULKAN_ENGINE_UTILS_SOURCE} ${VULKAN_ENGINE_PLATFORM_SOURCE} ${VULKAN_ENGINE_RENDERING_SOURCE}
                                         ${VULKAN_ENGINE_SOURCE} ${VULKAN_ENGINE_ANDROID_SOURCE})

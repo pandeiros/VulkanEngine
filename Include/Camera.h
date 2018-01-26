@@ -49,6 +49,9 @@ public:
         const glm::mat4 clipMatrix = DEFAULT_CLIP_MATRIX);
 
     glm::mat4 GetViewProjectionMatrix() const;
+    glm::mat4 GetViewMatrix() const;
+    glm::mat4 GetProjectionMatrix() const;
+    glm::mat4 GetClipMatrix() const;
 
     void Move(glm::vec3 positionDelta);
 

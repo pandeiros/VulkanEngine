@@ -48,8 +48,8 @@ struct PerformanceSection
 
     ~PerformanceSection();
 
-    void Add(PerformanceSection& section);
-    void End(PerformanceSection& section, std::chrono::steady_clock* timer);
+    void Add(PerformanceSection& performanceSection);
+    void End(PerformanceSection& performanceSection, std::chrono::steady_clock* timer);
     void EndInternal(std::chrono::steady_clock* timer);
 
     void Log(uint32_t level, std::chrono::steady_clock* timer);
@@ -74,8 +74,8 @@ struct PerformanceData
 
     ~PerformanceData();
 
-    void AddSection(PerformanceSection& section);
-    void EndSection(PerformanceSection& section);
+    void AddSection(PerformanceSection& performanceSection);
+    void EndSection(PerformanceSection& performanceSection);
 
     void Log();
 

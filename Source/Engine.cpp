@@ -54,7 +54,7 @@ void Engine::Init(DevicePtr device)
 
 void Engine::Update()
 {
-    DebugTools::LogPerformanceData();
+    //DebugTools::LogPerformanceData();
     DebugTools::ClearPerformanceData();
 
     VK_PERFORMANCE_DATA("Engine");

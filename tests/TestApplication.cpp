@@ -52,11 +52,12 @@ void TestApplication::Init()
         fov *= 1.f / aspect;
     }
     camera = new Camera(fov, aspect, 0.1f, 100.f,
-    { glm::vec3(-5, 3, -10), glm::vec3(0, 0, 0), glm::vec3(0, -1, 0) }, Camera::DEFAULT_CLIP_MATRIX);
+//    { glm::vec3(-5, 3, -10), glm::vec3(0, 0, 0), glm::vec3(0, -1, 0) }, Camera::DEFAULT_CLIP_MATRIX);
+    { glm::vec3(0, 0, 10), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0) }, Camera::DEFAULT_CLIP_MATRIX);
     engine->GetWorld()->AddCamera(camera);
 
     glm::mat4 vpMatrix = camera->GetViewProjectionMatrix();
-    glm::mat4 mvpMatrix = vpMatrix *glm::mat4(1.0f);
+    glm::mat4 mvpMatrix = vpMatrix * glm::mat4(1.0f);
 
     Renderer* renderer = engine->GetRenderer();
 
@@ -118,17 +119,23 @@ void TestApplication::Tick(float deltaTime)
         }
 #endif
 
+        glm::mat4 headMatrix = glm::translate(glm::rotate(GetEngine()->GetInputManager()->GetHeadMatrix(), glm::radians(180.f), glm::vec3(0.f, 0.f, 1.f)), glm::vec3(0.f, 0.f, -10.f));
+
         std::chrono::duration<double> diff = std::chrono::duration_cast<std::chrono::duration<double>>(timer.now() - lastTime);
         if (diff.count() >= 1.0)
         {
             lastTime = timer.now();
             VK_LOG(LogTestApplication, Debug, "FPS: %.0f", GetEngine()->GetFPS());
+            VK_LOG(LogTestApplication, Debug, "View: %s", glm::to_string(camera->GetViewMatrix()).c_str());
+//            VK_LOG(LogTestApplication, Debug, "Head: %s", glm::to_string(glm::translate(glm::rotate(GetEngine()->GetInputManager()->GetHeadMatrix(), glm::radians(180.f), glm::vec3(0.f, 1.f, 0.f)), glm::vec3(0.f, 0.f, -10.f))).c_str());
+            VK_LOG(LogTestApplication, Debug, "Head: %s", glm::to_string(GetEngine()->GetInputManager()->GetLeftEyeMatrix()).c_str());
         }
 
-        camera->Move(glm::vec3(deltaTime * std::sin(colorRotator) * 10.f, 0.f, 0.f));
+        //camera->Move(glm::vec3(deltaTime * std::sin(colorRotator) * 10.f, 0.f, 0.f));
 
-        glm::mat4 vpMatrix = camera->GetViewProjectionMatrix();
-        glm::mat4 mvpMatrix = vpMatrix * glm::mat4(1.0f);
+        //glm::mat4 vpMatrix = camera->GetViewProjectionMatrix();
+        //glm::mat4 mvpMatrix = vpMatrix * glm::mat4(1.0f);
+        glm::mat4 mvpMatrix = camera->GetClipMatrix() * camera->GetProjectionMatrix() * glm::translate(camera->GetViewMatrix(), glm::vec3(2, 0, 0)) * glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 1.f, 1.f)), glm::vec3(0, 0, -10));
         Renderer* renderer = engine->GetRenderer();
 
         Buffer& uniformBuffer = renderer->GetUniformBuffer();
