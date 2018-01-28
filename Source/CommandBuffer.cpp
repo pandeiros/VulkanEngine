@@ -9,6 +9,12 @@
 
 VULKAN_NS_USING;
 
+CommandBuffer::CommandBuffer(VkCommandBuffer commandBuffer)
+    : commandBuffer(commandBuffer)
+{
+
+}
+
 VkCommandBuffer CommandBuffer::GetVkCommandBuffer()
 {
     return commandBuffer;

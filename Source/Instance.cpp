@@ -59,8 +59,14 @@ void Instance::InitDeviceAndWindow(PhysicalDevice* physicalDevice)
         VK_KHR_SWAPCHAIN_EXTENSION_NAME
     };
 
+    VkPhysicalDeviceFeatures requiredFeatures = {};
+
+#ifdef VULKAN_VR_MODE_VIEWPORTS
+    requiredFeatures.multiViewport = VK_TRUE;
+#endif
+
     device = std::shared_ptr<Device>(new Device(physicalDevice,
-        deviceExtensions, {}));
+        deviceExtensions, requiredFeatures));
 
     // Window
     int32_t height = 0, width = 0;

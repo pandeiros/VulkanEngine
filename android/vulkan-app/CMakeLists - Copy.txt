@@ -22,7 +22,7 @@ get_filename_component(GLMINC_PREFIX
 add_subdirectory(${CMAKE_SOURCE_DIR}/../../ ${CMAKE_BINARY_DIR}/vulkan-engine)
 
 # Build application's shared library
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11  -Werror -D VK_USE_PLATFORM_ANDROID_KHR -D__ANDROID__ -DVULKAN_ENABLE_DEBUG")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11  -Werror -D VK_USE_PLATFORM_ANDROID_KHR -D__ANDROID__ -DVULKAN_ENABLE_DEBUG -DVULKAN_VR_MODE")
 
 # Force export ANativeActivity_onCreate(),
 # Refer to: https://github.com/android-ndk/ndk/issues/381.

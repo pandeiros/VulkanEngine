@@ -35,7 +35,7 @@ void CommandPool::Reset(VkDevice device, VkCommandPoolResetFlags flags)
     VK_VERIFY(vkResetCommandPool(device, commandPool, flags));
 }
 
-void CommandPool::AllocateCommandBuffer(VkDevice device, VkCommandBufferLevel level)
+void CommandPool::AllocateCommandBuffers(VkDevice device, VkCommandBufferLevel level, uint32_t commandBufferCount)
 {
     if (commandPool)
     {
@@ -44,19 +44,49 @@ void CommandPool::AllocateCommandBuffer(VkDevice device, VkCommandBufferLevel le
             nullptr,
             commandPool,
             level,
-            1
+            commandBufferCount
         };
 
-        VK_VERIFY(vkAllocateCommandBuffers(device, &commandBufferAllocateInfo, commandBuffer.GetVkCommandBufferPtr()));
+        std::vector<VkCommandBuffer> vkCommandBuffers(commandBufferCount);
+
+        VK_VERIFY(vkAllocateCommandBuffers(device, &commandBufferAllocateInfo, vkCommandBuffers.data()));
+
+        for (VkCommandBuffer vkCommandBuffer : vkCommandBuffers)
+        {
+            commandBuffers.push_back(CommandBuffer(vkCommandBuffer));
+        }
+        //VK_VERIFY(vkAllocateCommandBuffers(device, &commandBufferAllocateInfo, commandBuffer.GetVkCommandBufferPtr()));
     }
 }
 
-void CommandPool::FreeCommandBuffer(VkDevice device, VkCommandPool commandPool)
+void CommandPool::FreeCommandBuffers(VkDevice device, VkCommandPool commandPool)
 {
-    vkFreeCommandBuffers(device, commandPool, 1, commandBuffer.GetVkCommandBufferPtr());
+    for (CommandBuffer& commandBuffer : commandBuffers)
+    {
+        vkFreeCommandBuffers(device, commandPool, 1, commandBuffer.GetVkCommandBufferPtr());
+    }
 }
 
-CommandBuffer& CommandPool::GetCommandBufferRef()
+CommandBuffer& CommandPool::GetCommandBufferRef(uint32_t commandBufferIndex)
 {
-    return commandBuffer;
+    VK_ASSERT(commandBufferIndex < commandBuffers.size(), "Command buffer index is out of scope.");
+
+    return commandBuffers[commandBufferIndex];
+}
+
+std::vector<VkCommandBuffer> CommandPool::GetVkCommandBuffers(std::vector<uint32_t> commandBufferIndexes)
+{
+    std::vector<VkCommandBuffer> vkCommandBuffers;
+
+    for (uint32_t index : commandBufferIndexes)
+    {
+        vkCommandBuffers.push_back(commandBuffers[index].GetVkCommandBuffer());
+    }
+
+    return vkCommandBuffers;
+}
+
+std::vector<CommandBuffer>& CommandPool::GetCommandBuffers()
+{
+    return commandBuffers;
 }

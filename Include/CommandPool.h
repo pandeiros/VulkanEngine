@@ -36,18 +36,21 @@ public:
 
     void Reset(VkDevice device, VkCommandPoolResetFlags flags);
 
-    void AllocateCommandBuffer(VkDevice device, VkCommandBufferLevel level);
+    void AllocateCommandBuffers(VkDevice device, VkCommandBufferLevel level, uint32_t commandBufferCount);
 
-    void FreeCommandBuffer(VkDevice device, VkCommandPool commandPool);
+    void FreeCommandBuffers(VkDevice device, VkCommandPool commandPool);
 
-    CommandBuffer& GetCommandBufferRef();
+    CommandBuffer& GetCommandBufferRef(uint32_t commandBufferIndex);
+
+    std::vector<VkCommandBuffer> GetVkCommandBuffers(std::vector<uint32_t> commandBufferIndexes);
+    std::vector<CommandBuffer>& GetCommandBuffers();
 
 private:
     VkCommandPool commandPool = VK_NULL_HANDLE;
 
     VkCommandPoolCreateInfo commandPoolCreateInfo = {};
 
-    CommandBuffer commandBuffer;
+    std::vector<CommandBuffer> commandBuffers;
 };
 
 VULKAN_NS_END

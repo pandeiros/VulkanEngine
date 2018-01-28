@@ -43,16 +43,16 @@ void TestApplication::Init()
 
     commandPool.Create(device->GetVkDevice(), VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
         instance->GetDevice()->GetPhysicalDevice()->GetGraphicsQueueFamilyIndex());
-    commandPool.AllocateCommandBuffer(device->GetVkDevice(), VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 
-    float fov = glm::radians(45.f);
+    commandPool.AllocateCommandBuffers(device->GetVkDevice(), VK_COMMAND_BUFFER_LEVEL_PRIMARY, VULKAN_COMMAND_BUFFER_COUNT);
+
+    float fov = glm::radians(90.f);
     float aspect = (float)instance->GetWindow()->GetSurfaceSize().width / (float)instance->GetWindow()->GetSurfaceSize().height;
     if (aspect > 1.f)
     {
         fov *= 1.f / aspect;
     }
     camera = new Camera(fov, aspect, 0.1f, 100.f,
-//    { glm::vec3(-5, 3, -10), glm::vec3(0, 0, 0), glm::vec3(0, -1, 0) }, Camera::DEFAULT_CLIP_MATRIX);
     { glm::vec3(0, 0, 10), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0) }, Camera::DEFAULT_CLIP_MATRIX);
     engine->GetWorld()->AddCamera(camera);
 
@@ -61,11 +61,14 @@ void TestApplication::Init()
 
     Renderer* renderer = engine->GetRenderer();
 
-    Buffer& uniformBuffer = renderer->GetUniformBuffer();
-    uniformBuffer.CreateExclusive(device->GetVkDevice(), 0, sizeof(mvpMatrix), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
-    uniformBuffer.Allocate(device, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    uniformBuffer.Copy(device->GetVkDevice(), &mvpMatrix, 0, sizeof(mvpMatrix));
-    uniformBuffer.UpdateDescriptorInfo(0, sizeof(mvpMatrix));
+    for (uint32_t i = 0; i < VULKAN_DESCRIPTOR_SETS_COUNT; ++i)
+    {
+        Buffer& uniformBuffer = renderer->GetUniformBuffer(i);
+        uniformBuffer.CreateExclusive(device->GetVkDevice(), 0, 2 * 256, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT); // #TODO Use device properties instead of 256
+        uniformBuffer.Allocate(device, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        //uniformBuffer.Copy(device->GetVkDevice(), &mvpMatrix, 0, sizeof(mvpMatrix));
+        uniformBuffer.UpdateDescriptorInfo(0, VK_WHOLE_SIZE);
+    }
 
     renderer->CreateDescriptorSetLayout();
     renderer->CreatePipelineLayout(device->GetVkDevice());
@@ -104,21 +107,13 @@ void TestApplication::Tick(float deltaTime)
     VK_PERFORMANCE_SECTION("Test application");
 
     Window* window = instance->GetWindow();
-    CommandBuffer& commandBuffer = commandPool.GetCommandBufferRef();
+    std::vector<CommandBuffer>& commandBuffers = commandPool.GetCommandBuffers();
     Queue& queue = instance->GetDevice()->GetQueueRef();
     Renderer* renderer = GetEngine()->GetRenderer();
     Device* device = instance->GetDevice();
 
     if (window->Update())
     {
-        // #TODO Make Input class to handle this.
-#ifdef __ANDROID__
-        if (AndroidUtils::controllerApi)
-        {
-            controller_state.Update(*AndroidUtils::controllerApi);
-        }
-#endif
-
         glm::mat4 headMatrix = glm::translate(glm::rotate(GetEngine()->GetInputManager()->GetHeadMatrix(), glm::radians(180.f), glm::vec3(0.f, 0.f, 1.f)), glm::vec3(0.f, 0.f, -10.f));
 
         std::chrono::duration<double> diff = std::chrono::duration_cast<std::chrono::duration<double>>(timer.now() - lastTime);
@@ -126,70 +121,92 @@ void TestApplication::Tick(float deltaTime)
         {
             lastTime = timer.now();
             VK_LOG(LogTestApplication, Debug, "FPS: %.0f", GetEngine()->GetFPS());
-            VK_LOG(LogTestApplication, Debug, "View: %s", glm::to_string(camera->GetViewMatrix()).c_str());
-//            VK_LOG(LogTestApplication, Debug, "Head: %s", glm::to_string(glm::translate(glm::rotate(GetEngine()->GetInputManager()->GetHeadMatrix(), glm::radians(180.f), glm::vec3(0.f, 1.f, 0.f)), glm::vec3(0.f, 0.f, -10.f))).c_str());
-            VK_LOG(LogTestApplication, Debug, "Head: %s", glm::to_string(GetEngine()->GetInputManager()->GetLeftEyeMatrix()).c_str());
+            //VK_LOG(LogTestApplication, Debug, "View: %s", glm::to_string(camera->GetViewMatrix()).c_str());
+            //VK_LOG(LogTestApplication, Debug, "Head: %s", glm::to_string(glm::translate(glm::rotate(GetEngine()->GetInputManager()->GetHeadMatrix(), glm::radians(180.f), glm::vec3(0.f, 1.f, 0.f)), glm::vec3(0.f, 0.f, -10.f))).c_str());
+            //VK_LOG(LogTestApplication, Debug, "ViewportMAtrix: %s", glm::to_string(glm::translate(glm::scale(glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f)), glm::vec3(0, 0, 0.f))).c_str());
+            //VK_LOG(LogTestApplication, Debug, "1.f matrix: %s", glm::to_string(glm::mat4(1.f)).c_str());
         }
 
         //camera->Move(glm::vec3(deltaTime * std::sin(colorRotator) * 10.f, 0.f, 0.f));
 
         //glm::mat4 vpMatrix = camera->GetViewProjectionMatrix();
         //glm::mat4 mvpMatrix = vpMatrix * glm::mat4(1.0f);
-        glm::mat4 mvpMatrix = camera->GetClipMatrix() * camera->GetProjectionMatrix() * glm::translate(camera->GetViewMatrix(), glm::vec3(2, 0, 0)) * glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.1f, 1.f, 1.f)), glm::vec3(0, 0, -10));
-        Renderer* renderer = engine->GetRenderer();
 
-        Buffer& uniformBuffer = renderer->GetUniformBuffer();
-        uniformBuffer.Copy(device->GetVkDevice(), &mvpMatrix, 0, sizeof(mvpMatrix));
+        //glm::mat4 mvpMatrix = camera->GetClipMatrix() * camera->GetProjectionMatrix() * GetEngine()->GetInputManager()->GetHeadMatrix() * glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.5f, 1.f, 1.f)), glm::vec3(0, 0, -10));
+        //Renderer* renderer = engine->GetRenderer();
+
+        //Buffer& uniformBuffer = renderer->GetUniformBuffer();
+        //uniformBuffer.Copy(device->GetVkDevice(), &mvpMatrix, 0, sizeof(mvpMatrix));
 
         window->BeginRender();
 
-        commandBuffer.Reset(0);
-        //commandBuffer.Begin(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT, nullptr);
-        commandBuffer.Begin(0, nullptr);
-
-        VkRect2D renderArea{};
-        renderArea.offset.x = 0;
-        renderArea.offset.y = 0;
-        renderArea.extent = window->GetSurfaceSize();
-
-        std::vector<VkClearValue> clearValues = std::vector<VkClearValue>(2);
-
-        clearValues[0].color.float32[0] = 0.2f;
-        clearValues[0].color.float32[1] = 0.2f;
-        clearValues[0].color.float32[2] = 0.2f; // std::sin(colorRotator + (float)PI / 2.f) * 0.5f + 0.5f;
-        clearValues[0].color.float32[3] = 0.2f;
-
-        clearValues[1].depthStencil.depth = 1.f;
-        clearValues[1].depthStencil.stencil = 0;
-
+        for (uint32_t i = 0; i < commandBuffers.size(); ++i)
         {
-            VK_PERFORMANCE_SECTION("Render initialization");
-            commandBuffer.BeginRenderPass(window->GetRenderPass(), window->GetActiveFramebuffer(), renderArea, clearValues, VK_SUBPASS_CONTENTS_INLINE);
-            renderer->BindPipeline(commandBuffer.GetVkCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS);
-            renderer->BindDescriptorSets(commandBuffer.GetVkCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS);
-            renderer->BindVertexBuffers(commandBuffer.GetVkCommandBuffer(), { 0 });
-            renderer->CommandSetViewports(commandBuffer.GetVkCommandBuffer());
-            renderer->CommandSetScissors(commandBuffer.GetVkCommandBuffer());
-        }
+            VkRect2D renderArea{};
+            renderArea.offset.x = i * window->GetSurfaceSize().width / 2;
+            renderArea.offset.y = 0;
+            renderArea.extent = window->GetSurfaceSize();
+            renderArea.extent.width /= 2;
 
-        // #REFACTOR
-        {
-            VK_PERFORMANCE_SECTION("Draw");
-            vkCmdDraw(commandBuffer.GetVkCommandBuffer(), 12 * 3, 1, 0, 0);
-        }
+            //glm::mat4 viewportMatrix = glm::translate(glm::scale(glm::mat4(1.f), glm::vec3(renderArea.extent.width / 2, renderArea.extent.height / 2, 1.f - 0.f)), glm::vec3(renderArea.offset.x, renderArea.offset.y, 0.f));
+            //glm::mat4 viewportMatrix = glm::translate(glm::scale(glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f)), glm::vec3(renderArea.offset.x, renderArea.offset.y, 0.f));
+            //glm::mat4 viewportMatrix = glm::scale(glm::translate(glm::mat4(1.f), glm::vec3(renderArea.offset.x, renderArea.offset.y, 0.f)), glm::vec3(1.f, 1.f, 1.f));
+            glm::mat4 testTransform = glm::translate(glm::mat4(1.f), glm::vec3(i == 0 ? -0.5f : 0.5f, 0.f, 0.f));
+            //glm::mat4 viewportMatrix = glm::mat4(1.f);
+            glm::mat4 mvpMatrix = camera->GetClipMatrix() * testTransform * camera->GetProjectionMatrix() * GetEngine()->GetInputManager()->GetHeadMatrix() * glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.5f, 1.f, 1.f)), glm::vec3(0, 0, -10));
+            Renderer* renderer = engine->GetRenderer();
 
-        commandBuffer.EndRenderPass();
-        commandBuffer.End();
+
+            Buffer& uniformBuffer = renderer->GetUniformBuffer(0);
+            uniformBuffer.Copy(device->GetVkDevice(), &mvpMatrix, i * 256, sizeof(mvpMatrix));
+            //uniformBuffer.UpdateDescriptorInfo(i * 256, 64);
+
+            commandBuffers[i].Reset(0);
+            //commandBuffer.Begin(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT, nullptr);
+            commandBuffers[i].Begin(0, nullptr);
+
+            std::vector<VkClearValue> clearValues = std::vector<VkClearValue>(2);
+
+            clearValues[0].color.float32[0] = (float)i / 4;
+            clearValues[0].color.float32[1] = 0.0f;
+            clearValues[0].color.float32[2] = (1.f - i) / 4;
+            clearValues[0].color.float32[3] = 0.0f;
+
+            clearValues[1].depthStencil.depth = 1.f;
+            clearValues[1].depthStencil.stencil = 0;
+
+            //renderer->UpdateDescriptorSets(device->GetVkDevice(), i);
+
+            {
+                VK_PERFORMANCE_SECTION("Render initialization");
+                uint32_t dynamicOffset = i * 256;
+                commandBuffers[i].BeginRenderPass(window->GetRenderPass(), window->GetActiveFramebuffer(), renderArea, clearValues, VK_SUBPASS_CONTENTS_INLINE);
+                renderer->BindPipeline(commandBuffers[i].GetVkCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS);
+                renderer->BindDescriptorSets(commandBuffers[i].GetVkCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, { dynamicOffset });
+                renderer->BindVertexBuffers(commandBuffers[i].GetVkCommandBuffer(), { 0 });
+                renderer->CommandSetViewports(commandBuffers[i].GetVkCommandBuffer());
+                renderer->CommandSetScissors(commandBuffers[i].GetVkCommandBuffer(), i);
+            }
+
+            // #REFACTOR
+            {
+                VK_PERFORMANCE_SECTION("Draw");
+                vkCmdDraw(commandBuffers[i].GetVkCommandBuffer(), 12 * 3, 1, 0, 0);
+            }
+
+            commandBuffers[i].EndRenderPass();
+            commandBuffers[i].End();
+        }
 
         // #TODO Clean this up
         VkFence fence = window->GetFence();
         vkResetFences(instance->GetDevice()->GetVkDevice(), 1, &fence);
 
-        std::vector<VkCommandBuffer> commandBuffers = { commandBuffer.GetVkCommandBuffer() };
+        //std::vector<VkCommandBuffer> commandBuffers = { commandBuffer.GetVkCommandBuffer() };
         std::vector<VkSemaphore> waitSemaphores = { window->GetSemaphore() };
 
         VkPipelineStageFlags pipelineStageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        queue.Submit(&pipelineStageFlags, waitSemaphores, commandBuffers,
+        queue.Submit(&pipelineStageFlags, waitSemaphores, commandPool.GetVkCommandBuffers({0, 1}),
         {}, window->GetFence());
 
         window->EndRender({}, { window->GetFence() });

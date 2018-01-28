@@ -28,8 +28,32 @@ VULKAN_NS_BEGIN
  * Should be the same during pipeline creation and during any call that change
  * their values. Also they should have same value.
  */
+
+#ifdef __ANDROID__
 #define VULKAN_VIEWPORT_COUNT 1
+#elif  defined(VULKAN_VR_MODE_VIEWPORTS)
+#define VULKAN_VIEWPORT_COUNT 2
+#else
+#define VULKAN_VIEWPORT_COUNT 1
+#endif
+
 #define VULKAN_SCISSOR_COUNT VULKAN_VIEWPORT_COUNT
+
+#ifdef VULKAN_VR_MODE
+#define VULKAN_COMMAND_BUFFER_COUNT 2
+#else
+#define VULKAN_COMMAND_BUFFER_COUNT 1
+#endif
+
+///**
+// * @class Math
+// */
+//struct TransformationData
+//{
+//    float x, y;
+//};
+
+
 
 /*
  * @class Renderer
@@ -46,24 +70,25 @@ public:
     void InitShaders(VkDevice device, const char* vertexShaderText, const char* fragmentShaderText);
     void InitDescriptorPool(VkDevice device);
     void InitDescriptorSet(VkDevice device);
+    //void UpdateDescriptorSets(VkDevice device, uint32_t uniformBufferIndex);
     void InitPipelineCache(VkDevice device);
     void InitPipeline(VkDevice device, VkExtent2D size, VkRenderPass renderPass);
 
     void BindPipeline(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint);
-    void BindDescriptorSets(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint);
+    void BindDescriptorSets(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint, std::vector<uint32_t> dynamicOffsets);
     void BindVertexBuffers(VkCommandBuffer commandBuffer, std::vector<VkDeviceSize> offsets);
 
     void CommandSetViewports(VkCommandBuffer commandBuffer);
-    void CommandSetScissors(VkCommandBuffer commandBuffer);
+    void CommandSetScissors(VkCommandBuffer commandBuffer, uint32_t index);
 
-    Buffer& GetUniformBuffer();
+    Buffer& GetUniformBuffer(uint32_t index);
     Buffer& GetVertexBuffer();
 
     void AddVertexInputBinding(uint32_t binding, uint32_t stride, VkVertexInputRate inputRate);
     void AddVertexInputAttribute(uint32_t location, uint32_t binding, VkFormat format, uint32_t offset);
 
 protected:
-    Buffer uniformBuffer;
+    std::vector<Buffer> uniformBuffers;
     Buffer vertexBuffer;
 
     std::vector<VkDescriptorSetLayout> descriptorSetLayouts;

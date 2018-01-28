@@ -18,3 +18,9 @@
 
 #ifdef VULKAN_ENABLE_RUNTIME_DEBUG
 #endif
+
+// #SUPPORT Currently implementing VR mode using single viewport, because
+// Android does not support multi viewport feature.
+#ifdef VULKAN_VR_MODE_VIEWPORTS
+#undef VULKAN_VR_MODE_VIEWPORTS
+#endif

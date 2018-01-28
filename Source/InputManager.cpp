@@ -15,6 +15,8 @@ VK_DECLARE_LOG_CATEGORY(LogInputManager);
 InputManager::InputManager()
 {
     InitInputs();
+
+    headMatrix = leftEyeMatrix = rightEyeMatrix = glm::mat4(1.f);
 }
 
 glm::mat4 InputManager::GetHeadMatrix()

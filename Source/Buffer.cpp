@@ -60,7 +60,7 @@ void Buffer::Allocate(Device* device, const VkMemoryPropertyFlags requiredProper
 
 void Buffer::Copy(VkDevice device, void* sourceData, uint32_t offset, uint32_t size)
 {
-    void* destinationData = memory.MapMemory(device, offset, GetMemoryRequirements(device).size, 0);
+    void* destinationData = memory.MapMemory(device, offset, size, 0);
     memcpy(destinationData, sourceData, size);
     memory.UnmapMemory(device);
 }

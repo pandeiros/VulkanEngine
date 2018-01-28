@@ -198,6 +198,9 @@ void PhysicalDevice::LogInfo()
     {
         VK_LOG(LogPhysicalDevice, Debug, "  %s", property.displayName);
     }
+
+    VK_LOG(LogPhysicalDevice, Debug, "Multiviewport support: %s", supportedFeatures.multiViewport ? "true" : "false");
+    VK_LOG(LogPhysicalDevice, Debug, "Geometry shader support: %s", supportedFeatures.geometryShader ? "true" : "false");
 }
 
 uint32_t PhysicalDevice::GetMemoryTypeIndex(const VkMemoryRequirements* memoryRequirements, const VkMemoryPropertyFlags requiredProperties)

@@ -34,7 +34,6 @@ VULKAN_NS_BEGIN
 
 // Should not be in the same scope as other data.
 #define VK_PERFORMANCE_DATA(NAME) PerformanceData performanceDataObject(NAME)
-// Should not be in the same scope as other section.
 #define VK_PERFORMANCE_SECTION(NAME) PerformanceSection performanceSectionObject(NAME)
 
 #else

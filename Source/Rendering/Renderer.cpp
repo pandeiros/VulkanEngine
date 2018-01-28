@@ -17,6 +17,8 @@ Renderer::Renderer(std::shared_ptr<Device> device)
     : VulkanClass(device)
 {
     bIncludeVertexInput = true;
+
+    uniformBuffers.resize(VULKAN_DESCRIPTOR_SETS_COUNT);
 }
 
 Renderer::~Renderer()
@@ -39,7 +41,10 @@ Renderer::~Renderer()
 
     vkDestroyPipelineLayout(device->GetVkDevice(), pipelineLayout, nullptr);
 
-    uniformBuffer.Destroy(device->GetVkDevice());
+    for (Buffer& uniformBuffer : uniformBuffers)
+    {
+        uniformBuffer.Destroy(device->GetVkDevice());
+    }
 }
 
 void Renderer::CreateDescriptorSetLayout()
@@ -50,31 +55,31 @@ void Renderer::CreateDescriptorSetLayout()
     layoutBindings.push_back(
     {
         0,
-        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
         1,
         VK_SHADER_STAGE_VERTEX_BIT,
         nullptr
     });
 
-    // Texture.
-    if (bTextureEnabled)
-    {
-        layoutBindings.push_back(
-        {
-            1,
-            VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-            1,
-            VK_SHADER_STAGE_FRAGMENT_BIT,
-            nullptr
-        });
-    }
+    //// Texture.
+    //if (bTextureEnabled)
+    //{
+    //    layoutBindings.push_back(
+    //    {
+    //        1,
+    //        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+    //        1,
+    //        VK_SHADER_STAGE_FRAGMENT_BIT,
+    //        nullptr
+    //    });
+    //}
 
-    uint32_t bindingCount = bTextureEnabled ? 2 : 1;
+    //uint32_t bindingCount = 2; // bTextureEnabled ? 2 : 1;
     descriptorSetLayoutCreateInfo = {
         VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
         nullptr,
         0,
-        bindingCount,
+        (uint32_t)layoutBindings.size(),
         layoutBindings.data()
     };
 
@@ -170,7 +175,7 @@ void Renderer::InitShaders(VkDevice device, const char* vertexShaderText, const 
 void Renderer::InitDescriptorPool(VkDevice device)
 {
     descriptorPoolSizes.push_back({
-        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
         1
     });
 
@@ -186,7 +191,7 @@ void Renderer::InitDescriptorPool(VkDevice device)
         VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
         nullptr,
         0,
-        1,
+        VULKAN_DESCRIPTOR_SETS_COUNT,
         (uint32_t)descriptorPoolSizes.size(),
         descriptorPoolSizes.data()
     };
@@ -207,37 +212,59 @@ void Renderer::InitDescriptorSet(VkDevice device)
     descriptorSets.resize(VULKAN_DESCRIPTOR_SETS_COUNT);
     VK_VERIFY(vkAllocateDescriptorSets(device, &descriptorSetAllocateInfo, descriptorSets.data()));
 
-    writeDescriptorSets.push_back({
-        VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-        nullptr,
-        descriptorSets[0],
-        0,
-        0,
-        1,
-        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        nullptr,
-        uniformBuffer.GetDescriptorInfo(),
-        nullptr
-    });
+    for (uint32_t i = 0; i < VULKAN_DESCRIPTOR_SETS_COUNT; ++i)
+    {
+        writeDescriptorSets.push_back({
+            VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+            nullptr,
+            descriptorSets[i],
+            0,
+            0,
+            1,
+            VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+            nullptr,
+            uniformBuffers[i].GetDescriptorInfo(),
+            nullptr
+        });
+    }
 
-    //if (bTextureEnabled)
-    //{
-    //    writeDescriptorSets.push_back({
-    //        VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-    //        nullptr,
-    //        descriptorSets[0],
-    //        1,
-    //        0,
-    //        1,
-    //        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-    //        textureData.GetImageInfo(),                 // #TODO Pending feature
-    //        nullptr,
-    //        nullptr
-    //    });
-    //}
-
-    vkUpdateDescriptorSets(device, bTextureEnabled ? 2 : 1, writeDescriptorSets.data(), 0, nullptr);
+    vkUpdateDescriptorSets(device, (uint32_t)writeDescriptorSets.size(), writeDescriptorSets.data(), 0, nullptr);
 }
+
+//void Renderer::UpdateDescriptorSets(VkDevice device, uint32_t uniformBufferIndex)
+//{
+//    writeDescriptorSets.push_back({
+//        VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+//        nullptr,
+//        descriptorSets[uniformBufferIndex],
+//        0,
+//        0,
+//        1,
+//        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+//        nullptr,
+//        uniformBuffers[uniformBufferIndex].GetDescriptorInfo(),
+//        nullptr
+//    });
+//
+//    //if (bTextureEnabled)
+//    //{
+//    //    writeDescriptorSets.push_back({
+//    //        VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+//    //        nullptr,
+//    //        descriptorSets[0],
+//    //        1,
+//    //        0,
+//    //        1,
+//    //        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+//    //        textureData.GetImageInfo(),                 // #TODO Pending feature
+//    //        nullptr,
+//    //        nullptr
+//    //    });
+//    //}
+//
+//    //vkUpdateDescriptorSets(device, bTextureEnabled ? 2 : 1, writeDescriptorSets.data(), 0, nullptr);
+//    vkUpdateDescriptorSets(device, 1, writeDescriptorSets.data(), 0, nullptr);
+//}
 
 void Renderer::InitPipelineCache(VkDevice device)
 {
@@ -338,14 +365,33 @@ void Renderer::InitPipeline(VkDevice device, VkExtent2D size, VkRenderPass rende
 
     viewports.push_back({
         0.f, 0.f,
-        (float)size.width, (float)size.height,
+        (float)size.width / VULKAN_VIEWPORT_COUNT, (float)size.height,
+        0.f, 1.f
+    });
+
+    // #TODO Refactor
+    scissors.push_back({
+        { 0, 0 },
+        { size.width / 2, size.height }
+    });
+
+    scissors.push_back({
+        { (int32_t)size.width / 2, 0 },
+        { size.width / 2, size.height }
+    });
+
+#ifdef VULKAN_VR_MODE_VIEWPORTS
+    viewports.push_back({
+        (float)size.width / VULKAN_VIEWPORT_COUNT, 0.f,
+        (float)size.width / VULKAN_VIEWPORT_COUNT, (float)size.height,
         0.f, 1.f
     });
 
     scissors.push_back({
-        { 0, 0 },
-        { size.width, size.height }
+        { (int32_t)size.width / VULKAN_VIEWPORT_COUNT, 0 },
+        { size.width / VULKAN_VIEWPORT_COUNT, size.height }
     });
+#endif
 
     // #TODO Clean
 #ifndef __ANDROID__
@@ -431,10 +477,10 @@ void Renderer::BindPipeline(VkCommandBuffer commandBuffer, VkPipelineBindPoint p
     vkCmdBindPipeline(commandBuffer, pipelineBindPoint, pipeline);
 }
 
-void Renderer::BindDescriptorSets(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint)
+void Renderer::BindDescriptorSets(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint, std::vector<uint32_t> dynamicOffsets)
 {
     vkCmdBindDescriptorSets(commandBuffer, pipelineBindPoint, pipelineLayout, 0,
-        VULKAN_DESCRIPTOR_SETS_COUNT, descriptorSets.data(), 0, nullptr);
+        VULKAN_DESCRIPTOR_SETS_COUNT, descriptorSets.data(), (uint32_t)dynamicOffsets.size(), dynamicOffsets.data());
 }
 
 void Renderer::BindVertexBuffers(VkCommandBuffer commandBuffer, std::vector<VkDeviceSize> offsets)
@@ -449,16 +495,16 @@ void Renderer::CommandSetViewports(VkCommandBuffer commandBuffer)
 //#endif
 }
 
-void Renderer::CommandSetScissors(VkCommandBuffer commandBuffer)
+void Renderer::CommandSetScissors(VkCommandBuffer commandBuffer, uint32_t index)
 {
 //#ifndef __ANDROID__
-    vkCmdSetScissor(commandBuffer, 0, (uint32_t)scissors.size(), scissors.data());
+    vkCmdSetScissor(commandBuffer, 0, 1, &scissors[index]);
 //#endif
 }
 
-Buffer& Renderer::GetUniformBuffer()
+Buffer& Renderer::GetUniformBuffer(uint32_t index)
 {
-    return uniformBuffer;
+    return uniformBuffers[index];
 }
 
 Buffer& Renderer::GetVertexBuffer()

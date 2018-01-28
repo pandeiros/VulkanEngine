@@ -58,7 +58,7 @@ set_target_properties(lib_gvr PROPERTIES IMPORTED_LOCATION
                       ${CMAKE_SOURCE_DIR}/../libraries/jni/${ANDROID_ABI}/libgvr.so)
 
 # Build application's shared library
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11  -Werror -D VK_USE_PLATFORM_ANDROID_KHR -D__ANDROID__ -DVULKAN_ENABLE_DEBUG ${GVR_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11  -Werror -D VK_USE_PLATFORM_ANDROID_KHR -D__ANDROID__ -DVULKAN_ENABLE_DEBUG -DVULKAN_VR_MODE ${GVR_FLAGS}")
 
 # Force export ANativeActivity_onCreate(),
 # Refer to: https://github.com/android-ndk/ndk/issues/381.

@@ -20,10 +20,7 @@ VULKAN_NS_BEGIN
 class CommandBuffer
 {
 public:
-    /**
-     * Default constructor.
-     */
-    CommandBuffer() = default;
+    CommandBuffer(VkCommandBuffer commandBuffer);
 
     /**
      * Default destructor.
