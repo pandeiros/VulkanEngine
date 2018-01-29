@@ -74,15 +74,30 @@ void TestApplication::Init()
     renderer->CreatePipelineLayout(device->GetVkDevice());
     renderer->InitShaders(device->GetVkDevice(), VULKAN_VERTEX_SHADER_TEXT, VULKAN_FRAGMENT_SHADER_TEXT);
 
-    Cube cube{ 1.f };
-    uint32_t size, stride;
-    void* data = cube.GetData(size, stride);
+
+    //Cube cube{ 1.f, };
+    uint32_t finalSize, size, stride;
+    std::vector<Cube> cubes;
+    for (uint32_t i = 0; i < 4; ++i)
+    {
+        cubes.push_back(Cube { 1.f, {glm::vec3(std::cos(PI / 2 * (i)) * 7, 0.f, std::sin(PI / 2 * i) * 7)} });
+    }
+    cubes[0].GetData(size, stride);
+    finalSize = size * (uint32_t)cubes.size();
 
     Buffer& vertexBuffer = renderer->GetVertexBuffer();
-    vertexBuffer.CreateExclusive(device->GetVkDevice(), 0, size, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+    vertexBuffer.CreateExclusive(device->GetVkDevice(), 0, finalSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
     vertexBuffer.Allocate(device, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    vertexBuffer.Copy(device->GetVkDevice(), data, 0, size);
-    vertexBuffer.UpdateDescriptorInfo(0, size);
+
+    uint32_t offset = 0;
+    for (uint32_t i = 0; i < cubes.size(); ++i)
+    {
+        cubes[i].UpdateVertices();
+        void* data = cubes[i].GetData(size, stride);
+        vertexBuffer.Copy(device->GetVkDevice(), data, offset, size);
+        offset += size;
+    }
+    vertexBuffer.UpdateDescriptorInfo(0, VK_WHOLE_SIZE);
 
     renderer->AddVertexInputBinding(0, stride, VK_VERTEX_INPUT_RATE_VERTEX);
     renderer->AddVertexInputAttribute(0, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 0);
@@ -151,11 +166,11 @@ void TestApplication::Tick(float deltaTime)
             //glm::mat4 viewportMatrix = glm::translate(glm::scale(glm::mat4(1.f), glm::vec3(renderArea.extent.width / 2, renderArea.extent.height / 2, 1.f - 0.f)), glm::vec3(renderArea.offset.x, renderArea.offset.y, 0.f));
             //glm::mat4 viewportMatrix = glm::translate(glm::scale(glm::mat4(1.f), glm::vec3(1.f, 1.f, 1.f)), glm::vec3(renderArea.offset.x, renderArea.offset.y, 0.f));
             //glm::mat4 viewportMatrix = glm::scale(glm::translate(glm::mat4(1.f), glm::vec3(renderArea.offset.x, renderArea.offset.y, 0.f)), glm::vec3(1.f, 1.f, 1.f));
-            glm::mat4 testTransform = glm::translate(glm::mat4(1.f), glm::vec3(i == 0 ? -0.5f : 0.5f, 0.f, 0.f));
-            //glm::mat4 viewportMatrix = glm::mat4(1.f);
-            glm::mat4 mvpMatrix = camera->GetClipMatrix() * testTransform * camera->GetProjectionMatrix() * GetEngine()->GetInputManager()->GetHeadMatrix() * glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.5f, 1.f, 1.f)), glm::vec3(0, 0, -10));
-            Renderer* renderer = engine->GetRenderer();
 
+            glm::mat4 testTransform = glm::translate(glm::mat4(1.f), glm::vec3(i == 0 ? -0.5f : 0.5f, 0.f, 0.f));
+            glm::mat4 mvpMatrix = camera->GetClipMatrix() * testTransform * camera->GetProjectionMatrix() * GetEngine()->GetInputManager()->GetHeadMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(0, -3, 0));
+            //glm::mat4 mvpMatrix = camera->GetClipMatrix() * testTransform * camera->GetProjectionMatrix() * camera->GetViewMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(0, -3, -20));
+            Renderer* renderer = engine->GetRenderer();
 
             Buffer& uniformBuffer = renderer->GetUniformBuffer(0);
             uniformBuffer.Copy(device->GetVkDevice(), &mvpMatrix, i * 256, sizeof(mvpMatrix));
@@ -167,10 +182,10 @@ void TestApplication::Tick(float deltaTime)
 
             std::vector<VkClearValue> clearValues = std::vector<VkClearValue>(2);
 
-            clearValues[0].color.float32[0] = (float)i / 4;
-            clearValues[0].color.float32[1] = 0.0f;
-            clearValues[0].color.float32[2] = (1.f - i) / 4;
-            clearValues[0].color.float32[3] = 0.0f;
+            clearValues[0].color.float32[0] = 0.f;
+            clearValues[0].color.float32[1] = 0.f;
+            clearValues[0].color.float32[2] = 0.f;
+            clearValues[0].color.float32[3] = 0.f;
 
             clearValues[1].depthStencil.depth = 1.f;
             clearValues[1].depthStencil.stencil = 0;
@@ -191,7 +206,7 @@ void TestApplication::Tick(float deltaTime)
             // #REFACTOR
             {
                 VK_PERFORMANCE_SECTION("Draw");
-                vkCmdDraw(commandBuffers[i].GetVkCommandBuffer(), 12 * 3, 1, 0, 0);
+                vkCmdDraw(commandBuffers[i].GetVkCommandBuffer(), 12 * 3 * 4, 1, 0, 0);
             }
 
             commandBuffers[i].EndRenderPass();

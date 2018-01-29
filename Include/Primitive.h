@@ -8,6 +8,8 @@
 
 #include "VulkanCore.h"
 
+#include "Utils/Math.h"
+
 /**
  * @file Primitive.h
  */
@@ -32,6 +34,22 @@ struct VertexUV
     float u, v;
 };
 
+struct Transform
+{
+    Transform()
+    {
+        position = glm::vec3(0.f, 0.f, 0.f);
+    }
+
+    Transform(glm::vec3 position)
+        : position(position)
+    {}
+
+    glm::vec3 position;
+};
+
+static const Transform DEFAULT_TRANSFORM = Transform(glm::vec3(0.f, 0.f, 0.f));
+
 #define XYZ1(X, Y, Z) (X), (Y), (Z), 1.f
 #define COLOR_FLAT(R, G, B) XYZ1(R, G, B)
 //#define UV(_u_, _v_) (_u_), (_v_)
@@ -42,20 +60,18 @@ struct VertexUV
 class Primitive
 {
 public:
-    /**
-     * Default constructor.
-     */
-    Primitive() = default;
+    Primitive(Transform transform)
+        : transform(transform)
+    {}
 
-    /**
-     * Default destructor.
-     */
-    ~Primitive() = default;
+    void UpdateVertices();
 
     void* GetData(uint32_t& dataSize, uint32_t& dataStride);
 
 protected:
     std::vector<Vertex> vertices;
+
+    Transform transform;
 };
 
 /**
@@ -69,7 +85,7 @@ public:
      */
     ~Cube() = default;
 
-    Cube(float sideLength = 1.f);
+    Cube(float sideLength = 1.f, Transform transform = DEFAULT_TRANSFORM);
 };
 
 VULKAN_NS_END

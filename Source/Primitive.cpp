@@ -8,8 +8,27 @@
 
 VULKAN_NS_USING;
 
+void Primitive::UpdateVertices()
+{
+    for (Vertex& vertex : vertices)
+    {
+        vertex.x += transform.position.x;
+        vertex.y += transform.position.y;
+        vertex.z += transform.position.z;
+    }
+}
+
+void* Primitive::GetData(uint32_t& dataSize, uint32_t& dataStride)
+{
+    dataSize = (uint32_t)vertices.size() * sizeof(Vertex);
+    dataStride = sizeof(Vertex);
+
+    return vertices.data();
+}
+
 // #REFACTOR
-Cube::Cube(float sideLength)
+Cube::Cube(float sideLength, Transform transform)
+    : Primitive(transform)
 {
     vertices.insert(vertices.end(), {
         // red face
@@ -55,12 +74,4 @@ Cube::Cube(float sideLength)
         { XYZ1(1, -1, -1), COLOR_FLAT(0.f, 1.f, 1.f) },
         { XYZ1(-1, -1, -1), COLOR_FLAT(0.f, 1.f, 1.f) }
     });
-}
-
-void* Primitive::GetData(uint32_t& dataSize, uint32_t& dataStride)
-{
-    dataSize = (uint32_t)vertices.size() * sizeof(Vertex);
-    dataStride = sizeof(Vertex);
-
-    return vertices.data();
 }
