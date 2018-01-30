@@ -53,7 +53,7 @@ void TestApplication::Init()
         fov *= 1.f / aspect;
     }
     camera = new Camera(fov, aspect, 0.1f, 100.f,
-    { glm::vec3(0, 0, 10), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0) }, Camera::DEFAULT_CLIP_MATRIX);
+    { glm::vec3(0, 50, 10), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0) }, Camera::DEFAULT_CLIP_MATRIX);
     engine->GetWorld()->AddCamera(camera);
 
     glm::mat4 vpMatrix = camera->GetViewProjectionMatrix();
@@ -74,16 +74,29 @@ void TestApplication::Init()
     renderer->CreatePipelineLayout(device->GetVkDevice());
     renderer->InitShaders(device->GetVkDevice(), VULKAN_VERTEX_SHADER_TEXT, VULKAN_FRAGMENT_SHADER_TEXT);
 
+    // Perlin noise grid.
 
     //Cube cube{ 1.f, };
     uint32_t finalSize, size, stride;
     std::vector<Cube> cubes;
-    for (uint32_t i = 0; i < 4; ++i)
+    int32_t cubeCount = 100;
+    for (int32_t i = 0; i < cubeCount; ++i)
     {
-        cubes.push_back(Cube { 1.f, {glm::vec3(std::cos(PI / 2 * (i)) * 7, 0.f, std::sin(PI / 2 * i) * 7)} });
+        for (int32_t j = 0; j < cubeCount; ++j)
+        {
+            //cubes.push_back(Cube{ 1.f, { glm::vec3(std::cos(PI / 2 * (i)) * 7, 0.f, std::sin(PI / 2 * i) * 7) } });
+
+            float xArg = float(i - cubeCount / 2);
+            float yArg = float(j - cubeCount / 2);
+            float y = 5 * ((float)std::cos(xArg / cubeCount * PI * 2) + (float)std::sin(yArg * 3 / 2 / cubeCount * PI * 2));
+
+            cubes.push_back(Cube{ 1.f, { glm::vec3(xArg * 0.75f, y, yArg * 0.75f), glm::vec3(0.25f, 0.25f, 0.25f)} });
+            cubes[cubes.size() - 1].SetColor({ xArg / cubeCount + 0.5f, 0, yArg / cubeCount + 0.5f});
+        }
     }
+    cubesToDraw = (uint32_t)cubes.size();
     cubes[0].GetData(size, stride);
-    finalSize = size * (uint32_t)cubes.size();
+    finalSize = size * cubesToDraw;
 
     Buffer& vertexBuffer = renderer->GetVertexBuffer();
     vertexBuffer.CreateExclusive(device->GetVkDevice(), 0, finalSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
@@ -168,8 +181,12 @@ void TestApplication::Tick(float deltaTime)
             //glm::mat4 viewportMatrix = glm::scale(glm::translate(glm::mat4(1.f), glm::vec3(renderArea.offset.x, renderArea.offset.y, 0.f)), glm::vec3(1.f, 1.f, 1.f));
 
             glm::mat4 testTransform = glm::translate(glm::mat4(1.f), glm::vec3(i == 0 ? -0.5f : 0.5f, 0.f, 0.f));
-            glm::mat4 mvpMatrix = camera->GetClipMatrix() * testTransform * camera->GetProjectionMatrix() * GetEngine()->GetInputManager()->GetHeadMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(0, -3, 0));
-            //glm::mat4 mvpMatrix = camera->GetClipMatrix() * testTransform * camera->GetProjectionMatrix() * camera->GetViewMatrix() * glm::translate(glm::mat4(1.0f), glm::vec3(0, -3, -20));
+#ifdef __ANDROID__
+            glm::mat4 mvpMatrix = camera->GetClipMatrix() * testTransform * camera->GetProjectionMatrix() *
+                (i == 0 ? GetEngine()->GetInputManager()->GetLeftEyeMatrix() : GetEngine()->GetInputManager()->GetRightEyeMatrix()) * glm::translate(glm::mat4(1.0f), glm::vec3(0, -30, 0));
+#else
+            glm::mat4 mvpMatrix = camera->GetClipMatrix() * testTransform * camera->GetProjectionMatrix() * camera->GetViewMatrix() * glm::mat4(1.0f);
+#endif
             Renderer* renderer = engine->GetRenderer();
 
             Buffer& uniformBuffer = renderer->GetUniformBuffer(0);
@@ -206,7 +223,7 @@ void TestApplication::Tick(float deltaTime)
             // #REFACTOR
             {
                 VK_PERFORMANCE_SECTION("Draw");
-                vkCmdDraw(commandBuffers[i].GetVkCommandBuffer(), 12 * 3 * 4, 1, 0, 0);
+                vkCmdDraw(commandBuffers[i].GetVkCommandBuffer(), 12 * 3 * cubesToDraw, 1, 0, 0);
             }
 
             commandBuffers[i].EndRenderPass();

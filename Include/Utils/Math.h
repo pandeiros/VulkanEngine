@@ -29,6 +29,14 @@ VULKAN_NS_BEGIN
 
 struct Vector2D
 {
+    Vector2D()
+        : x(0.f), y(0.f)
+    {}
+
+    Vector2D(float x, float y)
+        : x(x), y(y)
+    {}
+
     float x, y;
 };
 

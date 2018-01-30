@@ -10,8 +10,6 @@
 
 VULKAN_NS_USING;
 
-VK_DECLARE_LOG_CATEGORY(LogInputManager);
-
 InputManager::InputManager()
 {
     InitInputs();
@@ -41,29 +39,9 @@ void InputManager::InitInputs()
 #endif
 }
 
-void InputManager::UpdateButtonMapping(InputCodes inputCode, InputState newState)
+InputState InputManager::MapToButtonInputState(bool value)
 {
-    InputState& previousState = buttonMappings.at(inputCode);
-
-    if (previousState == newState)
-    {
-        // DO NOTHING
-    }
-    else if (previousState == InputState::DOWN && newState == InputState::UP)
-    {
-        // Event ON_UP
-        VK_LOG(LogInputManager, Debug, "Input code %u %u", (uint32_t)inputCode, (uint32_t)newState);
-    }
-    else if (previousState == InputState::UP && newState == InputState::DOWN)
-    {
-        // Event ON_DOWN
-    }
-    else
-    {
-        // Wrong states!
-    }
-
-    previousState = newState;
+    return (value ? InputState::DOWN : InputState::UP);
 }
 
 #ifdef __ANDROID__
@@ -72,10 +50,10 @@ void InputManager::UpdateGVRControllerState(gvr::ControllerApi* controllerApi)
 {
     controllerState.Update(*controllerApi);
 
-    UpdateButtonMapping(InputCodes::GVR_BUTTON_APP, MapToInputState(controllerState.GetButtonState(gvr::kControllerButtonApp)));
-    UpdateButtonMapping(InputCodes::GVR_BUTTON_CLICK, MapToInputState(controllerState.GetButtonState(gvr::kControllerButtonClick)));
+    buttonData.UpdateMappings(InputCodes::GVR_BUTTON_APP, MapToButtonInputState(controllerState.GetButtonState(gvr::kControllerButtonApp)), 0.f);
+    buttonData.UpdateMappings(InputCodes::GVR_BUTTON_CLICK, MapToButtonInputState(controllerState.GetButtonState(gvr::kControllerButtonClick)), 0.f);
 
-    //vector2DMappings
+    vector2DData.UpdateMappings(InputCodes::GVR_TOUCHPAD, controllerState.GetTouchDown() ? InputState::DOWN : InputState::UP, { controllerState.GetTouchPos().x, controllerState.GetTouchPos().y });
 }
 
 void InputManager::UpdateGVRHeadPose(gvr::GvrApi* gvrApi)
@@ -90,14 +68,10 @@ void InputManager::UpdateGVRHeadPose(gvr::GvrApi* gvrApi)
 
 void InputManager::InitGVRInput()
 {
-    buttonMappings.insert(std::make_pair(InputCodes::GVR_BUTTON_APP, InputState::UP));
-    buttonMappings.insert(std::make_pair(InputCodes::GVR_BUTTON_CLICK, InputState::UP));
-    //vector2DMappings.insert_or_assign(InputCodes::GVR_TOUCHPAD, InputStorage<Vector2D>({0.f, 0.f}, InputState::UP, InputType::TOUCH));
-}
+    buttonData.GetData().insert(std::make_pair(InputCodes::GVR_BUTTON_APP, InputData<float>(InputState::UP, InputType::BUTTON, 0.f)));
+    buttonData.GetData().insert(std::make_pair(InputCodes::GVR_BUTTON_CLICK, InputData<float>(InputState::UP, InputType::BUTTON, 0.f)));
 
-InputState InputManager::MapToInputState(bool value)
-{
-    return (value ? InputState::DOWN : InputState::UP);
+    vector2DData.GetData().insert(std::make_pair(InputCodes::GVR_TOUCHPAD, InputData<Vector2D>(InputState::UP, InputType::TOUCH, {})));
 }
 
 #endif

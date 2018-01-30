@@ -39,16 +39,18 @@ struct Transform
     Transform()
     {
         position = glm::vec3(0.f, 0.f, 0.f);
+        scale = glm::vec3(1.f, 1.f, 1.f);
     }
 
-    Transform(glm::vec3 position)
-        : position(position)
+    Transform(glm::vec3 position, glm::vec3 scale)
+        : position(position), scale(scale)
     {}
 
     glm::vec3 position;
+    glm::vec3 scale;
 };
 
-static const Transform DEFAULT_TRANSFORM = Transform(glm::vec3(0.f, 0.f, 0.f));
+static const Transform DEFAULT_TRANSFORM = Transform(glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f));
 
 #define XYZ1(X, Y, Z) (X), (Y), (Z), 1.f
 #define COLOR_FLAT(R, G, B) XYZ1(R, G, B)
@@ -85,6 +87,7 @@ public:
      */
     ~Cube() = default;
 
+    void SetColor(glm::vec3 color);
     Cube(float sideLength = 1.f, Transform transform = DEFAULT_TRANSFORM);
 };
 

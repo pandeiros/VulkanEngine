@@ -8,7 +8,7 @@
 
 #include "VulkanCore.h"
 
-#include "Utils/Math.h"
+#include "Core.h"
 
 #ifdef __ANDROID__
 #include "gvr.h"
@@ -23,6 +23,8 @@
  */
 
 VULKAN_NS_BEGIN
+
+VK_DECLARE_LOG_CATEGORY(LogInputManager);
 
 /**
  *
@@ -49,7 +51,8 @@ enum InputEvent
     ON_UP,
     ON_PRESSED,
     ON_LONG_PRESSED,
-    ON_CHANGE
+    ON_CHANGE,
+    ALWAYS
 };
 
 enum InputCodes
@@ -63,12 +66,12 @@ enum InputCodes
 };
 
 template<typename T>
-class InputStorage
+struct InputData
 {
-    InputStorage()
+    InputData()
     {}
 
-    InputStorage(T value, InputState state, InputType type)
+    InputData(InputState state, InputType type, T value)
         : value(value), state(state), type(type)
     {}
 
@@ -77,6 +80,61 @@ class InputStorage
     InputType type;
     std::chrono::steady_clock::time_point startTime;
 };
+
+template<typename T>
+class InputStorage
+{
+public:
+    InputStorage()
+    {}
+
+    void UpdateMappings(InputCodes inputCode, InputState newState, T newValue);
+    void BroadcastEvents(InputCodes inputCode, InputEvent event, T value);
+
+    std::map<InputCodes, InputData<T>>& GetData();
+
+private:
+    std::map<InputCodes, InputData<T>> data;
+};
+
+template<typename T>
+std::map<InputCodes, InputData<T>>& InputStorage<T>::GetData()
+{
+    return data;
+}
+
+template<typename T>
+void InputStorage<T>::UpdateMappings(InputCodes inputCode, InputState newState, T newValue)
+{
+    auto& input = data.at(inputCode);
+
+    if (input.state == newState)
+    {
+
+    }
+    else if (input.state == InputState::DOWN && newState == InputState::UP)
+    {
+        // Event ON_UP
+        VK_LOG(LogInputManager, Debug, "Input code %u: %u", (uint32_t)inputCode, (uint32_t)newState);
+    }
+    else if (input.state == InputState::UP && newState == InputState::DOWN)
+    {
+        // Event ON_DOWN
+        VK_LOG(LogInputManager, Debug, "Input code %u: %u", (uint32_t)inputCode, (uint32_t)newState);
+    }
+    else
+    {
+        // Wrong states!
+    }
+
+    input.state = newState;
+};
+
+template<typename T>
+void InputStorage<T>::BroadcastEvents(InputCodes inputCode, InputEvent event, T value)
+{
+
+}
 
 /**
  * @class InputManager
@@ -93,16 +151,21 @@ public:
 
 private:
     void InitInputs();
-    void UpdateButtonMapping(InputCodes inputCode, InputState newState);
 
-    std::map<InputCodes, InputState> buttonMappings;
-    std::map<InputCodes, InputStorage<Vector2D>> vector2DMappings;
+    InputStorage<float> buttonData;
+    InputStorage<Vector2D> vector2DData;
 
     glm::mat4 headMatrix;
     glm::mat4 leftEyeMatrix;
     glm::mat4 rightEyeMatrix;
 
     std::chrono::steady_clock timer;
+
+    InputState MapToButtonInputState(bool value);
+
+    //////////////////////////////////////////////////////////////////////////
+    // Events
+    //////////////////////////////////////////////////////////////////////////
 
 #ifdef __ANDROID__
 public:
@@ -111,7 +174,6 @@ public:
 
 private:
     void InitGVRInput();
-    InputState MapToInputState(bool value);
 
     // GVR Controller
     gvr::ControllerState controllerState;

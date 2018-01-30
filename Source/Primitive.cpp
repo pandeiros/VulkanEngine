@@ -12,6 +12,10 @@ void Primitive::UpdateVertices()
 {
     for (Vertex& vertex : vertices)
     {
+        vertex.x *= transform.scale.x;
+        vertex.y *= transform.scale.y;
+        vertex.z *= transform.scale.z;
+
         vertex.x += transform.position.x;
         vertex.y += transform.position.y;
         vertex.z += transform.position.z;
@@ -24,6 +28,16 @@ void* Primitive::GetData(uint32_t& dataSize, uint32_t& dataStride)
     dataStride = sizeof(Vertex);
 
     return vertices.data();
+}
+
+void Cube::SetColor(glm::vec3 color)
+{
+    for (Vertex& vertex : vertices)
+    {
+        vertex.r = color.x;
+        vertex.g = color.y;
+        vertex.b = color.z;
+    }
 }
 
 // #REFACTOR
