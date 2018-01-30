@@ -88,7 +88,7 @@ void TestApplication::Init()
 
             float xArg = float(i - cubeCount / 2);
             float yArg = float(j - cubeCount / 2);
-            float y = 5 * ((float)std::cos(xArg / cubeCount * PI * 2) + (float)std::sin(yArg * 3 / 2 / cubeCount * PI * 2));
+            float y = 10 * ((float)std::cos(xArg / cubeCount * PI * 2) + (float)std::sin(yArg * 3 / 2 / cubeCount * PI * 2));
 
             cubes.push_back(Cube{ 1.f, { glm::vec3(xArg * 0.75f, y, yArg * 0.75f), glm::vec3(0.25f, 0.25f, 0.25f)} });
             cubes[cubes.size() - 1].SetColor({ xArg / cubeCount + 0.5f, 0, yArg / cubeCount + 0.5f});
@@ -183,7 +183,7 @@ void TestApplication::Tick(float deltaTime)
             glm::mat4 testTransform = glm::translate(glm::mat4(1.f), glm::vec3(i == 0 ? -0.5f : 0.5f, 0.f, 0.f));
 #ifdef __ANDROID__
             glm::mat4 mvpMatrix = camera->GetClipMatrix() * testTransform * camera->GetProjectionMatrix() *
-                (i == 0 ? GetEngine()->GetInputManager()->GetLeftEyeMatrix() : GetEngine()->GetInputManager()->GetRightEyeMatrix()) * glm::translate(glm::mat4(1.0f), glm::vec3(0, -30, 0));
+                (i == 0 ? GetEngine()->GetInputManager()->GetLeftEyeMatrix() : GetEngine()->GetInputManager()->GetRightEyeMatrix()) * glm::translate(glm::mat4(1.0f), glm::vec3(0, -10, 10));
 #else
             glm::mat4 mvpMatrix = camera->GetClipMatrix() * testTransform * camera->GetProjectionMatrix() * camera->GetViewMatrix() * glm::mat4(1.0f);
 #endif
