@@ -4,31 +4,9 @@
  * Copyright (C) 2016-2017 Pawel Kaczynski
  */
 
-#include "Primitive.h"
+#include "Rendering/Cube.h"
 
 VULKAN_NS_USING;
-
-void Primitive::UpdateVertices()
-{
-    for (Vertex& vertex : vertices)
-    {
-        vertex.x *= transform.scale.x;
-        vertex.y *= transform.scale.y;
-        vertex.z *= transform.scale.z;
-
-        vertex.x += transform.position.x;
-        vertex.y += transform.position.y;
-        vertex.z += transform.position.z;
-    }
-}
-
-void* Primitive::GetData(uint32_t& dataSize, uint32_t& dataStride)
-{
-    dataSize = (uint32_t)vertices.size() * sizeof(Vertex);
-    dataStride = sizeof(Vertex);
-
-    return vertices.data();
-}
 
 void Cube::SetColor(glm::vec3 color)
 {
@@ -42,8 +20,9 @@ void Cube::SetColor(glm::vec3 color)
 
 // #REFACTOR
 Cube::Cube(float sideLength, Transform transform)
-    : Primitive(transform)
+    //: RenderComponent(transform)
 {
+    this->transform = transform;
     vertices.insert(vertices.end(), {
         // red face
         { XYZ1(-1, -1, 1), COLOR_FLAT(1.f, 0.f, 0.f) },

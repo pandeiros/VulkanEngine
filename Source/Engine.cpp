@@ -6,10 +6,10 @@
 
 #include "Engine.h"
 
+#include "Core.h"
+
 #include <cstdlib>
 #include <algorithm>
-
-#include "Core.h"
 
 VULKAN_NS_USING;
 
@@ -43,13 +43,14 @@ Engine::~Engine()
     }
 }
 
-void Engine::Init(DevicePtr device)
+void Engine::Init(Instance* instance)
 {
     this->device = device;
 
-    renderer.reset(new Renderer(device));
-    world.reset(new World(device));
+    renderer.reset(new Renderer(instance->GetDevicePtr(), this));
+    world.reset(new World(instance->GetDevicePtr(), this));
     inputManager.reset(new InputManager);
+    window = instance->GetWindow();
 }
 
 void Engine::Update()
@@ -169,6 +170,8 @@ void Engine::UpdateInternal(float deltaTime)
     }
 
     world->Update(deltaTime);
+
+    renderer->Update(deltaTime);
 }
 
 float Engine::GetMinDeltaTime() const

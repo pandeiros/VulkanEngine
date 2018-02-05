@@ -50,10 +50,10 @@ void InputManager::UpdateGVRControllerState(gvr::ControllerApi* controllerApi)
 {
     controllerState.Update(*controllerApi);
 
-    buttonData.UpdateMappings(InputCodes::GVR_BUTTON_APP, MapToButtonInputState(controllerState.GetButtonState(gvr::kControllerButtonApp)), 0.f);
-    buttonData.UpdateMappings(InputCodes::GVR_BUTTON_CLICK, MapToButtonInputState(controllerState.GetButtonState(gvr::kControllerButtonClick)), 0.f);
+    floatData.UpdateMappings(InputCode::GVR_BUTTON_APP, MapToButtonInputState(controllerState.GetButtonState(gvr::kControllerButtonApp)), 0.f);
+    floatData.UpdateMappings(InputCode::GVR_BUTTON_CLICK, MapToButtonInputState(controllerState.GetButtonState(gvr::kControllerButtonClick)), 0.f);
 
-    vector2DData.UpdateMappings(InputCodes::GVR_TOUCHPAD, controllerState.GetTouchDown() ? InputState::DOWN : InputState::UP, { controllerState.GetTouchPos().x, controllerState.GetTouchPos().y });
+    vector2DData.UpdateMappings(InputCode::GVR_TOUCHPAD, controllerState.GetTouchDown() ? InputState::DOWN : InputState::UP, { controllerState.GetTouchPos().x, controllerState.GetTouchPos().y });
 }
 
 void InputManager::UpdateGVRHeadPose(gvr::GvrApi* gvrApi)
@@ -61,17 +61,29 @@ void InputManager::UpdateGVRHeadPose(gvr::GvrApi* gvrApi)
     // Obtain the latest, predicted head pose.
     gvr::ClockTimePoint timePoint = gvrApi->GetTimePointNow();
 
-    headMatrix = Math::Transpose(gvrApi->GetHeadSpaceFromStartSpaceRotation(timePoint));
-    leftEyeMatrix = 10.f * Math::Transpose(gvrApi->GetEyeFromHeadMatrix(GVR_LEFT_EYE)) * headMatrix;
-    rightEyeMatrix = Math::Transpose(gvrApi->GetEyeFromHeadMatrix(GVR_RIGHT_EYE)) * headMatrix;
+    glm::mat4 headMatrix = Math::Transpose(gvrApi->GetHeadSpaceFromStartSpaceRotation(timePoint));
+
+    matrixData.UpdateMappings(InputCode::GVR_HEAD_MATRIX, InputState::ACTIVE, headMatrix);
+    matrixData.UpdateMappings(InputCode::GVR_LEFT_EYE_MATRIX, InputState::ACTIVE, Math::Transpose(gvrApi->GetEyeFromHeadMatrix(GVR_LEFT_EYE)) * headMatrix);
+    matrixData.UpdateMappings(InputCode::GVR_RIGHT_EYE_MATRIX, InputState::ACTIVE, Math::Transpose(gvrApi->GetEyeFromHeadMatrix(GVR_RIGHT_EYE)) * headMatrix);
+
+
+
+    //headMatrix = Math::Transpose(gvrApi->GetHeadSpaceFromStartSpaceRotation(timePoint));
+    //leftEyeMatrix = 10.f * Math::Transpose(gvrApi->GetEyeFromHeadMatrix(GVR_LEFT_EYE)) * headMatrix;
+    //rightEyeMatrix = Math::Transpose(gvrApi->GetEyeFromHeadMatrix(GVR_RIGHT_EYE)) * headMatrix;
 }
 
 void InputManager::InitGVRInput()
 {
-    buttonData.GetData().insert(std::make_pair(InputCodes::GVR_BUTTON_APP, InputData<float>(InputState::UP, InputType::BUTTON, 0.f)));
-    buttonData.GetData().insert(std::make_pair(InputCodes::GVR_BUTTON_CLICK, InputData<float>(InputState::UP, InputType::BUTTON, 0.f)));
+    floatData.GetData().insert(std::make_pair(InputCode::GVR_BUTTON_APP, InputData<float>(InputState::UP, InputType::BUTTON, 0.f)));
+    floatData.GetData().insert(std::make_pair(InputCode::GVR_BUTTON_CLICK, InputData<float>(InputState::UP, InputType::BUTTON, 0.f)));
 
-    vector2DData.GetData().insert(std::make_pair(InputCodes::GVR_TOUCHPAD, InputData<Vector2D>(InputState::UP, InputType::TOUCH, {})));
+    vector2DData.GetData().insert(std::make_pair(InputCode::GVR_TOUCHPAD, InputData<Vector2D>(InputState::UP, InputType::TOUCH, {})));
+
+    matrixData.GetData().insert(std::make_pair(InputCode::GVR_HEAD_MATRIX, InputData<glm::mat4>(InputState::INACTIVE, InputType::CONTINUOUS, glm::mat4(1.f))));
+    matrixData.GetData().insert(std::make_pair(InputCode::GVR_LEFT_EYE_MATRIX, InputData<glm::mat4>(InputState::INACTIVE, InputType::CONTINUOUS, glm::mat4(1.f))));
+    matrixData.GetData().insert(std::make_pair(InputCode::GVR_RIGHT_EYE_MATRIX, InputData<glm::mat4>(InputState::INACTIVE, InputType::CONTINUOUS, glm::mat4(1.f))));
 }
 
 #endif

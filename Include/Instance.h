@@ -7,7 +7,6 @@
 #pragma once
 
 #include "VulkanCore.h"
-#include "Engine.h"
 #include "Device.h"
 #include "Window.h"
 
@@ -35,7 +34,6 @@ public:
     std::shared_ptr<Device> GetDevicePtr();
     Device* GetDevice();
     Window* GetWindow();
-    //Window& GetWindowRef();
 
 private:
     VkInstance instance = VK_NULL_HANDLE;

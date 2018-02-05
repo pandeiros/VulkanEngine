@@ -6,6 +6,8 @@
 
 #include "Camera.h"
 
+#include "Core.h"
+
 VULKAN_NS_USING;
 
 const glm::mat4 Camera::DEFAULT_CLIP_MATRIX = glm::mat4(
@@ -45,6 +47,14 @@ void Camera::Move(glm::vec3 positionDelta)
 {
     transform.eye += positionDelta;
     UpdateMatrices();
+}
+
+void Camera::OnUpdateTransform(InputCode inputCode, InputEvent event, glm::mat4 value)
+{
+    if (inputCode == InputCode::GVR_LEFT_EYE_MATRIX)
+    {
+        VULKAN_LOGGER("Left eye matrix: %s", glm::to_string(value));
+    }
 }
 
 void Camera::UpdateMatrices()

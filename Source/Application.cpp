@@ -69,7 +69,7 @@ void Application::Init()
 
     instance->InitDeviceAndWindow(engine->GetPhysicalDevice(0));
 
-    engine->Init(instance->GetDevicePtr());
+    engine->Init(instance.get());
     //engine->LogDeviceProperties();
 }
 

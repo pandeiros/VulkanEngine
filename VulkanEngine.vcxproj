@@ -261,6 +261,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="android\utils\AndroidUtils.cpp" />
+    <ClCompile Include="source\Actor.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="source\Buffer.cpp">
       <SubType>
       </SubType>
@@ -322,13 +326,24 @@
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="source\Primitive.cpp" />
     <ClCompile Include="source\Queue.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="source\Rendering\Cube.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="source\Rendering\RenderComponent.cpp">
       <SubType>
       </SubType>
     </ClCompile>
     <ClCompile Include="source\Rendering\Renderer.cpp" />
     <ClCompile Include="source\Rendering\ShaderTools.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="source\Rendering\Shape.cpp">
       <SubType>
       </SubType>
     </ClCompile>
@@ -372,6 +387,10 @@
   <ItemGroup>
     <ClInclude Include="android\utils\AndroidCore.h" />
     <ClInclude Include="android\utils\AndroidUtils.h" />
+    <ClInclude Include="include\Actor.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="include\Buffer.h">
       <SubType>
       </SubType>
@@ -430,8 +449,15 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="include\Platforms\Win32\Window_Win32.h" />
-    <ClInclude Include="Include\Primitive.h" />
     <ClInclude Include="include\Queue.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Rendering\Cube.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Rendering\RenderComponent.h">
       <SubType>
       </SubType>
     </ClInclude>
@@ -441,6 +467,10 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="include\Rendering\ShaderTools.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Rendering\Shape.h">
       <SubType>
       </SubType>
     </ClInclude>

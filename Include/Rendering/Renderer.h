@@ -8,6 +8,7 @@
 
 #include "VulkanCore.h"
 
+#include "CommandPool.h"
 #include "Buffer.h"
 
 #include <vector>
@@ -24,36 +25,30 @@ VULKAN_NS_BEGIN
  */
 #define VULKAN_DESCRIPTOR_SETS_COUNT 1
 
-/**
- * Should be the same during pipeline creation and during any call that change
- * their values. Also they should have same value.
- */
-
 #ifdef __ANDROID__
 #define VULKAN_VIEWPORT_COUNT 1
-#elif  defined(VULKAN_VR_MODE_VIEWPORTS)
+#elif defined(VULKAN_VR_MODE_VIEWPORTS)
 #define VULKAN_VIEWPORT_COUNT 2
 #else
 #define VULKAN_VIEWPORT_COUNT 1
 #endif
 
+/**
+ * Should be the same during pipeline creation and during any call that change
+ * their values.
+ */
 #define VULKAN_SCISSOR_COUNT VULKAN_VIEWPORT_COUNT
 
+/**
+ * Regardless of having multi viewports feature enables, we create a buffer for each camera.
+ */
 #ifdef VULKAN_VR_MODE
 #define VULKAN_COMMAND_BUFFER_COUNT 2
 #else
 #define VULKAN_COMMAND_BUFFER_COUNT 1
 #endif
 
-///**
-// * @class Math
-// */
-//struct TransformationData
-//{
-//    float x, y;
-//};
-
-
+class Engine;
 
 /*
  * @class Renderer
@@ -61,36 +56,50 @@ VULKAN_NS_BEGIN
 class Renderer : public VulkanClass
 {
 public:
-    Renderer(std::shared_ptr<Device> device);
+    Renderer(std::shared_ptr<Device> device, Engine* engine);
     ~Renderer();
 
-    void CreateDescriptorSetLayout();
-    void CreatePipelineLayout(VkDevice device);
+    virtual void Tick(float deltaTime) override;
+    virtual void Init();
 
-    void InitShaders(VkDevice device, const char* vertexShaderText, const char* fragmentShaderText);
-    void InitDescriptorPool(VkDevice device);
-    void InitDescriptorSet(VkDevice device);
-    //void UpdateDescriptorSets(VkDevice device, uint32_t uniformBufferIndex);
-    void InitPipelineCache(VkDevice device);
-    void InitPipeline(VkDevice device, VkExtent2D size, VkRenderPass renderPass);
+    //////////////////////////////////////////////////////////////////////////
+    // Settings
+    //////////////////////////////////////////////////////////////////////////
 
-    void BindPipeline(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint);
-    void BindDescriptorSets(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint, std::vector<uint32_t> dynamicOffsets);
-    void BindVertexBuffers(VkCommandBuffer commandBuffer, std::vector<VkDeviceSize> offsets);
+private:
+    Engine* engine;
 
-    void CommandSetViewports(VkCommandBuffer commandBuffer);
-    void CommandSetScissors(VkCommandBuffer commandBuffer, uint32_t index);
+    bool bTextureEnabled = false;
+    bool bIncludeVertexInput = true;
+
+    //////////////////////////////////////////////////////////////////////////
+    // CommandPool & Buffers
+    //////////////////////////////////////////////////////////////////////////
+
+public:
+    CommandPool commandPool;
 
     Buffer& GetUniformBuffer(uint32_t index);
     Buffer& GetVertexBuffer();
 
-    void AddVertexInputBinding(uint32_t binding, uint32_t stride, VkVertexInputRate inputRate);
-    void AddVertexInputAttribute(uint32_t location, uint32_t binding, VkFormat format, uint32_t offset);
+    void BindVertexBuffers(VkCommandBuffer commandBuffer, std::vector<VkDeviceSize> offsets);
 
 protected:
     std::vector<Buffer> uniformBuffers;
     Buffer vertexBuffer;
 
+    //////////////////////////////////////////////////////////////////////////
+    // Descriptor pool/sets
+    //////////////////////////////////////////////////////////////////////////
+
+public:
+    void CreateDescriptorSetLayout();
+    void InitDescriptorPool(VkDevice device);
+    void InitDescriptorSet(VkDevice device);
+
+    void BindDescriptorSets(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint, std::vector<uint32_t> dynamicOffsets);
+
+private:
     std::vector<VkDescriptorSetLayout> descriptorSetLayouts;
     VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = {};
 
@@ -102,10 +111,24 @@ protected:
     std::vector<VkDescriptorSet> descriptorSets;
     std::vector<VkWriteDescriptorSet> writeDescriptorSets;
 
+    //////////////////////////////////////////////////////////////////////////
+    // Pipeline
+    //////////////////////////////////////////////////////////////////////////
+
+public:
+    void CreatePipelineLayout();
+
+    void InitPipelineCache(VkDevice device);
+    void InitPipeline(VkDevice device, VkExtent2D size, VkRenderPass renderPass);
+
+    void BindPipeline(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint);
+
+    void AddVertexInputBinding(uint32_t binding, uint32_t stride, VkVertexInputRate inputRate);
+    void AddVertexInputAttribute(uint32_t location, uint32_t binding, VkFormat format, uint32_t offset);
+
+private:
     VkPipelineLayout pipelineLayout = VK_NULL_HANDLE;
     VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
-
-    std::vector<VkPipelineShaderStageCreateInfo> pipelineShaderStageCreateInfo;
 
     VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
     VkPipelineCache pipelineCache = VK_NULL_HANDLE;
@@ -120,8 +143,6 @@ protected:
     VkPipelineViewportStateCreateInfo pipelineViewportStateCreateInfo = {};
     VkPipelineDepthStencilStateCreateInfo pipelineDepthStencilStateCreateInfo = {};
     VkPipelineMultisampleStateCreateInfo pipelineMultisampleStateCreateInfo = {};
-    std::vector<VkViewport> viewports;
-    std::vector<VkRect2D> scissors;
 
     VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo = {};
     VkPipeline pipeline = VK_NULL_HANDLE;
@@ -129,10 +150,30 @@ protected:
     std::vector<VkVertexInputBindingDescription> vertexInputBindings;
     std::vector<VkVertexInputAttributeDescription> vertexInputAttributes;
 
-private:
+    //////////////////////////////////////////////////////////////////////////
+    // Shaders
+    //////////////////////////////////////////////////////////////////////////
 
-    bool bTextureEnabled = false;
-    bool bIncludeVertexInput = true;
+public:
+    // #TODO Refactor to compile all necessary shaders when initializing.
+    // Need to remember which shader was already compiled to avoid multiple compilations.
+    // Should enable to call this function multiple times to compile new shaders.
+    void InitShaders(const char* vertexShaderText, const char* fragmentShaderText);
+
+private:
+    std::vector<VkPipelineShaderStageCreateInfo> pipelineShaderStageCreateInfo;
+
+    //////////////////////////////////////////////////////////////////////////
+    // Viewports/Scissors
+    //////////////////////////////////////////////////////////////////////////
+
+public:
+    void CommandSetViewports(VkCommandBuffer commandBuffer);
+    void CommandSetScissors(VkCommandBuffer commandBuffer, uint32_t index);
+
+protected:
+    std::vector<VkViewport> viewports;
+    std::vector<VkRect2D> scissors;
 };
 
 VULKAN_NS_END

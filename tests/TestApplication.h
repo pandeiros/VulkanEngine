@@ -49,7 +49,6 @@ private:
     std::chrono::steady_clock timer;
     std::chrono::steady_clock::time_point lastTime;
 
-    // Perlin noise
     uint32_t cubesToDraw = 0;
     const uint32_t PERLIN_NODE_COUNT = 20;
     //float PerlinGradientMap[]

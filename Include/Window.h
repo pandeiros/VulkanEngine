@@ -51,6 +51,7 @@ public:
     // #TODO Maybe rename this to Present or sth
     void EndRender(std::vector<VkSemaphore> WaitSemaphores, std::vector<VkFence> waitFences);
 
+    float GetAspectRatio();
     VkExtent2D GetSurfaceSize();
     VkRenderPass GetRenderPass();
     VkFramebuffer GetActiveFramebuffer();

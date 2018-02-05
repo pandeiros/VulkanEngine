@@ -8,7 +8,7 @@
 
 #include "Core.h"
 #include "World.h"
-#include "Primitive.h"
+#include "Rendering/Cube.h"
 #include "Rendering/ShaderTools.h"
 
 #ifdef __ANDROID__
@@ -28,33 +28,42 @@ TestApplication::~TestApplication()
     Queue& queue = instance->GetDevice()->GetQueueRef();
     queue.WaitIdle();
 
-    delete camera;
+    //delete camera;
 
-    Device* device = instance->GetDevice();
+    //Device* device = instance->GetDevice();
 
-    commandPool.Destroy(device->GetVkDevice());
+    //commandPool.Destroy(device->GetVkDevice());
 }
 
 void TestApplication::Init()
 {
+    VK_PERFORMANCE_DATA("Application init");
+
     Application::Init();
 
     Device* device = instance->GetDevice();
 
-    commandPool.Create(device->GetVkDevice(), VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
-        instance->GetDevice()->GetPhysicalDevice()->GetGraphicsQueueFamilyIndex());
+    //commandPool.Create(device->GetVkDevice(), VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+    //    instance->GetDevice()->GetPhysicalDevice()->GetGraphicsQueueFamilyIndex());
 
-    commandPool.AllocateCommandBuffers(device->GetVkDevice(), VK_COMMAND_BUFFER_LEVEL_PRIMARY, VULKAN_COMMAND_BUFFER_COUNT);
+    //commandPool.AllocateCommandBuffers(device->GetVkDevice(), VK_COMMAND_BUFFER_LEVEL_PRIMARY, VULKAN_COMMAND_BUFFER_COUNT);
 
-    float fov = glm::radians(90.f);
-    float aspect = (float)instance->GetWindow()->GetSurfaceSize().width / (float)instance->GetWindow()->GetSurfaceSize().height;
-    if (aspect > 1.f)
-    {
-        fov *= 1.f / aspect;
-    }
-    camera = new Camera(fov, aspect, 0.1f, 100.f,
-    { glm::vec3(0, 50, 10), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0) }, Camera::DEFAULT_CLIP_MATRIX);
-    engine->GetWorld()->AddCamera(camera);
+    //float fov = glm::radians(90.f);
+    //float aspect = (float)instance->GetWindow()->GetSurfaceSize().width / (float)instance->GetWindow()->GetSurfaceSize().height;
+    //if (aspect > 1.f)
+    //{
+    //    fov *= 1.f / aspect;
+    //}
+    //camera = new Camera(fov, aspect, 0.1f, 100.f,
+    //{ glm::vec3(0, 50, 10), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0) }, Camera::DEFAULT_CLIP_MATRIX);
+
+#ifdef __ANDROID__
+    engine->GetWorld()->SetCamera(CameraMode::VR, 90.f, instance->GetWindow()->GetAspectRatio(), 0.1f, 100.f);
+#else
+    engine->GetWorld()->SetCamera(CameraMode::DEFAULT, 90.f, instance->GetWindow()->GetAspectRatio(), 0.1f, 100.f);
+#endif
+
+    engine->GetRenderer()->Init();
 
     glm::mat4 vpMatrix = camera->GetViewProjectionMatrix();
     glm::mat4 mvpMatrix = vpMatrix * glm::mat4(1.0f);
@@ -66,15 +75,13 @@ void TestApplication::Init()
         Buffer& uniformBuffer = renderer->GetUniformBuffer(i);
         uniformBuffer.CreateExclusive(device->GetVkDevice(), 0, 2 * 256, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT); // #TODO Use device properties instead of 256
         uniformBuffer.Allocate(device, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        //uniformBuffer.Copy(device->GetVkDevice(), &mvpMatrix, 0, sizeof(mvpMatrix));
         uniformBuffer.UpdateDescriptorInfo(0, VK_WHOLE_SIZE);
     }
 
     renderer->CreateDescriptorSetLayout();
-    renderer->CreatePipelineLayout(device->GetVkDevice());
-    renderer->InitShaders(device->GetVkDevice(), VULKAN_VERTEX_SHADER_TEXT, VULKAN_FRAGMENT_SHADER_TEXT);
+    renderer->CreatePipelineLayout();
+    renderer->InitShaders(VULKAN_VERTEX_SHADER_TEXT, VULKAN_FRAGMENT_SHADER_TEXT);
 
-    // Perlin noise grid.
 
     //Cube cube{ 1.f, };
     uint32_t finalSize, size, stride;

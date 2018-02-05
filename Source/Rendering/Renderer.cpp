@@ -13,16 +13,23 @@ VULKAN_NS_USING;
 
 VK_DECLARE_LOG_CATEGORY(LogRenderer);
 
-Renderer::Renderer(std::shared_ptr<Device> device)
-    : VulkanClass(device)
+Renderer::Renderer(std::shared_ptr<Device> device, Engine* engine)
+    : VulkanClass(device), engine(engine)
 {
     bIncludeVertexInput = true;
 
     uniformBuffers.resize(VULKAN_DESCRIPTOR_SETS_COUNT);
+
+    commandPool.Create(device->GetVkDevice(), VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+        device->GetPhysicalDevice()->GetGraphicsQueueFamilyIndex());
+
+    commandPool.AllocateCommandBuffers(device->GetVkDevice(), VK_COMMAND_BUFFER_LEVEL_PRIMARY, VULKAN_COMMAND_BUFFER_COUNT);
 }
 
 Renderer::~Renderer()
 {
+    commandPool.Destroy(device->GetVkDevice());
+
     vkDestroyPipeline(device->GetVkDevice(), pipeline, nullptr);
     vkDestroyPipelineCache(device->GetVkDevice(), pipelineCache, nullptr);
     vkDestroyDescriptorPool(device->GetVkDevice(), descriptorPool, nullptr);
@@ -47,8 +54,46 @@ Renderer::~Renderer()
     }
 }
 
+void Renderer::Tick(float deltaTime)
+{
+    VK_PERFORMANCE_SECTION("Renderer update");
+}
+
+void Renderer::Init()
+{
+    VK_PERFORMANCE_SECTION("Renderer init");
+
+    for (uint32_t i = 0; i < VULKAN_DESCRIPTOR_SETS_COUNT; ++i)
+    {
+        uniformBuffers[i].CreateExclusive(device->GetVkDevice(), 0, 2 * 256, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT); // #TODO Use device properties instead of 256
+        uniformBuffers[i].Allocate(device.get(), VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        uniformBuffers[i].UpdateDescriptorInfo(0, VK_WHOLE_SIZE);
+    }
+
+    CreateDescriptorSetLayout();
+    CreatePipelineLayout();
+    InitShaders(VULKAN_VERTEX_SHADER_TEXT, VULKAN_FRAGMENT_SHADER_TEXT);
+}
+
+Buffer& Renderer::GetUniformBuffer(uint32_t index)
+{
+    return uniformBuffers[index];
+}
+
+Buffer& Renderer::GetVertexBuffer()
+{
+    return vertexBuffer;
+}
+
+void Renderer::BindVertexBuffers(VkCommandBuffer commandBuffer, std::vector<VkDeviceSize> offsets)
+{
+    vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffer.GetVkBufferPtr(), offsets.data());
+}
+
 void Renderer::CreateDescriptorSetLayout()
 {
+    VK_PERFORMANCE_SECTION("Create Descriptor Set Layout");
+
     std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
 
     // Uniform buffer.
@@ -74,7 +119,6 @@ void Renderer::CreateDescriptorSetLayout()
     //    });
     //}
 
-    //uint32_t bindingCount = 2; // bTextureEnabled ? 2 : 1;
     descriptorSetLayoutCreateInfo = {
         VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
         nullptr,
@@ -85,91 +129,6 @@ void Renderer::CreateDescriptorSetLayout()
 
     descriptorSetLayouts.resize(VULKAN_DESCRIPTOR_SETS_COUNT);
     VK_VERIFY(vkCreateDescriptorSetLayout(device->GetVkDevice(), &descriptorSetLayoutCreateInfo, nullptr, descriptorSetLayouts.data()));
-}
-
-void Renderer::CreatePipelineLayout(VkDevice device)
-{
-    pipelineLayoutCreateInfo = {
-        VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-        nullptr,
-        0,
-        (uint32_t)descriptorSetLayouts.size(),
-        descriptorSetLayouts.data(),
-        0,
-        nullptr
-    };
-
-    VK_VERIFY(vkCreatePipelineLayout(device, &pipelineLayoutCreateInfo, nullptr, &pipelineLayout));
-}
-
-void Renderer::InitShaders(VkDevice device, const char* vertexShaderText, const char* fragmentShaderText)
-{
-    if (!(vertexShaderText || fragmentShaderText))
-    {
-        VK_LOG(LogRenderer, Error, "Invalid shaders!");
-        return;
-    }
-
-    ShaderTools::InitGLSLang();
-
-    VkShaderModuleCreateInfo moduleCreateInfo;
-
-    if (vertexShaderText)
-    {
-        std::vector<unsigned int> vertexSPIRV;
-
-        pipelineShaderStageCreateInfo.push_back({
-            VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-            nullptr,
-            0,
-            VK_SHADER_STAGE_VERTEX_BIT,
-            VK_NULL_HANDLE,
-            "main",
-            nullptr
-            });
-
-
-        VK_ASSERT(ShaderTools::glslToSPIRV(VK_SHADER_STAGE_VERTEX_BIT, vertexShaderText, vertexSPIRV), "Cannot convert shader to SPIR-V.\n%s", vertexShaderText);
-
-        moduleCreateInfo = {
-            VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
-            nullptr,
-            0,
-            vertexSPIRV.size() * sizeof(unsigned int),
-            vertexSPIRV.data()
-        };
-
-        VK_VERIFY(vkCreateShaderModule(device, &moduleCreateInfo, NULL, &pipelineShaderStageCreateInfo[0].module));
-    }
-
-    if (fragmentShaderText)
-    {
-        std::vector<unsigned int> fragmentSPIRV;
-
-        pipelineShaderStageCreateInfo.push_back({
-            VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-            nullptr,
-            0,
-            VK_SHADER_STAGE_FRAGMENT_BIT,
-            VK_NULL_HANDLE,
-            "main",
-            nullptr
-            });
-
-        VK_ASSERT(ShaderTools::glslToSPIRV(VK_SHADER_STAGE_FRAGMENT_BIT, fragmentShaderText, fragmentSPIRV), "Cannot convert shader to SPIR-V.\n%s", fragmentShaderText);
-
-        moduleCreateInfo = {
-            VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
-            nullptr,
-            0,
-            fragmentSPIRV.size() * sizeof(unsigned int),
-            fragmentSPIRV.data()
-        };
-
-        VK_VERIFY(vkCreateShaderModule(device, &moduleCreateInfo, NULL, &pipelineShaderStageCreateInfo[1].module));
-    }
-
-    ShaderTools::FinalizeGLSLang();
 }
 
 void Renderer::InitDescriptorPool(VkDevice device)
@@ -231,40 +190,28 @@ void Renderer::InitDescriptorSet(VkDevice device)
     vkUpdateDescriptorSets(device, (uint32_t)writeDescriptorSets.size(), writeDescriptorSets.data(), 0, nullptr);
 }
 
-//void Renderer::UpdateDescriptorSets(VkDevice device, uint32_t uniformBufferIndex)
-//{
-//    writeDescriptorSets.push_back({
-//        VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-//        nullptr,
-//        descriptorSets[uniformBufferIndex],
-//        0,
-//        0,
-//        1,
-//        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-//        nullptr,
-//        uniformBuffers[uniformBufferIndex].GetDescriptorInfo(),
-//        nullptr
-//    });
-//
-//    //if (bTextureEnabled)
-//    //{
-//    //    writeDescriptorSets.push_back({
-//    //        VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
-//    //        nullptr,
-//    //        descriptorSets[0],
-//    //        1,
-//    //        0,
-//    //        1,
-//    //        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-//    //        textureData.GetImageInfo(),                 // #TODO Pending feature
-//    //        nullptr,
-//    //        nullptr
-//    //    });
-//    //}
-//
-//    //vkUpdateDescriptorSets(device, bTextureEnabled ? 2 : 1, writeDescriptorSets.data(), 0, nullptr);
-//    vkUpdateDescriptorSets(device, 1, writeDescriptorSets.data(), 0, nullptr);
-//}
+void Renderer::BindDescriptorSets(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint, std::vector<uint32_t> dynamicOffsets)
+{
+    vkCmdBindDescriptorSets(commandBuffer, pipelineBindPoint, pipelineLayout, 0,
+        VULKAN_DESCRIPTOR_SETS_COUNT, descriptorSets.data(), (uint32_t)dynamicOffsets.size(), dynamicOffsets.data());
+}
+
+void Renderer::CreatePipelineLayout()
+{
+    VK_PERFORMANCE_SECTION("Create Pipeline Layout");
+
+    pipelineLayoutCreateInfo = {
+        VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
+        nullptr,
+        0,
+        (uint32_t)descriptorSetLayouts.size(),
+        descriptorSetLayouts.data(),
+        0,
+        nullptr
+    };
+
+    VK_VERIFY(vkCreatePipelineLayout(device->GetVkDevice(), &pipelineLayoutCreateInfo, nullptr, &pipelineLayout));
+}
 
 void Renderer::InitPipelineCache(VkDevice device)
 {
@@ -350,7 +297,7 @@ void Renderer::InitPipeline(VkDevice device, VkExtent2D size, VkRenderPass rende
         VK_LOGIC_OP_NO_OP,
         (uint32_t)pipelineColorBlendAttachmentState.size(),
         pipelineColorBlendAttachmentState.data(),
-        {1.f, 1.f, 1.f, 1.f}
+        { 1.f, 1.f, 1.f, 1.f }
     };
 
     pipelineViewportStateCreateInfo = {
@@ -369,18 +316,17 @@ void Renderer::InitPipeline(VkDevice device, VkExtent2D size, VkRenderPass rende
         0.f, 1.f
     });
 
-    // #TODO Refactor
     scissors.push_back({
         { 0, 0 },
-        { size.width / 2, size.height }
+        { size.width / VULKAN_COMMAND_BUFFER_COUNT, size.height }
     });
 
+#ifdef VULKAN_VR_MODE
     scissors.push_back({
-        { (int32_t)size.width / 2, 0 },
-        { size.width / 2, size.height }
+        { (int32_t)size.width / VULKAN_COMMAND_BUFFER_COUNT, 0 },
+        { size.width / VULKAN_COMMAND_BUFFER_COUNT, size.height }
     });
-
-#ifdef VULKAN_VR_MODE_VIEWPORTS
+#elif defined(VULKAN_VR_MODE_VIEWPORTS)
     viewports.push_back({
         (float)size.width / VULKAN_VIEWPORT_COUNT, 0.f,
         (float)size.width / VULKAN_VIEWPORT_COUNT, (float)size.height,
@@ -393,22 +339,8 @@ void Renderer::InitPipeline(VkDevice device, VkExtent2D size, VkRenderPass rende
     });
 #endif
 
-    // #TODO Clean
-#ifndef __ANDROID__
     dynamicStates[dynamicStateCreateInfo.dynamicStateCount++] = VK_DYNAMIC_STATE_VIEWPORT;
     dynamicStates[dynamicStateCreateInfo.dynamicStateCount++] = VK_DYNAMIC_STATE_SCISSOR;
-#else
-    // Some Android drivers do not support dynamic viewports and scissors.
-
-    //pipelineViewportStateCreateInfo.scissorCount = (uint32_t)scissors.size();
-    //pipelineViewportStateCreateInfo.pScissors = scissors.data();
-    //pipelineViewportStateCreateInfo.viewportCount = (uint32_t)viewports.size();
-    //pipelineViewportStateCreateInfo.pViewports = viewports.data();
-
-    dynamicStates[dynamicStateCreateInfo.dynamicStateCount++] = VK_DYNAMIC_STATE_VIEWPORT;
-    dynamicStates[dynamicStateCreateInfo.dynamicStateCount++] = VK_DYNAMIC_STATE_SCISSOR;
-
-#endif
 
     VkStencilOpState stencilOpState = {
         VK_STENCIL_OP_KEEP,
@@ -477,46 +409,11 @@ void Renderer::BindPipeline(VkCommandBuffer commandBuffer, VkPipelineBindPoint p
     vkCmdBindPipeline(commandBuffer, pipelineBindPoint, pipeline);
 }
 
-void Renderer::BindDescriptorSets(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint, std::vector<uint32_t> dynamicOffsets)
-{
-    vkCmdBindDescriptorSets(commandBuffer, pipelineBindPoint, pipelineLayout, 0,
-        VULKAN_DESCRIPTOR_SETS_COUNT, descriptorSets.data(), (uint32_t)dynamicOffsets.size(), dynamicOffsets.data());
-}
-
-void Renderer::BindVertexBuffers(VkCommandBuffer commandBuffer, std::vector<VkDeviceSize> offsets)
-{
-    vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffer.GetVkBufferPtr(), offsets.data());
-}
-
-void Renderer::CommandSetViewports(VkCommandBuffer commandBuffer)
-{
-//#ifndef __ANDROID__
-    vkCmdSetViewport(commandBuffer, 0, (uint32_t)viewports.size(), viewports.data());
-//#endif
-}
-
-void Renderer::CommandSetScissors(VkCommandBuffer commandBuffer, uint32_t index)
-{
-//#ifndef __ANDROID__
-    vkCmdSetScissor(commandBuffer, 0, 1, &scissors[index]);
-//#endif
-}
-
-Buffer& Renderer::GetUniformBuffer(uint32_t index)
-{
-    return uniformBuffers[index];
-}
-
-Buffer& Renderer::GetVertexBuffer()
-{
-    return vertexBuffer;
-}
-
 void Renderer::AddVertexInputBinding(uint32_t binding, uint32_t stride, VkVertexInputRate inputRate)
 {
     vertexInputBindings.push_back({
         binding, stride, inputRate
-        });
+    });
 }
 
 void Renderer::AddVertexInputAttribute(uint32_t location, uint32_t binding, VkFormat format, uint32_t offset)
@@ -524,4 +421,86 @@ void Renderer::AddVertexInputAttribute(uint32_t location, uint32_t binding, VkFo
     vertexInputAttributes.push_back({
         location, binding, format, offset
     });
+}
+
+void Renderer::InitShaders(const char* vertexShaderText, const char* fragmentShaderText)
+{
+    VK_PERFORMANCE_SECTION("Initialize Shaders");
+
+    if (!(vertexShaderText || fragmentShaderText))
+    {
+        VK_LOG(LogRenderer, Error, "Invalid shaders!");
+        return;
+    }
+
+    ShaderTools::InitGLSLang();
+
+    VkShaderModuleCreateInfo moduleCreateInfo;
+
+    if (vertexShaderText)
+    {
+        std::vector<unsigned int> vertexSPIRV;
+
+        pipelineShaderStageCreateInfo.push_back({
+            VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+            nullptr,
+            0,
+            VK_SHADER_STAGE_VERTEX_BIT,
+            VK_NULL_HANDLE,
+            "main",
+            nullptr
+            });
+
+
+        VK_ASSERT(ShaderTools::glslToSPIRV(VK_SHADER_STAGE_VERTEX_BIT, vertexShaderText, vertexSPIRV), "Cannot convert shader to SPIR-V.\n%s", vertexShaderText);
+
+        moduleCreateInfo = {
+            VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+            nullptr,
+            0,
+            vertexSPIRV.size() * sizeof(unsigned int),
+            vertexSPIRV.data()
+        };
+
+        VK_VERIFY(vkCreateShaderModule(device->GetVkDevice(), &moduleCreateInfo, NULL, &pipelineShaderStageCreateInfo[0].module));
+    }
+
+    if (fragmentShaderText)
+    {
+        std::vector<unsigned int> fragmentSPIRV;
+
+        pipelineShaderStageCreateInfo.push_back({
+            VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+            nullptr,
+            0,
+            VK_SHADER_STAGE_FRAGMENT_BIT,
+            VK_NULL_HANDLE,
+            "main",
+            nullptr
+            });
+
+        VK_ASSERT(ShaderTools::glslToSPIRV(VK_SHADER_STAGE_FRAGMENT_BIT, fragmentShaderText, fragmentSPIRV), "Cannot convert shader to SPIR-V.\n%s", fragmentShaderText);
+
+        moduleCreateInfo = {
+            VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+            nullptr,
+            0,
+            fragmentSPIRV.size() * sizeof(unsigned int),
+            fragmentSPIRV.data()
+        };
+
+        VK_VERIFY(vkCreateShaderModule(device->GetVkDevice(), &moduleCreateInfo, NULL, &pipelineShaderStageCreateInfo[1].module));
+    }
+
+    ShaderTools::FinalizeGLSLang();
+}
+
+void Renderer::CommandSetViewports(VkCommandBuffer commandBuffer)
+{
+    vkCmdSetViewport(commandBuffer, 0, (uint32_t)viewports.size(), viewports.data());
+}
+
+void Renderer::CommandSetScissors(VkCommandBuffer commandBuffer, uint32_t index)
+{
+    vkCmdSetScissor(commandBuffer, 0, 1, &scissors[index]);
 }

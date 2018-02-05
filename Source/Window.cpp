@@ -131,6 +131,11 @@ void Window::EndRender(std::vector<VkSemaphore> waitSemaphores, std::vector<VkFe
     VK_VERIFY(presentResult);
 }
 
+float Window::GetAspectRatio()
+{
+    return (float)GetSurfaceSize().width / (float)GetSurfaceSize().height;
+}
+
 VkExtent2D Window::GetSurfaceSize()
 {
     return windowCreateInfo.surfaceSize;

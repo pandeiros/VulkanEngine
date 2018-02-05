@@ -10,9 +10,6 @@
  * @file VarArgs.h
  */
 
-/**
- * THESE MACROS
- */
 #define VARARG_EXTRA(A) A,
 #define VARARG_NONE
 #define VARARG_PURE =0
@@ -26,6 +23,7 @@ static inline double		CheckVA(double d)           { return d; }
 static inline long		    CheckVA(long l)             { return l; }
 static inline long		    CheckVA(unsigned long ul)   { return ul; }
 static inline char			CheckVA(char c)             { return c; }
+static inline const char*   CheckVA(std::string s)      { return s.c_str(); }
 //static inline void*			CheckVA(char* s)            { return (void*)s; }
 static inline char*			CheckVA(char* s)            { return s; }
 static inline bool		    CheckVA(bool b)             { return b; }

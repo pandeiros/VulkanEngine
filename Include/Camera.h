@@ -9,6 +9,7 @@
 #include "VulkanCore.h"
 
 #include "Utils/Math.h"
+#include "InputManager.h"
 
 /**
  * @file Camera.h
@@ -16,8 +17,14 @@
 
 VULKAN_NS_BEGIN
 
+enum CameraMode
+{
+    DEFAULT,
+    VR
+};
+
 /**
- * @class Actor
+ * @struct CameraTransform
  */
 struct CameraTransform
 {
@@ -44,7 +51,7 @@ public:
      */
     ~Camera() = default;
 
-    /** yFOV in degrees. */
+    /** */
     Camera(float yFovRadians, float aspectRatio, float zNear, float zFar, CameraTransform transform,
         const glm::mat4 clipMatrix = DEFAULT_CLIP_MATRIX);
 
@@ -54,6 +61,8 @@ public:
     glm::mat4 GetClipMatrix() const;
 
     void Move(glm::vec3 positionDelta);
+
+    void OnUpdateTransform(InputCode inputCode, InputEvent event, glm::mat4 value);
 
 private:
     void UpdateMatrices();

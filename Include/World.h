@@ -8,7 +8,7 @@
 
 #include "VulkanCore.h"
 
-#include "Object.h"
+#include "Actor.h"
 #include "Camera.h"
 #include "Device.h"
 
@@ -21,22 +21,7 @@
 
 VULKAN_NS_BEGIN
 
-/**
- * @class Actor
- */
-class Actor : public Object
-{
-public:
-    /**
-     * Default constructor.
-     */
-    Actor() = default;
-
-    /**
-     * Default destructor.
-     */
-    ~Actor() = default;
-};
+class Engine;
 
 /**
  * @class World
@@ -44,16 +29,18 @@ public:
 class World : public VulkanClass
 {
 public:
-    World(DevicePtr device);
+    World(DevicePtr device, Engine* engine);
 
     ~World();
 
-    //void Destroy() override;
+private:
+    Engine* engine;
 
     //////////////////////////////////////////////////////////////////////////
     // World management
     //////////////////////////////////////////////////////////////////////////
 
+public:
     void Tick(float deltaTime) override;
 
 private:
@@ -63,17 +50,19 @@ private:
     //////////////////////////////////////////////////////////////////////////
 
 public:
-    void AddCamera(Camera* camera);
+    void SetCamera(CameraMode cameraMode, float yFovDegrees, float aspectRatio, float zNear, float zFar);
+
+    //void AddCamera(Camera* camera);
 
 private:
-    std::set<Camera*> cameras;
+    std::vector<std::unique_ptr<Camera>> cameras;
 
     //////////////////////////////////////////////////////////////////////////
     // Objects
     //////////////////////////////////////////////////////////////////////////
 
 public:
-    std::vector<Object*> worldObjects;
+    std::vector<Actor*> actors;
 };
 
 VULKAN_NS_END

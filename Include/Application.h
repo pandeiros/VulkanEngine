@@ -9,6 +9,7 @@
 #include "VulkanCore.h"
 
 #include "Instance.h"
+#include "Engine.h"
 
 /**
  * @file Application.h

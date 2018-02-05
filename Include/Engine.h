@@ -9,6 +9,7 @@
 #define VULKAN_ENGINE_VERSION VK_MAKE_VERSION(0, 0, 2)
 #define VULKAN_ENGINE_NAME "Vulkan Engine"
 
+#include "Instance.h"
 #include "PhysicalDevice.h"
 #include "World.h"
 #include "Rendering/Renderer.h"
@@ -41,7 +42,7 @@ public:
     Engine(uint32_t frameRate, bool useFixedFrameRate = false);
     ~Engine();
 
-    void Init(DevicePtr device);
+    void Init(Instance* instance);
 
 private:
     DevicePtr device;
@@ -110,6 +111,7 @@ public:
 
 private:
     std::unique_ptr<Renderer> renderer;
+    Window* window;
 
     //////////////////////////////////////////////////////////////////////////
     // Input
@@ -130,7 +132,6 @@ public:
     void InitPhysicalDevices(VkInstance instance);
 
     PhysicalDevice* GetPhysicalDevice(uint32_t deviceIndex);
-
 
     void LogInstanceProperties();
     void LogDeviceProperties();
