@@ -10,8 +10,11 @@
 
 #include "CommandPool.h"
 #include "Buffer.h"
+#include "ShaderTools.h"
+#include "RenderComponent.h"
 
 #include <vector>
+#include <map>
 
 /**
  * @file Renderer.h
@@ -40,7 +43,7 @@ VULKAN_NS_BEGIN
 #define VULKAN_SCISSOR_COUNT VULKAN_VIEWPORT_COUNT
 
 /**
- * Regardless of having multi viewports feature enables, we create a buffer for each camera.
+ * Regardless of having multi viewports feature enabled or not, we create a buffer for each camera.
  */
 #ifdef VULKAN_VR_MODE
 #define VULKAN_COMMAND_BUFFER_COUNT 2
@@ -59,8 +62,8 @@ public:
     Renderer(std::shared_ptr<Device> device, Engine* engine);
     ~Renderer();
 
+    virtual void Init() override;
     virtual void Tick(float deltaTime) override;
-    virtual void Init();
 
     //////////////////////////////////////////////////////////////////////////
     // Settings
@@ -77,16 +80,15 @@ private:
     //////////////////////////////////////////////////////////////////////////
 
 public:
-    CommandPool commandPool;
-
     Buffer& GetUniformBuffer(uint32_t index);
-    Buffer& GetVertexBuffer();
+    VertexBuffer& GetVertexBuffer();
 
     void BindVertexBuffers(VkCommandBuffer commandBuffer, std::vector<VkDeviceSize> offsets);
 
 protected:
+    CommandPool commandPool;
     std::vector<Buffer> uniformBuffers;
-    Buffer vertexBuffer;
+    VertexBuffer vertexBuffer;
 
     //////////////////////////////////////////////////////////////////////////
     // Descriptor pool/sets
@@ -94,8 +96,8 @@ protected:
 
 public:
     void CreateDescriptorSetLayout();
-    void InitDescriptorPool(VkDevice device);
-    void InitDescriptorSet(VkDevice device);
+    void InitDescriptorPool();
+    void InitDescriptorSet();
 
     void BindDescriptorSets(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint, std::vector<uint32_t> dynamicOffsets);
 
@@ -118,8 +120,8 @@ private:
 public:
     void CreatePipelineLayout();
 
-    void InitPipelineCache(VkDevice device);
-    void InitPipeline(VkDevice device, VkExtent2D size, VkRenderPass renderPass);
+    void InitPipelineCache();
+    void InitPipeline(VkExtent2D size, VkRenderPass renderPass);
 
     void BindPipeline(VkCommandBuffer commandBuffer, VkPipelineBindPoint pipelineBindPoint);
 
@@ -155,16 +157,22 @@ private:
     //////////////////////////////////////////////////////////////////////////
 
 public:
+    size_t CompileShader(const char* shaderText, VkShaderStageFlagBits shaderType);
+
     // #TODO Refactor to compile all necessary shaders when initializing.
     // Need to remember which shader was already compiled to avoid multiple compilations.
     // Should enable to call this function multiple times to compile new shaders.
-    void InitShaders(const char* vertexShaderText, const char* fragmentShaderText);
+    //void InitShaders(const char* vertexShaderText, const char* fragmentShaderText);
+
+    void InitShaders(ShaderIndexData& shaderIndexData);
 
 private:
     std::vector<VkPipelineShaderStageCreateInfo> pipelineShaderStageCreateInfo;
 
+    std::map<size_t, ShaderCache> shaderCacheData;
+
     //////////////////////////////////////////////////////////////////////////
-    // Viewports/Scissors
+    // Viewports/Scissors/Render area
     //////////////////////////////////////////////////////////////////////////
 
 public:
@@ -172,8 +180,28 @@ public:
     void CommandSetScissors(VkCommandBuffer commandBuffer, uint32_t index);
 
 protected:
+    VkRect2D GetRenderArea(uint32_t viewportIndex);
+    std::vector<VkClearValue> GetClearValues();
+
     std::vector<VkViewport> viewports;
     std::vector<VkRect2D> scissors;
+
+    //////////////////////////////////////////////////////////////////////////
+    // Render components
+    //////////////////////////////////////////////////////////////////////////
+
+public:
+    RenderComponent* AddRenderComponent(VertexData vertexData, ShaderEntry shaderEntry);
+
+private:
+    std::vector<std::unique_ptr<RenderComponent>> renderComponents;
+
+//    //////////////////////////////////////////////////////////////////////////
+//    // Command pool
+//    //////////////////////////////////////////////////////////////////////////
+//
+//private:
+//    CommandPool commandPool;
 };
 
 VULKAN_NS_END

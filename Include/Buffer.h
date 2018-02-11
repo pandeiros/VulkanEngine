@@ -10,6 +10,7 @@
 
 #include "Device.h"
 #include "Memory.h"
+#include "Utils/Math.h"
 
 /**
  * @file Buffer.h
@@ -39,7 +40,7 @@ public:
     void Destroy(VkDevice device);
 
     void Allocate(Device* device, const VkMemoryPropertyFlags requiredProperties);
-    void Copy(VkDevice device, void* sourceData, uint32_t offset, uint32_t size);
+    void Copy(VkDevice device, void* sourceData, uint32_t offset, uint32_t size, Transform transform = Transform());
 
     Memory& GetMemory();
     VkMemoryRequirements GetMemoryRequirements(VkDevice device);
@@ -49,6 +50,9 @@ public:
     VkBuffer* GetVkBufferPtr();
     VkDescriptorBufferInfo* GetDescriptorInfo();
 
+    void SetStride(const uint32_t stride);
+    uint32_t GetStride() const;
+
 protected:
     VkBuffer buffer = VK_NULL_HANDLE;
 
@@ -56,6 +60,9 @@ protected:
     VkDescriptorBufferInfo descriptorInfo = {};
 
     Memory memory;
+
+    uint32_t stride = 0;
+    size_t usedSize = 0;
 };
 
 /**
@@ -75,6 +82,18 @@ public:
     ~SparseBuffer() = default;
 
     // #TODO Add SparseBufferMemoryBind
+
+private:
+
+};
+
+/**
+ * @class SparseImage
+ */
+class VertexBuffer : public Buffer
+{
+public:
+    uint32_t GetVertexCount();
 
 private:
 

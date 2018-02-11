@@ -108,6 +108,7 @@ private:
 
 public:
     Renderer* GetRenderer();
+    Window* GetWindow();
 
 private:
     std::unique_ptr<Renderer> renderer;

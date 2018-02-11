@@ -14,6 +14,10 @@ void Object::Update(float deltaTime)
     {
         this->Tick(deltaTime);
     }
+    else
+    {
+        SetDirty(false);
+    }
 }
 
 bool Object::IsDirty() const

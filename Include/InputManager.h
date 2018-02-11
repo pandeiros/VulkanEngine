@@ -138,19 +138,20 @@ void InputStorage<T>::UpdateMappings(InputCode inputCode, InputState newState, T
     else if (input.state == InputState::DOWN && newState == InputState::UP)
     {
         //VK_LOG(LogInputManager, Debug, "Input code %u: %u", (uint32_t)inputCode, (uint32_t)newState);
-        BroadcastEvents(inputCode, newState, newValue);
+        BroadcastEvents(inputCode, InputEvent::ON_UP, newValue);
     }
     else if (input.state == InputState::UP && newState == InputState::DOWN)
     {
         //VK_LOG(LogInputManager, Debug, "Input code %u: %u", (uint32_t)inputCode, (uint32_t)newState);
-        BroadcastEvents(inputCode, newState, newValue);
-    }
-    else
-    {
-        // Wrong states!
+        BroadcastEvents(inputCode, InputEvent::ON_DOWN, newValue);
     }
 
     input.state = newState;
+
+    if (input.state == InputState::ACTIVE)
+    {
+        BroadcastEvents(inputCode, InputEvent::ON_ACTIVE, newValue);
+    }
 };
 
 template<typename T>
@@ -195,7 +196,7 @@ public:
     template<typename T>
     void BindEvent(InputCode inputCode, InputEventDelegate<T> eventDelegate)
     {
-        VK_ASSERT(0, "BindEvent: unsupported type %s", typeid(value).name());
+        VK_ASSERT(0, "BindEvent: unsupported type %s", typeid(T).name());
     }
 
 private:

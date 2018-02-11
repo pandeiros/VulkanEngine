@@ -52,13 +52,17 @@ public:
     ~Camera() = default;
 
     /** */
-    Camera(float yFovRadians, float aspectRatio, float zNear, float zFar, CameraTransform transform,
+    Camera(CameraMode cameraMode, float yFovRadians, float aspectRatio, float zNear, float zFar, CameraTransform transform,
         const glm::mat4 clipMatrix = DEFAULT_CLIP_MATRIX);
 
-    glm::mat4 GetViewProjectionMatrix() const;
+    glm::mat4 GetCameraMatrix() const;
+
     glm::mat4 GetViewMatrix() const;
     glm::mat4 GetProjectionMatrix() const;
     glm::mat4 GetClipMatrix() const;
+    glm::mat4 GetViewportMatrix() const;
+
+    void SetViewportMatrix(const glm::mat4 viewportMatrix);
 
     void Move(glm::vec3 positionDelta);
 
@@ -66,6 +70,9 @@ public:
 
 private:
     void UpdateMatrices();
+    void UpdateViewMatrix();
+    void UpdateProjectionMatrix();
+    void RecalculateCameraMatrix();
 
     // In radians.
     float yFOV;
@@ -77,7 +84,11 @@ private:
     glm::mat4 viewMatrix;
     glm::mat4 projectionMatrix;
     glm::mat4 clipMatrix;
-    glm::mat4 viewProjectionClipMatrix;
+    glm::mat4 viewportMatrix;
+
+    glm::mat4 cameraMatrix;
+
+    CameraMode cameraMode;
 };
 
 VULKAN_NS_END

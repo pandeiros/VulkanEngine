@@ -11,6 +11,7 @@
 #include "Actor.h"
 #include "Camera.h"
 #include "Device.h"
+#include "Buffer.h"
 
 #include <chrono>
 #include <set>
@@ -43,6 +44,8 @@ private:
 public:
     void Tick(float deltaTime) override;
 
+    bool PrepareVertexData(VertexBuffer& vertexBuffer, ShaderIndexData& shaderIndexData);
+
 private:
 
     //////////////////////////////////////////////////////////////////////////
@@ -50,6 +53,8 @@ private:
     //////////////////////////////////////////////////////////////////////////
 
 public:
+    glm::mat4 GetCameraMatrix(uint32_t viewportIndex);
+
     void SetCamera(CameraMode cameraMode, float yFovDegrees, float aspectRatio, float zNear, float zFar);
 
     //void AddCamera(Camera* camera);
@@ -58,10 +63,13 @@ private:
     std::vector<std::unique_ptr<Camera>> cameras;
 
     //////////////////////////////////////////////////////////////////////////
-    // Objects
+    // Actors
     //////////////////////////////////////////////////////////////////////////
 
 public:
+    void AddActor(Actor* actor);
+
+private:
     std::vector<Actor*> actors;
 };
 

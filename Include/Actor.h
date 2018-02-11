@@ -17,10 +17,36 @@
 
 VULKAN_NS_BEGIN
 
+class Actor;
+
+/**
+ * @class SceneComponent
+ */
+class SceneComponent : public Object
+{
+public:
+    void SetOwner(Actor* actor);
+
+    void SetRenderComponent(RenderComponent* renderComponent);
+    void SetColor(const glm::vec3 color);
+
+    RenderComponent* GetRenderComponent() const;
+
+    Transform GetTransform() const;
+
+private:
+    RenderComponent* renderComponent;
+
+    Transform transform;
+    glm::vec3 color;
+
+    Actor* owner = nullptr;
+};
+
 /**
  * @class Actor
  */
-class Actor
+class Actor : public Object
 {
 public:
     /**
@@ -33,8 +59,18 @@ public:
      */
     ~Actor() = default;
 
+    void SetSceneComponent(SceneComponent* sceneComponent);
+    SceneComponent* GetSceneComponent() const;
+
+    void SetTransform(Transform newTransform);
+    Transform GetTransform() const;
+
+    //void* GetData(uint32_t& dataSize, uint32_t& dataStride);
+
 protected:
-    RenderComponent renderComponent;
+    std::unique_ptr<SceneComponent> sceneComponent;
+
+    Transform transform;
 };
 
 VULKAN_NS_END

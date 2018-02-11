@@ -30,6 +30,10 @@ static inline bool		    CheckVA(bool b)             { return b; }
 template<class T> T*		CheckVA(T* p)               { return p; }
 template<class T> const T*	CheckVA(const T* p)         { return p; }
 
+#ifndef __ANDROID__
+static inline size_t        CheckVA(size_t u)           { return u; }
+#endif
+
 
 #define VARARG_DECL( FuncRet, StaticFuncRet, Return, FuncName, Pure, FormatType, ExtraDecl, ExtraCall )	\
 	FuncRet FuncName##__VA( ExtraDecl FormatType Format, ... ) Pure;  \

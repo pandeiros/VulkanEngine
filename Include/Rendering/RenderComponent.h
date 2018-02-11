@@ -16,6 +16,9 @@
 
 VULKAN_NS_BEGIN
 
+#define XYZ1(X, Y, Z) (X), (Y), (Z), 1.f
+#define COLOR_FLAT(R, G, B) XYZ1(R, G, B)
+
 struct Vertex
 {
     // Position
@@ -34,26 +37,9 @@ struct VertexUV
     float u, v;
 };
 
-struct Transform
-{
-    Transform()
-    {
-        position = glm::vec3(0.f, 0.f, 0.f);
-        scale = glm::vec3(1.f, 1.f, 1.f);
-    }
-
-    Transform(glm::vec3 position, glm::vec3 scale)
-        : position(position), scale(scale)
-    {}
-
-    glm::vec3 position;
-    glm::vec3 scale;
-};
-
+typedef std::vector<Vertex> VertexData;
+typedef std::vector<size_t> ShaderIndexData;
 static const Transform DEFAULT_TRANSFORM = Transform(glm::vec3(0.f, 0.f, 0.f), glm::vec3(1.f, 1.f, 1.f));
-
-#define XYZ1(X, Y, Z) (X), (Y), (Z), 1.f
-#define COLOR_FLAT(R, G, B) XYZ1(R, G, B)
 
 /**
  * @class RenderComponent
@@ -61,12 +47,15 @@ static const Transform DEFAULT_TRANSFORM = Transform(glm::vec3(0.f, 0.f, 0.f), g
 class RenderComponent
 {
 public:
-    void UpdateVertices();
+    //void UpdateVertices();
     void* GetData(uint32_t& dataSize, uint32_t& dataStride);
 
+    void SetVertexData(VertexData& vertexData);
+    ShaderIndexData& GetShaderIndexData();
+
 protected:
-    std::vector<Vertex> vertices;
-    Transform transform;
+    VertexData vertices;
+    ShaderIndexData shaders;
 };
 
 VULKAN_NS_END

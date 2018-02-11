@@ -40,6 +40,31 @@ struct Vector2D
     float x, y;
 };
 
+struct Transform
+{
+    Transform()
+    {
+        position = glm::vec3(0.f, 0.f, 0.f);
+        scale = glm::vec3(1.f, 1.f, 1.f);
+    }
+
+    Transform(glm::vec3 position, glm::vec3 scale)
+        : position(position), scale(scale)
+    {}
+
+    const Transform operator+(const Transform& other) const
+    {
+        Transform result = *this;
+        result.position += other.position;
+        result.scale *= other.scale;
+
+        return result;
+    }
+
+    glm::vec3 position;
+    glm::vec3 scale;
+};
+
 /**
  * @class Math
  */

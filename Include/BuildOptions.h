@@ -24,3 +24,7 @@
 #ifdef VULKAN_VR_MODE_VIEWPORTS
 #undef VULKAN_VR_MODE_VIEWPORTS
 #endif
+
+#ifndef __ANDROID__
+#undef VULKAN_VR_MODE
+#endif

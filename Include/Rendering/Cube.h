@@ -9,6 +9,7 @@
 #include "VulkanCore.h"
 
 #include "Shape.h"
+#include "Shaders.h"
 
 /**
  * @file Cube.h
@@ -27,8 +28,11 @@ public:
      */
     ~Cube() = default;
 
-    void SetColor(glm::vec3 color);
-    Cube(float sideLength = 1.f, Transform transform = DEFAULT_TRANSFORM);
+    //void SetColor(glm::vec3 color);
+    //Cube(float sideLength = 1.f); // , Transform transform = DEFAULT_TRANSFORM);
+
+    static VertexData GetCubeVertexData();
+    static ShaderEntry GetCubeShaderEntry();
 };
 
 VULKAN_NS_END

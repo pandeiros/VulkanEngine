@@ -65,28 +65,32 @@ void TestApplication::Init()
 
     engine->GetRenderer()->Init();
 
-    glm::mat4 vpMatrix = camera->GetViewProjectionMatrix();
-    glm::mat4 mvpMatrix = vpMatrix * glm::mat4(1.0f);
-
-    Renderer* renderer = engine->GetRenderer();
-
-    for (uint32_t i = 0; i < VULKAN_DESCRIPTOR_SETS_COUNT; ++i)
-    {
-        Buffer& uniformBuffer = renderer->GetUniformBuffer(i);
-        uniformBuffer.CreateExclusive(device->GetVkDevice(), 0, 2 * 256, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT); // #TODO Use device properties instead of 256
-        uniformBuffer.Allocate(device, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-        uniformBuffer.UpdateDescriptorInfo(0, VK_WHOLE_SIZE);
-    }
-
-    renderer->CreateDescriptorSetLayout();
-    renderer->CreatePipelineLayout();
-    renderer->InitShaders(VULKAN_VERTEX_SHADER_TEXT, VULKAN_FRAGMENT_SHADER_TEXT);
 
 
-    //Cube cube{ 1.f, };
-    uint32_t finalSize, size, stride;
-    std::vector<Cube> cubes;
+    //glm::mat4 vpMatrix = camera->GetViewProjectionMatrix();
+    //glm::mat4 mvpMatrix = vpMatrix * glm::mat4(1.0f);
+
+    //Renderer* renderer = engine->GetRenderer();
+
+    //for (uint32_t i = 0; i < VULKAN_DESCRIPTOR_SETS_COUNT; ++i)
+    //{
+    //    Buffer& uniformBuffer = renderer->GetUniformBuffer(i);
+    //    uniformBuffer.CreateExclusive(device->GetVkDevice(), 0, 2 * 256, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT); // #TODO Use device properties instead of 256
+    //    uniformBuffer.Allocate(device, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    //    uniformBuffer.UpdateDescriptorInfo(0, VK_WHOLE_SIZE);
+    //}
+
+    //renderer->CreateDescriptorSetLayout();
+    //renderer->CreatePipelineLayout();
+    //renderer->InitShaders(VULKAN_VERTEX_SHADER_TEXT, VULKAN_FRAGMENT_SHADER_TEXT);
+
+
+    RenderComponent* renderComponent = engine->GetRenderer()->AddRenderComponent(Cube::GetCubeVertexData(), Cube::GetCubeShaderEntry());
+
+    //uint32_t finalSize, size, stride;
+    //std::vector<Cube> cubes;
     int32_t cubeCount = 100;
+
     for (int32_t i = 0; i < cubeCount; ++i)
     {
         for (int32_t j = 0; j < cubeCount; ++j)
@@ -97,37 +101,52 @@ void TestApplication::Init()
             float yArg = float(j - cubeCount / 2);
             float y = 10 * ((float)std::cos(xArg / cubeCount * PI * 2) + (float)std::sin(yArg * 3 / 2 / cubeCount * PI * 2));
 
-            cubes.push_back(Cube{ 1.f, { glm::vec3(xArg * 0.75f, y, yArg * 0.75f), glm::vec3(0.25f, 0.25f, 0.25f)} });
-            cubes[cubes.size() - 1].SetColor({ xArg / cubeCount + 0.5f, 0, yArg / cubeCount + 0.5f});
+            Actor* actor = new Actor;
+            SceneComponent* sceneComponent = new SceneComponent;
+            actor->SetSceneComponent(sceneComponent);
+            sceneComponent->SetRenderComponent(renderComponent);
+
+            actor->SetTransform({ glm::vec3(xArg * 0.75f, y, yArg * 0.75f), glm::vec3(0.25f, 0.25f, 0.25f) });
+            actor->GetSceneComponent()->SetColor({ xArg / cubeCount + 0.5f, 0, yArg / cubeCount + 0.5f });
+
+            //Cube* cube = new Cube(1.f, { glm::vec3(xArg * 0.75f, y, yArg * 0.75f), glm::vec3(0.25f, 0.25f, 0.25f) });
+            //cube->SetColor({ xArg / cubeCount + 0.5f, 0, yArg / cubeCount + 0.5f });
+            //actor->SetRenderComponent(cube);
+
+            engine->GetWorld()->AddActor(actor);
+
+            //cubes.push_back(Cube{ 1.f, { glm::vec3(xArg * 0.75f, y, yArg * 0.75f), glm::vec3(0.25f, 0.25f, 0.25f)} });
+            //cubes[cubes.size() - 1].SetColor({ xArg / cubeCount + 0.5f, 0, yArg / cubeCount + 0.5f});
         }
     }
-    cubesToDraw = (uint32_t)cubes.size();
-    cubes[0].GetData(size, stride);
-    finalSize = size * cubesToDraw;
 
-    Buffer& vertexBuffer = renderer->GetVertexBuffer();
-    vertexBuffer.CreateExclusive(device->GetVkDevice(), 0, finalSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-    vertexBuffer.Allocate(device, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    //cubesToDraw = cubeCount * cubeCount;
+    //cubes[0].GetData(size, stride);
+    //finalSize = size * cubesToDraw;
 
-    uint32_t offset = 0;
-    for (uint32_t i = 0; i < cubes.size(); ++i)
-    {
-        cubes[i].UpdateVertices();
-        void* data = cubes[i].GetData(size, stride);
-        vertexBuffer.Copy(device->GetVkDevice(), data, offset, size);
-        offset += size;
-    }
-    vertexBuffer.UpdateDescriptorInfo(0, VK_WHOLE_SIZE);
+    //Buffer& vertexBuffer = renderer->GetVertexBuffer();
+    //vertexBuffer.CreateExclusive(device->GetVkDevice(), 0, finalSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+    //vertexBuffer.Allocate(device, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-    renderer->AddVertexInputBinding(0, stride, VK_VERTEX_INPUT_RATE_VERTEX);
-    renderer->AddVertexInputAttribute(0, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 0);
-    // #TODO Change format when using texture.
-    renderer->AddVertexInputAttribute(1, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 16);
+    //uint32_t offset = 0;
+    //for (uint32_t i = 0; i < cubes.size(); ++i)
+    //{
+    //    cubes[i].UpdateVertices();
+    //    void* data = cubes[i].GetData(size, stride);
+    //    vertexBuffer.Copy(device->GetVkDevice(), data, offset, size);
+    //    offset += size;
+    //}
+    //vertexBuffer.UpdateDescriptorInfo(0, VK_WHOLE_SIZE);
 
-    renderer->InitDescriptorPool(device->GetVkDevice());
-    renderer->InitDescriptorSet(device->GetVkDevice());
-    renderer->InitPipelineCache(device->GetVkDevice());
-    renderer->InitPipeline(device->GetVkDevice(), instance->GetWindow()->GetSurfaceSize(), instance->GetWindow()->GetRenderPass());
+    //renderer->AddVertexInputBinding(0, stride, VK_VERTEX_INPUT_RATE_VERTEX);
+    //renderer->AddVertexInputAttribute(0, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 0);
+    //// #TODO Change format when using texture.
+    //renderer->AddVertexInputAttribute(1, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 16);
+
+    //renderer->InitDescriptorPool(device->GetVkDevice());
+    //renderer->InitDescriptorSet(device->GetVkDevice());
+    //renderer->InitPipelineCache(device->GetVkDevice());
+    //renderer->InitPipeline(device->GetVkDevice(), instance->GetWindow()->GetSurfaceSize(), instance->GetWindow()->GetRenderPass());
 
     timer = std::chrono::steady_clock();
     lastTime = timer.now();
@@ -139,6 +158,7 @@ void TestApplication::Init()
 
 void TestApplication::Tick(float deltaTime)
 {
+    return;
     VK_PERFORMANCE_SECTION("Test application");
 
     Window* window = instance->GetWindow();
@@ -175,8 +195,11 @@ void TestApplication::Tick(float deltaTime)
 
         window->BeginRender();
 
+        std::vector<uint32_t> commandBufferIndexes = {};
         for (uint32_t i = 0; i < commandBuffers.size(); ++i)
         {
+            commandBufferIndexes.push_back(i);
+
             VkRect2D renderArea{};
             renderArea.offset.x = i * window->GetSurfaceSize().width / 2;
             renderArea.offset.y = 0;
@@ -245,7 +268,7 @@ void TestApplication::Tick(float deltaTime)
         std::vector<VkSemaphore> waitSemaphores = { window->GetSemaphore() };
 
         VkPipelineStageFlags pipelineStageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        queue.Submit(&pipelineStageFlags, waitSemaphores, commandPool.GetVkCommandBuffers({0, 1}),
+        queue.Submit(&pipelineStageFlags, waitSemaphores, commandPool.GetVkCommandBuffers(commandBufferIndexes),
         {}, window->GetFence());
 
         window->EndRender({}, { window->GetFence() });

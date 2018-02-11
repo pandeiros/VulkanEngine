@@ -18,6 +18,30 @@
 
 VULKAN_NS_BEGIN
 
+struct ShaderCache
+{
+    ShaderCache()
+        : shaderHash(0), shaderType(VK_SHADER_STAGE_VERTEX_BIT)
+    {}
+
+    ShaderCache(size_t shaderHash)
+        : shaderHash(shaderHash), shaderType(VK_SHADER_STAGE_VERTEX_BIT)
+    {}
+
+    ShaderCache(size_t shaderHash, VkShaderStageFlagBits shaderType, std::vector<unsigned int>& spirvData)
+        : shaderHash(shaderHash), shaderType(shaderType), spirvData(spirvData)
+    {}
+
+    bool operator==(ShaderCache& other) const
+    {
+        return shaderHash == other.shaderHash;
+    }
+
+    size_t shaderHash;
+    VkShaderStageFlagBits shaderType;
+    std::vector<unsigned int> spirvData;
+};
+
 /**
  * @class ShaderTools
  */

@@ -45,6 +45,12 @@ static const char* VULKAN_FRAGMENT_SHADER_TEXT =
     "   outColor = color;\n"
     "}\n";
 
+struct ShaderEntry
+{
+    std::vector<const char*> vertexShaders;
+    std::vector<const char*> fragmentShaders;
+};
+
 // #REFACTOR
 #ifdef __ANDROID__
 struct shader_type_mapping {

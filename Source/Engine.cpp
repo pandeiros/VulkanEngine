@@ -172,6 +172,8 @@ void Engine::UpdateInternal(float deltaTime)
     world->Update(deltaTime);
 
     renderer->Update(deltaTime);
+
+    world->SetDirty(false);
 }
 
 float Engine::GetMinDeltaTime() const
@@ -195,6 +197,11 @@ World* Engine::GetWorld()
 Renderer* Engine::GetRenderer()
 {
     return renderer.get();
+}
+
+Window* Engine::GetWindow()
+{
+    return window;
 }
 
 InputManager* Engine::GetInputManager()

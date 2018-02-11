@@ -6,6 +6,7 @@
 
 #include "Buffer.h"
 #include "Core.h"
+#include "Rendering//RenderComponent.h"
 
 VULKAN_NS_USING;
 
@@ -58,10 +59,34 @@ void Buffer::Allocate(Device* device, const VkMemoryPropertyFlags requiredProper
     device->BindBufferMemory(buffer, memory.GetVkMemory(), requirements.size);
 }
 
-void Buffer::Copy(VkDevice device, void* sourceData, uint32_t offset, uint32_t size)
+//void Buffer::Copy(VkDevice device, void* sourceData, uint32_t offset, uint32_t size)
+//{
+//    void* destinationData = memory.MapMemory(device, offset, size, 0);
+//    memcpy(destinationData, sourceData, size);
+//    memory.UnmapMemory(device);
+//}
+
+void Buffer::Copy(VkDevice device, void* sourceData, uint32_t offset, uint32_t size, Transform transform /*= Transform()*/)
 {
     void* destinationData = memory.MapMemory(device, offset, size, 0);
     memcpy(destinationData, sourceData, size);
+
+    // #TODO Extract this to another method
+    Vertex* vertexData = static_cast<Vertex*>(destinationData);
+    uint32_t vertexCount = size / sizeof(Vertex);
+    for (uint32_t i = 0; i < vertexCount; ++i)
+    {
+        (vertexData + i)->x *= transform.scale.x;
+        (vertexData + i)->y *= transform.scale.y;
+        (vertexData + i)->z *= transform.scale.z;
+
+        (vertexData + i)->x += transform.position.x;
+        (vertexData + i)->y += transform.position.y;
+        (vertexData + i)->z += transform.position.z;
+    }
+
+    usedSize += size;
+
     memory.UnmapMemory(device);
 }
 
@@ -95,4 +120,19 @@ VkBuffer* Buffer::GetVkBufferPtr()
 VkDescriptorBufferInfo* Buffer::GetDescriptorInfo()
 {
     return &descriptorInfo;
+}
+
+void Buffer::SetStride(const uint32_t stride)
+{
+    this->stride = stride;
+}
+
+uint32_t Buffer::GetStride() const
+{
+    return stride;
+}
+
+uint32_t VertexBuffer::GetVertexCount()
+{
+    return (uint32_t)usedSize / stride;
 }
