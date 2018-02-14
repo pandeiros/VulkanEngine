@@ -78,6 +78,11 @@ bool World::PrepareVertexData(VertexBuffer& vertexBuffer, ShaderIndexData& shade
     return true;
 }
 
+Camera* World::GetCamera(uint32_t viewportIndex)
+{
+    return cameras[viewportIndex].get();
+}
+
 glm::mat4 World::GetCameraMatrix(uint32_t viewportIndex)
 {
     return cameras[viewportIndex]->GetCameraMatrix();
@@ -105,20 +110,41 @@ void World::SetCamera(CameraMode cameraMode, float yFovDegrees, float aspectRati
     else if (cameraMode == CameraMode::VR)
     {
         Camera* leftEyeCamera = new Camera(CameraMode::VR, fov, aspectRatio, 0.1f, 100.f,
-        { glm::vec3(0, 0, 1), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0) });
+        { glm::vec3(0, 0, 1), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0) });
         Camera* rightEyeCamera = new Camera(CameraMode::VR, fov, aspectRatio, 0.1f, 100.f,
-        { glm::vec3(0, 0, 1), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0) });
+        { glm::vec3(0, 0, 1), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0) });
 
         engine->GetInputManager()->BindEvent<glm::mat4>(InputCode::GVR_LEFT_EYE_MATRIX,
             InputEventDelegate<glm::mat4>(InputEvent::ON_ACTIVE, std::bind(&Camera::OnUpdateTransform, leftEyeCamera, _1, _2, _3)));
         engine->GetInputManager()->BindEvent<glm::mat4>(InputCode::GVR_RIGHT_EYE_MATRIX,
             InputEventDelegate<glm::mat4>(InputEvent::ON_ACTIVE, std::bind(&Camera::OnUpdateTransform, rightEyeCamera, _1, _2, _3)));
 
+        engine->GetInputManager()->BindEvent<Vector2D>(InputCode::GVR_TOUCHPAD,
+            InputEventDelegate<Vector2D>(InputEvent::ON_ACTIVE, std::bind(&Camera::OnUpdatePosition, leftEyeCamera, _1, _2, _3)));
+        engine->GetInputManager()->BindEvent<Vector2D>(InputCode::GVR_TOUCHPAD,
+            InputEventDelegate<Vector2D>(InputEvent::ON_ACTIVE, std::bind(&Camera::OnUpdatePosition, rightEyeCamera, _1, _2, _3)));
+
+        engine->GetInputManager()->BindEvent<float>(InputCode::GVR_BUTTON_APP,
+            InputEventDelegate<float>(InputEvent::ON_PRESSED, std::bind(&Camera::OnModeChange, leftEyeCamera, _1, _2, _3)));
+        engine->GetInputManager()->BindEvent<float>(InputCode::GVR_BUTTON_APP,
+            InputEventDelegate<float>(InputEvent::ON_PRESSED, std::bind(&Camera::OnModeChange, rightEyeCamera, _1, _2, _3)));
+
         leftEyeCamera->SetViewportMatrix(glm::translate(glm::mat4(1.f), glm::vec3(-0.5f, 0.f, 0.f)));
         rightEyeCamera->SetViewportMatrix(glm::translate(glm::mat4(1.f), glm::vec3(0.5f, 0.f, 0.f)));
 
         cameras.push_back(std::unique_ptr<Camera>(std::move(leftEyeCamera)));
         cameras.push_back(std::unique_ptr<Camera>(std::move(rightEyeCamera)));
+    }
+}
+
+void World::SetLensUndistortionCoefficients(glm::vec4 coefficients)
+{
+    for (auto& camera : cameras)
+    {
+        if (camera->GetMode() == CameraMode::VR)
+        {
+            camera->SetLensUndistortionCoefficients(coefficients);
+        }
     }
 }
 

@@ -139,6 +139,7 @@ void InputStorage<T>::UpdateMappings(InputCode inputCode, InputState newState, T
     {
         //VK_LOG(LogInputManager, Debug, "Input code %u: %u", (uint32_t)inputCode, (uint32_t)newState);
         BroadcastEvents(inputCode, InputEvent::ON_UP, newValue);
+        BroadcastEvents(inputCode, InputEvent::ON_PRESSED, newValue);    // #TODO Refactor this using time
     }
     else if (input.state == InputState::UP && newState == InputState::DOWN)
     {
@@ -148,7 +149,7 @@ void InputStorage<T>::UpdateMappings(InputCode inputCode, InputState newState, T
 
     input.state = newState;
 
-    if (input.state == InputState::ACTIVE)
+    if (input.state == InputState::ACTIVE || (input.state == InputState::DOWN && input.type == InputType::TOUCH))
     {
         BroadcastEvents(inputCode, InputEvent::ON_ACTIVE, newValue);
     }

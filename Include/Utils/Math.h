@@ -80,6 +80,8 @@ public:
     template<typename T>
     static T Clamp(const T& Value, const T&Min, const T&Max);
 
+    static float MapToRange(const float value, const float inputMin, const float inputMax, const float outputMin, const float outputMax);
+
 #ifdef __ANDROID__
     static glm::mat4 Transpose(gvr::Mat4f mat4)
     {

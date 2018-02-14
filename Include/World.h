@@ -53,9 +53,11 @@ private:
     //////////////////////////////////////////////////////////////////////////
 
 public:
+    Camera* GetCamera(uint32_t viewportIndex);
     glm::mat4 GetCameraMatrix(uint32_t viewportIndex);
 
     void SetCamera(CameraMode cameraMode, float yFovDegrees, float aspectRatio, float zNear, float zFar);
+    void SetLensUndistortionCoefficients(glm::vec4 coefficients);
 
     //void AddCamera(Camera* camera);
 

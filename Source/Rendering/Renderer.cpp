@@ -116,10 +116,21 @@ void Renderer::Tick(float deltaTime)
         {
             commandBufferIndexes.push_back(i);
 
-            glm::mat4 mvpMatrix = engine->GetWorld()->GetCameraMatrix(i);
+            //glm::mat4 mvpMatrix = engine->GetWorld()->GetCameraMatrix(i);
+            glm::mat4 viewMatrix = engine->GetWorld()->GetCamera(i)->GetViewMatrix();
+            glm::mat4 projectionMatrix = engine->GetWorld()->GetCamera(i)->GetCorrectedProjectionMatrix();
+            glm::vec4 undistortionCoefficients = engine->GetWorld()->GetCamera(i)->GetLensUndistortionCoefficients();
+
+            uint32_t offset = i * 256;
 
             Buffer& uniformBuffer = GetUniformBuffer(0); // #TODO Refactor
-            uniformBuffer.Copy(device->GetVkDevice(), &mvpMatrix, i * 256, sizeof(mvpMatrix));
+            uniformBuffer.Copy(device->GetVkDevice(), &viewMatrix, offset, sizeof(viewMatrix));
+
+            offset += sizeof(viewMatrix);
+            uniformBuffer.Copy(device->GetVkDevice(), &projectionMatrix, offset, sizeof(projectionMatrix));
+
+            offset += sizeof(projectionMatrix);
+            uniformBuffer.Copy(device->GetVkDevice(), &undistortionCoefficients, offset, sizeof(undistortionCoefficients));
 
             commandBuffers[i].Reset(0);
             commandBuffers[i].Begin(0, nullptr);

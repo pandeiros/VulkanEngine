@@ -63,6 +63,7 @@ void TestApplication::Init()
     engine->GetWorld()->SetCamera(CameraMode::DEFAULT, 90.f, instance->GetWindow()->GetAspectRatio(), 0.1f, 100.f);
 #endif
 
+    engine->GetWorld()->SetLensUndistortionCoefficients(glm::vec4(0.2, 0.24, 0.0, 0.0));
     engine->GetRenderer()->Init();
 
 

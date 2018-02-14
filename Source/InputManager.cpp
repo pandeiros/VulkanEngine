@@ -53,7 +53,13 @@ void InputManager::UpdateGVRControllerState(gvr::ControllerApi* controllerApi)
     floatData.UpdateMappings(InputCode::GVR_BUTTON_APP, MapToButtonInputState(controllerState.GetButtonState(gvr::kControllerButtonApp)), 0.f);
     floatData.UpdateMappings(InputCode::GVR_BUTTON_CLICK, MapToButtonInputState(controllerState.GetButtonState(gvr::kControllerButtonClick)), 0.f);
 
-    vector2DData.UpdateMappings(InputCode::GVR_TOUCHPAD, controllerState.GetTouchDown() ? InputState::DOWN : InputState::UP, { controllerState.GetTouchPos().x, controllerState.GetTouchPos().y });
+    Vector2D controllerPos { controllerState.GetTouchPos().x, controllerState.GetTouchPos().y };
+    controllerPos.x = Math::MapToRange(controllerPos.x, 0.f, 1.f, -1.f, 1.f);
+    controllerPos.y = Math::MapToRange(controllerPos.y, 0.f, 1.f, -1.f, 1.f);
+
+    VK_LOG(LogInputManager, Debug, "Camera: %f, %f, %s", controllerPos.x, controllerPos.y, controllerState.IsTouching() ? "touching" : "notttt");
+
+    vector2DData.UpdateMappings(InputCode::GVR_TOUCHPAD, controllerState.IsTouching() ? InputState::DOWN : InputState::UP, controllerPos);
 }
 
 void InputManager::UpdateGVRHeadPose(gvr::GvrApi* gvrApi)
@@ -66,12 +72,6 @@ void InputManager::UpdateGVRHeadPose(gvr::GvrApi* gvrApi)
     matrixData.UpdateMappings(InputCode::GVR_HEAD_MATRIX, InputState::ACTIVE, headMatrix);
     matrixData.UpdateMappings(InputCode::GVR_LEFT_EYE_MATRIX, InputState::ACTIVE, Math::Transpose(gvrApi->GetEyeFromHeadMatrix(GVR_LEFT_EYE)) * headMatrix);
     matrixData.UpdateMappings(InputCode::GVR_RIGHT_EYE_MATRIX, InputState::ACTIVE, Math::Transpose(gvrApi->GetEyeFromHeadMatrix(GVR_RIGHT_EYE)) * headMatrix);
-
-
-
-    //headMatrix = Math::Transpose(gvrApi->GetHeadSpaceFromStartSpaceRotation(timePoint));
-    //leftEyeMatrix = 10.f * Math::Transpose(gvrApi->GetEyeFromHeadMatrix(GVR_LEFT_EYE)) * headMatrix;
-    //rightEyeMatrix = Math::Transpose(gvrApi->GetEyeFromHeadMatrix(GVR_RIGHT_EYE)) * headMatrix;
 }
 
 void InputManager::InitGVRInput()
