@@ -202,7 +202,7 @@ void Renderer::CreateDescriptorSetLayout()
 
     std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
 
-    // Uniform buffer.
+    // Vertex uniform buffer.
     layoutBindings.push_back(
     {
         0,
@@ -211,6 +211,26 @@ void Renderer::CreateDescriptorSetLayout()
         VK_SHADER_STAGE_VERTEX_BIT,
         nullptr
     });
+
+    // Tessellation control shader.
+    //layoutBindings.push_back(
+    //{
+    //    1,
+    //    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+    //    1,
+    //    VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT,
+    //    nullptr
+    //});
+
+    // Tessellation evaluation shader.
+    //layoutBindings.push_back(
+    //{
+    //    2,
+    //    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+    //    1,
+    //    VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
+    //    nullptr
+    //});
 
     //// Texture.
     //if (bTextureEnabled)
@@ -374,7 +394,7 @@ void Renderer::InitPipeline(VkExtent2D size, VkRenderPass renderPass)
         0,
         VK_FALSE,
         VK_FALSE,
-        VK_POLYGON_MODE_FILL,
+        polygonMode,
         VK_CULL_MODE_BACK_BIT,
         VK_FRONT_FACE_CLOCKWISE,
         VK_FALSE,

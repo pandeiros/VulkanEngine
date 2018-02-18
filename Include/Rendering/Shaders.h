@@ -20,40 +20,6 @@
 
 VULKAN_NS_BEGIN
 
-// To use in a vertex shader, modify it as follows:
-//
-// #include "CardboardDistortion.cginc"  <-- add this
-//
-// v2f vert (appdata_blah v) {
-//   v2f o;
-//   o.vertex = undistortVertex(v.vertex);    <-- replace "mul(UNITY_MATRIX_MVP, v.vertex)"
-//   ...
-//   return o;
-// }
-
-//float4    _Undistortion;
-//float     _MaxRadSq;
-//float     _NearClip;
-//float4x4  _RealProjection;
-//float4x4  _FixProjection;
-//
-//// Convert point from world space to undistorted camera space.
-//float4 undistort(float4 pos) {
-//    // Go to camera space.
-//    pos = mul(UNITY_MATRIX_MV, pos);
-//    if (pos.z <= -_NearClip) {  // Reminder: Forward is -Z.
-//                                // Undistort the point's coordinates in XY.
-//        float r2 = clamp(dot(pos.xy, pos.xy) / (pos.z*pos.z), 0, _MaxRadSq);
-//        pos.xy *= 1 + (_Undistortion.x + _Undistortion.y*r2)*r2;
-//    }
-//    return pos;
-//}
-//
-//// Multiply by no-lens projection matrix after undistortion.
-//float4 undistortVertex(float4 pos) {
-//    return mul(_RealProjection, undistort(pos));
-//}
-
 static const char* VULKAN_VERTEX_SHADER_TEXT =
     "#version 400\n"
     "#extension GL_ARB_separate_shader_objects : enable\n"
@@ -92,6 +58,8 @@ struct ShaderEntry
 {
     std::vector<const char*> vertexShaders;
     std::vector<const char*> fragmentShaders;
+    std::vector<const char*> tesselationControlShaders;
+    std::vector<const char*> tesselationEvaluationShaders;
 };
 
 // #REFACTOR

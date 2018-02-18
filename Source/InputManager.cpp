@@ -57,7 +57,7 @@ void InputManager::UpdateGVRControllerState(gvr::ControllerApi* controllerApi)
     controllerPos.x = Math::MapToRange(controllerPos.x, 0.f, 1.f, -1.f, 1.f);
     controllerPos.y = Math::MapToRange(controllerPos.y, 0.f, 1.f, -1.f, 1.f);
 
-    VK_LOG(LogInputManager, Debug, "Camera: %f, %f, %s", controllerPos.x, controllerPos.y, controllerState.IsTouching() ? "touching" : "notttt");
+    //VK_LOG(LogInputManager, Debug, "Camera: %f, %f, %s", controllerPos.x, controllerPos.y, controllerState.IsTouching() ? "touching" : "notttt");
 
     vector2DData.UpdateMappings(InputCode::GVR_TOUCHPAD, controllerState.IsTouching() ? InputState::DOWN : InputState::UP, controllerPos);
 }
@@ -67,7 +67,11 @@ void InputManager::UpdateGVRHeadPose(gvr::GvrApi* gvrApi)
     // Obtain the latest, predicted head pose.
     gvr::ClockTimePoint timePoint = gvrApi->GetTimePointNow();
 
-    glm::mat4 headMatrix = Math::Transpose(gvrApi->GetHeadSpaceFromStartSpaceRotation(timePoint));
+    // #TODO Temporary rotation correction.
+    glm::mat4 headMatrix = glm::rotate(Math::Transpose(gvrApi->GetHeadSpaceFromStartSpaceTransform(timePoint)), glm::radians(90.f), glm::vec3(0.f, 0.f, -1.f));
+    //glm::mat4 headMatrix = Math::Transpose(gvrApi->GetHeadSpaceFromStartSpaceTransform(timePoint));
+
+    //VK_LOG(LogInputManager, Debug, "head matrix %s", glm::to_string(headMatrix).c_str());
 
     matrixData.UpdateMappings(InputCode::GVR_HEAD_MATRIX, InputState::ACTIVE, headMatrix);
     matrixData.UpdateMappings(InputCode::GVR_LEFT_EYE_MATRIX, InputState::ACTIVE, Math::Transpose(gvrApi->GetEyeFromHeadMatrix(GVR_LEFT_EYE)) * headMatrix);

@@ -34,6 +34,8 @@ public:
 
     Transform GetTransform() const;
 
+    void ApplyTransformAndColor(void* data);
+
 private:
     RenderComponent* renderComponent;
 

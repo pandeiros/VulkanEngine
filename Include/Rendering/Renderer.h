@@ -152,6 +152,8 @@ private:
     std::vector<VkVertexInputBindingDescription> vertexInputBindings;
     std::vector<VkVertexInputAttributeDescription> vertexInputAttributes;
 
+    VkPolygonMode polygonMode = VK_POLYGON_MODE_FILL;
+
     //////////////////////////////////////////////////////////////////////////
     // Shaders
     //////////////////////////////////////////////////////////////////////////

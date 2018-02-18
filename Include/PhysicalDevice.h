@@ -55,6 +55,8 @@ public:
 
     uint32_t GetMemoryTypeIndex(const VkMemoryRequirements* memoryRequirements, const VkMemoryPropertyFlags requiredProperties);
 
+    void CheckRequiredFeatures(VkPhysicalDeviceFeatures& requiredFeatures);
+
 private:
     VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
     VkPhysicalDeviceProperties physicalDeviceProperties = {};

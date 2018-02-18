@@ -50,10 +50,15 @@ public:
 
     static void Clean();
 
+    static void InitControllerApi();
+
     static std::unique_ptr<Application> vulkanApplication;
     static android_app* nativeApplication;
+
+    // GVR
     static gvr::ControllerApi* controllerApi;
     static std::unique_ptr<gvr::GvrApi> gvrApi;
+    static gvr_context* gvrContext;
 
 private:
     static bool isPaused;

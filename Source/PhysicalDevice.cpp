@@ -201,6 +201,8 @@ void PhysicalDevice::LogInfo()
 
     VK_LOG(LogPhysicalDevice, Debug, "Multiviewport support: %s", supportedFeatures.multiViewport ? "true" : "false");
     VK_LOG(LogPhysicalDevice, Debug, "Geometry shader support: %s", supportedFeatures.geometryShader ? "true" : "false");
+    VK_LOG(LogPhysicalDevice, Debug, "Tesselation shader support: %s", supportedFeatures.tessellationShader ? "true" : "false");
+    VK_LOG(LogPhysicalDevice, Debug, "Tesselation shader support: %s", supportedFeatures.fillModeNonSolid ? "true" : "false");
 }
 
 uint32_t PhysicalDevice::GetMemoryTypeIndex(const VkMemoryRequirements* memoryRequirements, const VkMemoryPropertyFlags requiredProperties)
@@ -219,4 +221,17 @@ uint32_t PhysicalDevice::GetMemoryTypeIndex(const VkMemoryRequirements* memoryRe
     VK_ASSERT(0, "Could not find property memory type.");
 
     return UINT32_MAX;
+}
+
+void PhysicalDevice::CheckRequiredFeatures(VkPhysicalDeviceFeatures& requiredFeatures)
+{
+    VkBool32* requiredFeaturesPtr = static_cast<VkBool32*>(&requiredFeatures.robustBufferAccess);
+    VkBool32* supportedFeaturesPtr = static_cast<VkBool32*>(&supportedFeatures.robustBufferAccess);
+
+    for (uint32_t i = 0; i < sizeof(requiredFeatures) / sizeof(VkBool32); ++i)
+    {
+        VkBool32 supported = *(supportedFeaturesPtr + i);
+        VkBool32 required = *(supportedFeaturesPtr + i);
+        VK_ASSERT(!((!supported) && (required)), "Found not supported feature in required features at %d offset.", i);
+    }
 }

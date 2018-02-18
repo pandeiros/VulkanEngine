@@ -53,6 +53,7 @@ bool World::PrepareVertexData(VertexBuffer& vertexBuffer, ShaderIndexData& shade
         return false;
     }
 
+    // #TODO Refactor
     RenderComponent* renderComponent = actors[0]->GetSceneComponent()->GetRenderComponent();
     VK_ASSERT(renderComponent, "Invalid render component!");
 
@@ -69,7 +70,8 @@ bool World::PrepareVertexData(VertexBuffer& vertexBuffer, ShaderIndexData& shade
     for (uint32_t i = 0; i < actors.size(); ++i)
     {
         SceneComponent* sceneComponent = actors[i]->GetSceneComponent();
-        vertexBuffer.Copy(device->GetVkDevice(), data, offset, size, sceneComponent ? sceneComponent->GetTransform() : actors[i]->GetTransform());
+        void* dstData = vertexBuffer.Copy(device->GetVkDevice(), data, offset, size);// , sceneComponent ? sceneComponent->GetTransform() : actors[i]->GetTransform());
+        sceneComponent->ApplyTransformAndColor(dstData);
         offset += size;
     }
 

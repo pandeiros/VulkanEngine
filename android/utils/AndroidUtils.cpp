@@ -902,33 +902,11 @@ NATIVE_METHOD(void, nativeOnCreate)
     gvr_context *context = reinterpret_cast<gvr_context *>(j_native_gvr_context);
 
     AndroidUtils::gvrApi = gvr::GvrApi::WrapNonOwned(context);
+    AndroidUtils::gvrContext = context;
 
-    int32_t options = gvr::ControllerApi::DefaultOptions();
+    AndroidUtils::InitControllerApi();
 
-    // If you need accelerometer and gyro, enable them (they are not on
-    // by default). Touch, buttons and orientation are on by default.
-    options |= GVR_CONTROLLER_ENABLE_GYRO;
-    options |= GVR_CONTROLLER_ENABLE_ACCEL;
-
-    // Create the ControllerApi and ControllerState objects.
-    // controller_api = std::unique_ptr<gvr::ControllerApi>(new gvr::ControllerApi);
-    gvr::ControllerApi *controller_api = new gvr::ControllerApi;
-
-    AndroidUtils::controllerApi = controller_api;
-
-    // Initialize it. Notice that we pass the gvr_context pointer.
-    if (!controller_api->Init(options, context)) {
-        // Handle failure. Do not proceed in case of failure (calling other
-        // controller_api methods without a successful Init will crash with
-        // an assert failure.
-        return;
-    }
-
-    // If your app is in the resumed state (the Activity got onResume()), resume
-    // the controller API now (if not, wait until you get onResume()).
-    controller_api->Resume();
-
-    VK_LOG(LogAndroid, Debug, "GVR CONTROLLER INITIALIZED");
+    VK_LOG(LogAndroid, Debug, "GVR API INITIALIZED");
 }
 
 //static gvr::ControllerState controller_state;
@@ -1100,8 +1078,10 @@ FILE *AndroidFopen(const char *fname, const char *mode) {
 
 std::unique_ptr<vulkan::Application> AndroidUtils::vulkanApplication(nullptr);
 android_app* AndroidUtils::nativeApplication = nullptr;
+
 gvr::ControllerApi* AndroidUtils::controllerApi = nullptr;
 std::unique_ptr<gvr::GvrApi> AndroidUtils::gvrApi(nullptr);
+gvr_context* AndroidUtils::gvrContext = nullptr;
 
 bool AndroidUtils::isPaused = true;
 
@@ -1125,6 +1105,20 @@ void AndroidUtils::Start()
 
 void AndroidUtils::Update()
 {
+    if (controllerApi)
+    {
+        gvr::ControllerState controllerState;
+        controllerState.Update(*controllerApi);
+        if (controllerState.GetConnectionState() == gvr::ControllerConnectionState::GVR_CONTROLLER_DISCONNECTED)
+        {
+            InitControllerApi();
+        }
+    }
+    else
+    {
+        InitControllerApi();
+    }
+
     if (vulkanApplication->GetEngine() && !isPaused)
     {
         vulkanApplication->GetEngine()->GetInputManager()->UpdateGVRControllerState(controllerApi);
@@ -1152,6 +1146,37 @@ void AndroidUtils::Clean()
     {
         delete application;
     }
+}
+
+void AndroidUtils::InitControllerApi()
+{
+    int32_t options = gvr::ControllerApi::DefaultOptions();
+
+    // If you need accelerometer and gyro, enable them (they are not on
+    // by default). Touch, buttons and orientation are on by default.
+    options |= GVR_CONTROLLER_ENABLE_GYRO;
+    options |= GVR_CONTROLLER_ENABLE_ACCEL;
+
+    // Create the ControllerApi and ControllerState objects.
+    // controller_api = std::unique_ptr<gvr::ControllerApi>(new gvr::ControllerApi);
+    if (!controllerApi)
+    {
+        AndroidUtils::controllerApi = new gvr::ControllerApi;
+    }
+
+    // Initialize it. Notice that we pass the gvr_context pointer.
+    if (!controllerApi->Init(options, gvrContext)) {
+        // Handle failure. Do not proceed in case of failure (calling other
+        // controller_api methods without a successful Init will crash with
+        // an assert failure.
+        return;
+    }
+
+    // If your app is in the resumed state (the Activity got onResume()), resume
+    // the controller API now (if not, wait until you get onResume()).
+    controllerApi->Resume();
+
+    VK_LOG(LogAndroid, Debug, "GVR CONTROLLER INITIALIZED");
 }
 
 #endif

@@ -65,6 +65,10 @@ void Instance::InitDeviceAndWindow(PhysicalDevice* physicalDevice)
     requiredFeatures.multiViewport = VK_TRUE;
 #endif
 
+    requiredFeatures.fillModeNonSolid = VK_TRUE;
+
+    physicalDevice->CheckRequiredFeatures(requiredFeatures);
+
     device = std::shared_ptr<Device>(new Device(physicalDevice,
         deviceExtensions, requiredFeatures));
 
