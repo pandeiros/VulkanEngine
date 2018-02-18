@@ -66,6 +66,7 @@ void Instance::InitDeviceAndWindow(PhysicalDevice* physicalDevice)
 #endif
 
     requiredFeatures.fillModeNonSolid = VK_TRUE;
+    requiredFeatures.tessellationShader = VK_TRUE;
 
     physicalDevice->CheckRequiredFeatures(requiredFeatures);
 

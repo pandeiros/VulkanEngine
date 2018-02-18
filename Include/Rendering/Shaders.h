@@ -20,6 +20,37 @@
 
 VULKAN_NS_BEGIN
 
+static const char* VULKAN_TESSELATION_CONTROL_SHADER_TEXT =
+    "#version 450\n"
+    "layout (vertices = 3) out;\n"
+    "layout (location = 0) in vec4 inColor[];\n"
+    "layout (location = 0) out vec4 outColor[3];\n"
+    "void main()\n"
+    "{\n"
+    "    outColor[gl_InvocationID] = inColor[gl_InvocationID];\n"
+    "    if (gl_InvocationID == 0)\n"
+    "    {\n"
+    "        gl_TessLevelInner[0] = 4.f;\n"
+    "        gl_TessLevelOuter[0] = 4.f;\n"
+    "        gl_TessLevelOuter[1] = 4.f;\n"
+    "        gl_TessLevelOuter[2] = 4.f;\n"
+    "    }\n"
+    "   gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;\n"
+    "}\n";
+
+static const char* VULKAN_TESSELATION_EVALUATION_SHADER_TEXT =
+    "#version 450 core\n"
+    "layout (triangles, equal_spacing, cw) in;\n"
+    "layout (location = 0) in vec4 inColor[];\n"
+    "layout (location = 0) out vec4 outColor;\n"
+    "void main()\n"
+    "{\n"
+    "   outColor = inColor[0];\n"
+    "   gl_Position = gl_in[0].gl_Position * gl_TessCoord.x +\n"
+    "               gl_in[1].gl_Position * gl_TessCoord.y +\n"
+    "               gl_in[2].gl_Position * gl_TessCoord.z;\n"
+    "}\n";
+
 static const char* VULKAN_VERTEX_SHADER_TEXT =
     "#version 400\n"
     "#extension GL_ARB_separate_shader_objects : enable\n"
@@ -48,10 +79,10 @@ static const char* VULKAN_FRAGMENT_SHADER_TEXT =
     "#version 400\n"
     "#extension GL_ARB_separate_shader_objects : enable\n"
     "#extension GL_ARB_shading_language_420pack : enable\n"
-    "layout (location = 0) in vec4 color;\n"
+    "layout (location = 0) in vec4 inColor;\n"
     "layout (location = 0) out vec4 outColor;\n"
     "void main() {\n"
-    "   outColor = color;\n"
+    "   outColor = inColor;\n"
     "}\n";
 
 struct ShaderEntry

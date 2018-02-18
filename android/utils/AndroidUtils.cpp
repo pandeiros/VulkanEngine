@@ -899,7 +899,7 @@ NATIVE_METHOD(void, nativeOnCreate)
     LOGI("============ NATIVE ON CREATE ============");
 
     jlong j_native_gvr_context = gvr_context_ptr;
-    gvr_context *context = reinterpret_cast<gvr_context *>(j_native_gvr_context);
+    gvr_context* context = reinterpret_cast<gvr_context *>(j_native_gvr_context);
 
     AndroidUtils::gvrApi = gvr::GvrApi::WrapNonOwned(context);
     AndroidUtils::gvrContext = context;
@@ -1105,22 +1105,36 @@ void AndroidUtils::Start()
 
 void AndroidUtils::Update()
 {
-    if (controllerApi)
+//    if (controllerApi)
+//    {
+//        gvr::ControllerState controllerState;
+//        controllerState.Update(*controllerApi);
+//        if (controllerState.GetConnectionState() == gvr::ControllerConnectionState::GVR_CONTROLLER_DISCONNECTED)
+//        {
+//            InitControllerApi();
+//        }
+//    }
+//    else
+//    {
+//        InitControllerApi();
+//    }
+
+    if (AndroidUtils::vulkanApplication && vulkanApplication->GetEngine() && !isPaused)
     {
-        gvr::ControllerState controllerState;
-        controllerState.Update(*controllerApi);
-        if (controllerState.GetConnectionState() == gvr::ControllerConnectionState::GVR_CONTROLLER_DISCONNECTED)
+        if (controllerApi)
+        {
+            gvr::ControllerState controllerState;
+            controllerState.Update(*controllerApi);
+            if (controllerState.GetConnectionState() == gvr::ControllerConnectionState::GVR_CONTROLLER_DISCONNECTED)
+            {
+                InitControllerApi();
+            }
+        }
+        else
         {
             InitControllerApi();
         }
-    }
-    else
-    {
-        InitControllerApi();
-    }
 
-    if (vulkanApplication->GetEngine() && !isPaused)
-    {
         vulkanApplication->GetEngine()->GetInputManager()->UpdateGVRControllerState(controllerApi);
         vulkanApplication->GetEngine()->GetInputManager()->UpdateGVRHeadPose(gvrApi.get());
         vulkanApplication->GetEngine()->Update();

@@ -137,6 +137,7 @@ private:
 
     VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo = {};
     VkPipelineVertexInputStateCreateInfo pipelineVertexInputStateCreateInfo = {};
+    VkPipelineTessellationStateCreateInfo pipelineTesselationStateCreateInfo = {};
     VkPipelineInputAssemblyStateCreateInfo pipelineInputAssemblyStateCreateInfo = {};
     VkPipelineRasterizationStateCreateInfo pipelineRasterizationCreateInfo = {};
     VkPipelineColorBlendStateCreateInfo pipelineColorBlendStateCreateInfo = {};
@@ -152,7 +153,7 @@ private:
     std::vector<VkVertexInputBindingDescription> vertexInputBindings;
     std::vector<VkVertexInputAttributeDescription> vertexInputAttributes;
 
-    VkPolygonMode polygonMode = VK_POLYGON_MODE_FILL;
+    VkPolygonMode polygonMode = VK_POLYGON_MODE_LINE;
 
     //////////////////////////////////////////////////////////////////////////
     // Shaders

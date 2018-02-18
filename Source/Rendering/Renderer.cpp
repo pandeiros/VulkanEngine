@@ -212,7 +212,7 @@ void Renderer::CreateDescriptorSetLayout()
         nullptr
     });
 
-    // Tessellation control shader.
+    //// Tessellation control shader.
     //layoutBindings.push_back(
     //{
     //    1,
@@ -222,7 +222,7 @@ void Renderer::CreateDescriptorSetLayout()
     //    nullptr
     //});
 
-    // Tessellation evaluation shader.
+    //// Tessellation evaluation shader.
     //layoutBindings.push_back(
     //{
     //    2,
@@ -261,7 +261,7 @@ void Renderer::InitDescriptorPool()
 {
     descriptorPoolSizes.push_back({
         VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-        1
+        3
     });
 
     if (bTextureEnabled)
@@ -298,6 +298,7 @@ void Renderer::InitDescriptorSet()
     VK_VERIFY(vkAllocateDescriptorSets(device->GetVkDevice(), &descriptorSetAllocateInfo, descriptorSets.data()));
 
     for (uint32_t i = 0; i < VULKAN_DESCRIPTOR_SETS_COUNT; ++i)
+    //for (uint32_t i = 0; i < 3; ++i)
     {
         writeDescriptorSets.push_back({
             VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
@@ -384,8 +385,15 @@ void Renderer::InitPipeline(VkExtent2D size, VkRenderPass renderPass)
         VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
         nullptr,
         0,
-        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+        VK_PRIMITIVE_TOPOLOGY_PATCH_LIST, //VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
         VK_FALSE
+    };
+
+    pipelineTesselationStateCreateInfo = {
+        VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO,
+        nullptr,
+        0,
+        3
     };
 
     pipelineRasterizationCreateInfo = {
@@ -513,7 +521,7 @@ void Renderer::InitPipeline(VkExtent2D size, VkRenderPass renderPass)
         pipelineShaderStageCreateInfo.data(),
         &pipelineVertexInputStateCreateInfo,
         &pipelineInputAssemblyStateCreateInfo,
-        nullptr,
+        &pipelineTesselationStateCreateInfo,
         &pipelineViewportStateCreateInfo,
         &pipelineRasterizationCreateInfo,
         &pipelineMultisampleStateCreateInfo,
@@ -741,10 +749,18 @@ RenderComponent* Renderer::AddRenderComponent(VertexData vertexData, ShaderEntry
         renderComponent->GetShaderIndexData().push_back(CompileShader(fragmentShader, VK_SHADER_STAGE_FRAGMENT_BIT));
     }
 
+    for (const char* tesselationControlShader : shaderEntry.tesselationControlShaders)
+    {
+        renderComponent->GetShaderIndexData().push_back(CompileShader(tesselationControlShader, VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT));
+    }
+
+    for (const char* tesselationEvaluationShader : shaderEntry.tesselationEvaluationShaders)
+    {
+        renderComponent->GetShaderIndexData().push_back(CompileShader(tesselationEvaluationShader, VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT));
+    }
+
     renderComponents.push_back(std::unique_ptr<RenderComponent>());
     renderComponents.back().reset(renderComponent);
-
-    //return renderComponents[renderComponents.size() - 1].get();
 
     return renderComponents.back().get();
 }

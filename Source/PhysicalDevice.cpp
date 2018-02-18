@@ -202,7 +202,7 @@ void PhysicalDevice::LogInfo()
     VK_LOG(LogPhysicalDevice, Debug, "Multiviewport support: %s", supportedFeatures.multiViewport ? "true" : "false");
     VK_LOG(LogPhysicalDevice, Debug, "Geometry shader support: %s", supportedFeatures.geometryShader ? "true" : "false");
     VK_LOG(LogPhysicalDevice, Debug, "Tesselation shader support: %s", supportedFeatures.tessellationShader ? "true" : "false");
-    VK_LOG(LogPhysicalDevice, Debug, "Tesselation shader support: %s", supportedFeatures.fillModeNonSolid ? "true" : "false");
+    VK_LOG(LogPhysicalDevice, Debug, "Fill mode non solid support: %s", supportedFeatures.fillModeNonSolid ? "true" : "false");
 }
 
 uint32_t PhysicalDevice::GetMemoryTypeIndex(const VkMemoryRequirements* memoryRequirements, const VkMemoryPropertyFlags requiredProperties)
@@ -231,7 +231,7 @@ void PhysicalDevice::CheckRequiredFeatures(VkPhysicalDeviceFeatures& requiredFea
     for (uint32_t i = 0; i < sizeof(requiredFeatures) / sizeof(VkBool32); ++i)
     {
         VkBool32 supported = *(supportedFeaturesPtr + i);
-        VkBool32 required = *(supportedFeaturesPtr + i);
+        VkBool32 required = *(requiredFeaturesPtr + i);
         VK_ASSERT(!((!supported) && (required)), "Found not supported feature in required features at %d offset.", i);
     }
 }
