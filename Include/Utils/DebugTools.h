@@ -37,7 +37,7 @@ VULKAN_NS_BEGIN
 // Can be in the same scope as other section (nesting is allowed).
 #define VK_PERFORMANCE_SECTION(NAME) PerformanceSection performanceSectionObject(NAME)
 #else
-#define VK_PERFORMANCE_BEGIN(NAME)
+#define VK_PERFORMANCE_DATA(NAME)
 #define VK_PERFORMANCE_SECTION(NAME)
 #endif
 

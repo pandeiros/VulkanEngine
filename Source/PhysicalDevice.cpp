@@ -74,7 +74,7 @@ VkPhysicalDeviceMemoryProperties PhysicalDevice::GetPhysicalDeviceMemoryProperti
     return memoryProperties;
 }
 
-VkPhysicalDeviceFeatures PhysicalDevice::GetPhysicalDeviceFeatures() const
+VkPhysicalDeviceFeatures PhysicalDevice::GetSupportedPhysicalDeviceFeatures() const
 {
     return supportedFeatures;
 }

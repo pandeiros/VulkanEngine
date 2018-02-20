@@ -50,6 +50,8 @@ public:
     void CreateSemaphore(VkSemaphore* semaphorePointer);
     void DestroySemaphore(VkSemaphore semaphore);
 
+    VkPhysicalDeviceFeatures GetRequiredFeatures() const;
+
 private:
     void Init() override;
 

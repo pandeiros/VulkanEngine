@@ -46,10 +46,11 @@ struct Transform
     {
         position = glm::vec3(0.f, 0.f, 0.f);
         scale = glm::vec3(1.f, 1.f, 1.f);
+        rotation = glm::vec3(0.f, 0.f, 0.f);
     }
 
-    Transform(glm::vec3 position, glm::vec3 scale)
-        : position(position), scale(scale)
+    Transform(glm::vec3 position, glm::vec3 scale, glm::vec3 rotation = glm::vec3(0.f, 0.f, 0.f))
+        : position(position), scale(scale), rotation(rotation)
     {}
 
     const Transform operator+(const Transform& other) const
@@ -57,12 +58,14 @@ struct Transform
         Transform result = *this;
         result.position += other.position;
         result.scale *= other.scale;
+        result.rotation += other.rotation;
 
         return result;
     }
 
     glm::vec3 position;
     glm::vec3 scale;
+    glm::vec3 rotation;
 };
 
 /**

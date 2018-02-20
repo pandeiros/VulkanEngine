@@ -48,6 +48,13 @@ void SceneComponent::ApplyTransformAndColor(void* data)
         (vertexData + i)->y *= transform.scale.y;
         (vertexData + i)->z *= transform.scale.z;
 
+        glm::quat quatRotation = glm::quat(transform.rotation);
+        glm::vec3 vertex = glm::vec3((vertexData + i)->x, (vertexData + i)->y, (vertexData + i)->z);
+        vertex = quatRotation * vertex;
+        (vertexData + i)->x = vertex.x;
+        (vertexData + i)->y = vertex.y;
+        (vertexData + i)->z = vertex.z;
+
         (vertexData + i)->x += transform.position.x;
         (vertexData + i)->y += transform.position.y;
         (vertexData + i)->z += transform.position.z;

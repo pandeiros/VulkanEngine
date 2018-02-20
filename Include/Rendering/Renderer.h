@@ -154,6 +154,7 @@ private:
     std::vector<VkVertexInputAttributeDescription> vertexInputAttributes;
 
     VkPolygonMode polygonMode = VK_POLYGON_MODE_LINE;
+    VkPrimitiveTopology primitiveTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 
     //////////////////////////////////////////////////////////////////////////
     // Shaders
@@ -173,6 +174,8 @@ private:
     std::vector<VkPipelineShaderStageCreateInfo> pipelineShaderStageCreateInfo;
 
     std::map<size_t, ShaderCache> shaderCacheData;
+
+    bool bShouldEnableTessellation = false;
 
     //////////////////////////////////////////////////////////////////////////
     // Viewports/Scissors/Render area

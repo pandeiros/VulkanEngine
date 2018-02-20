@@ -76,21 +76,27 @@ android {
             path "CMakeLists.txt"
         }
     }
+//
+//    @ASSET_DIR@
+//
+//    sourceSets.main.assets.srcDirs '../../data'
 
-//    sourceSets {
-//        main {
-//            jniLibs {
-//                srcDir "${ndkDir}/sources/third_party/vulkan/src/build-android/jniLibs"
-//            }
-//        }
-//    }
+    sourceSets {
+        main {
+            assets.srcDirs = ['../../data']
+        }
+    }
+}
+
+afterEvaluate {
+    android.sourceSets.main.assets.srcDirs.each{println it}
 }
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
 //    compile 'com.android.support:multidex:1.0.2'
-    compile 'com.google.vr:sdk-base:1.80.0'
-    compile 'com.google.vr:sdk-controller:1.80.0'
+    compile 'com.google.vr:sdk-base:1.120.0'
+    compile 'com.google.vr:sdk-controller:1.120.0'
 }
 
 build.dependsOn(':extractNdk')

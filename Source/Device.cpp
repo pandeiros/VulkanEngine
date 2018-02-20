@@ -157,6 +157,11 @@ void Device::DestroySemaphore(VkSemaphore semaphore)
     }
 }
 
+VkPhysicalDeviceFeatures Device::GetRequiredFeatures() const
+{
+    return requiredFeatures;
+}
+
 void Device::Init()
 {
     float priorityQueue[]{ 0.f };

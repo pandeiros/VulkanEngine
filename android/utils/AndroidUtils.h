@@ -15,6 +15,7 @@
 #include <sstream>
 #include <vector>
 #include <memory>
+#include <streambuf>
 
 #include "VulkanCore.h"
 #include "AndroidCore.h"
@@ -32,6 +33,21 @@ extern "C" {
 }
 
 VULKAN_NS_BEGIN
+
+//template<typename CharT, typename TraitsT = std::char_traits<CharT> >
+//class vectorwrapbuf : public std::basic_streambuf<CharT, TraitsT> {
+//public:
+//    vectorwrapbuf(std::vector<CharT> &vec) {
+//        setg(vec.data(), vec.data(), vec.data() + vec.size());
+//    }
+//};
+
+struct wrap_vector_as_istream : std::streambuf
+{
+    wrap_vector_as_istream(std::vector<char> & vec ) {
+        this->setg(&vec[0], &vec[0], &vec[0]+vec.size() );
+    }
+};
 
 // Forward declaration.
 class Application;
@@ -51,6 +67,8 @@ public:
     static void Clean();
 
     static void InitControllerApi();
+
+    static std::vector<char> GetFileStream(std::string fileToFind);
 
     static std::unique_ptr<Application> vulkanApplication;
     static android_app* nativeApplication;

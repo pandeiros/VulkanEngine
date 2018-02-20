@@ -65,8 +65,11 @@ void Instance::InitDeviceAndWindow(PhysicalDevice* physicalDevice)
     requiredFeatures.multiViewport = VK_TRUE;
 #endif
 
-    requiredFeatures.fillModeNonSolid = VK_TRUE;
+#ifndef __ANDROID__
     requiredFeatures.tessellationShader = VK_TRUE;
+#endif
+
+    requiredFeatures.fillModeNonSolid = VK_TRUE;
 
     physicalDevice->CheckRequiredFeatures(requiredFeatures);
 

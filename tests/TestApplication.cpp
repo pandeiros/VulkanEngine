@@ -15,6 +15,9 @@
 #include "AndroidUtils.h"
 #endif
 
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "tinyobjloader/tiny_obj_loader.h"
+
 VK_DECLARE_LOG_CATEGORY(LogTestApplication);
 
 VULKAN_NS_USING;
@@ -90,7 +93,7 @@ void TestApplication::Init()
 
     //uint32_t finalSize, size, stride;
     //std::vector<Cube> cubes;
-    int32_t cubeCount = 100;
+    int32_t cubeCount = 50;
 
     for (int32_t i = 0; i < cubeCount; ++i)
     {
@@ -118,6 +121,78 @@ void TestApplication::Init()
 
             //cubes.push_back(Cube{ 1.f, { glm::vec3(xArg * 0.75f, y, yArg * 0.75f), glm::vec3(0.25f, 0.25f, 0.25f)} });
             //cubes[cubes.size() - 1].SetColor({ xArg / cubeCount + 0.5f, 0, yArg / cubeCount + 0.5f});
+        }
+    }
+
+    {
+        VertexData vertices;
+        //std::vector<uint32_t> indices;
+
+//#ifdef __ANDROID__
+//        FILE *fPtr = fopen("dodecahedron.obj", "rb");
+//        if (!fPtr)
+//        {
+//            VK_LOG(LogTestApplication, Error, "Cannot open test file");
+//        }
+//        else
+//        {
+//            fclose(fPtr);
+//        }
+//#endif
+
+        // #TODO Refactor
+#ifdef __ANDROID__
+        const std::string MODEL_PATH = "chalet.obj";
+#else
+        const std::string MODEL_PATH = "data/chalet.obj";
+#endif
+        tinyobj::attrib_t attrib;
+        std::vector<tinyobj::shape_t> shapes;
+        std::vector<tinyobj::material_t> materials;
+        std::string err;
+
+#ifdef __ANDROID__
+        std::vector<char> buffer = AndroidUtils::GetFileStream(MODEL_PATH);
+        wrap_vector_as_istream databuf(buffer);
+        std::istream is(&databuf);
+        if (tinyobj::LoadObj(&attrib, &shapes, &materials, &err, &is))
+#else
+        if (tinyobj::LoadObj(&attrib, &shapes, &materials, &err, MODEL_PATH.c_str()))
+#endif
+        {
+            for (const auto &shape : shapes)
+            {
+                //for (uint32_t indice = 0; indice < shape.mesh.indices.size(); indice += 3) {
+                for (const auto &indice : shape.mesh.indices)
+                {
+                    Vertex vertex = {};
+
+                    vertex.x = attrib.vertices[3 * indice.vertex_index + 0];
+                    vertex.y = attrib.vertices[3 * indice.vertex_index + 1];
+                    vertex.z = attrib.vertices[3 * indice.vertex_index + 2];
+                    vertex.w = 1.f;
+
+                    vertex.r = vertex.g = vertex.b = 0.8f;
+                    vertex.a = 1.f;
+
+                    vertices.push_back(vertex);
+                    //indices.push_back(indices.size());
+                }
+            }
+
+            RenderComponent *objRenderComponent = engine->GetRenderer()->AddRenderComponent(
+                    vertices, Cube::GetCubeShaderEntry());
+            Actor *actor = new Actor;
+            SceneComponent *sceneComponent = new SceneComponent;
+            actor->SetSceneComponent(sceneComponent);
+            sceneComponent->SetRenderComponent(objRenderComponent);
+            actor->GetSceneComponent()->SetColor({1.f, 1.f, 1.f});
+            actor->SetTransform({glm::vec3(0.f), glm::vec3(5.f), glm::vec3(glm::radians(-90.f), glm::radians(90.f), 0.f)});
+            engine->GetWorld()->AddActor(actor);
+        }
+        else
+        {
+            VK_LOG(LogTestApplication, Error, "Cannot load OBJ file!\n%s", err.c_str());
         }
     }
 

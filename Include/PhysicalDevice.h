@@ -36,7 +36,7 @@ public:
 
     VkPhysicalDeviceProperties GetPhysicalDeviceProperties() const;
     VkPhysicalDeviceMemoryProperties GetPhysicalDeviceMemoryProperties() const;
-    VkPhysicalDeviceFeatures GetPhysicalDeviceFeatures() const;
+    VkPhysicalDeviceFeatures GetSupportedPhysicalDeviceFeatures() const;
 
     const std::vector<VkLayerProperties>& GetAvailableDeviceLayers() const;
     const std::vector<VkExtensionProperties>& GetAvailableDeviceExtensions() const;

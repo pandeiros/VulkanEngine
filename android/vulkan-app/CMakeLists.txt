@@ -29,9 +29,11 @@ file(GLOB VULKAN_ENGINE_RENDERING_SOURCE ${VULKAN_ENGINE_DIR}/source/Rendering/*
 file(GLOB VULKAN_ENGINE_SOURCE ${VULKAN_ENGINE_DIR}/source/*.cpp)
 file(GLOB VULKAN_ENGINE_TEST_SOURCE ${VULKAN_ENGINE_DIR}/tests/*.cpp)
 file(GLOB VULKAN_ENGINE_ANDROID_SOURCE ${VULKAN_ENGINE_DIR}/android/utils/*.cpp)
+file(GLOB VULKAN_ENGINE_THIRD_PARTY_TINYOBJLOADER_SOURCE ${VULKAN_ENGINE_DIR}/third-party/tinyobjloader/tin_obj_loader.cc)
 
 set(VULKAN_ENGINE_INCLUDE_DIR "${VULKAN_ENGINE_DIR}/include")
 set(VULKAN_ENGINE_TEST_DIR "${VULKAN_ENGINE_DIR}/tests")
+set(VULKAN_ENGINE_THIRD_PARTY_DIR "${VULKAN_ENGINE_DIR}/third-party")
 
 if (ANDROID)
     set(ANDROID_INCLUDE_DIR "${VULKAN_ENGINE_DIR}/android/utils")
@@ -65,6 +67,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11  -Werror -D VK_USE_PLATFORM_A
 set(CMAKE_SHARED_LINKER_FLAGS
     "${CMAKE_SHARED_LINKER_FLAGS} -u ANativeActivity_onCreate")
 
+# set (ASSET_DIR "sourceSets.main.assets.srcDirs '../../data'")
+
 add_library(VulkanAppActivity SHARED
             ${CMAKE_SOURCE_DIR}/src/main/cpp/${MODULE_NAME}.cpp
             ${MODULE_SOURCE}
@@ -75,6 +79,7 @@ add_library(VulkanAppActivity SHARED
             ${VULKAN_ENGINE_SOURCE}
             ${VULKAN_ENGINE_TEST_SOURCE} 
             ${VULKAN_ENGINE_ANDROID_SOURCE}
+            ${VULKAN_ENGINE_THIRD_PARTY_TINYOBJLOADER_SOURCE}
 )
 
 add_library(native_app_glue STATIC
@@ -84,6 +89,7 @@ target_include_directories(VulkanAppActivity PRIVATE
                             ${INCLUDE_DIR}
                             ${VULKAN_ENGINE_INCLUDE_DIR}
                             ${VULKAN_ENGINE_TEST_DIR}
+                            ${VULKAN_ENGINE_THIRD_PARTY_DIR}
                             ${ANDROID_INCLUDE_DIR}
                             ${SAMPLES_DATA_DIR}
                             ${GLMINC_PREFIX}

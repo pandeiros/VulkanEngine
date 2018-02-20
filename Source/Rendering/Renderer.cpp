@@ -385,7 +385,7 @@ void Renderer::InitPipeline(VkExtent2D size, VkRenderPass renderPass)
         VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
         nullptr,
         0,
-        VK_PRIMITIVE_TOPOLOGY_PATCH_LIST, //VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+        primitiveTopology,
         VK_FALSE
     };
 
@@ -535,6 +535,11 @@ void Renderer::InitPipeline(VkExtent2D size, VkRenderPass renderPass)
         0
     };
 
+    if (!device->GetPhysicalDevice()->GetSupportedPhysicalDeviceFeatures().tessellationShader || !device->GetRequiredFeatures().tessellationShader)
+    {
+        graphicsPipelineCreateInfo.pTessellationState = nullptr;
+    }
+
     VK_VERIFY(vkCreateGraphicsPipelines(device->GetVkDevice(), pipelineCache, 1, &graphicsPipelineCreateInfo, nullptr, &pipeline));
 }
 
@@ -660,15 +665,34 @@ size_t Renderer::CompileShader(const char* shaderText, VkShaderStageFlagBits sha
 void Renderer::InitShaders(ShaderIndexData& shaderIndexData)
 {
     uint32_t index = 0;
+    bShouldEnableTessellation = false;
+    primitiveTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+
     for (size_t hash : shaderIndexData)
     {
         VK_ASSERT(shaderCacheData.find(hash) != shaderCacheData.end(), "Cannot find shader id: %lu", hash);
+
+        VkShaderStageFlagBits shaderType = shaderCacheData.at(hash).shaderType;
+
+        if (shaderType == VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT || shaderType == VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT)
+        {
+            if (device->GetPhysicalDevice()->GetSupportedPhysicalDeviceFeatures().tessellationShader
+                && device->GetRequiredFeatures().tessellationShader)
+            {
+                primitiveTopology = VK_PRIMITIVE_TOPOLOGY_PATCH_LIST;
+                bShouldEnableTessellation = true;
+            }
+            else
+            {
+                continue;
+            }
+        }
 
         pipelineShaderStageCreateInfo.push_back({
             VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
             nullptr,
             0,
-            shaderCacheData.at(hash).shaderType,
+            shaderType,
             VK_NULL_HANDLE,
             "main",
             nullptr
@@ -749,14 +773,17 @@ RenderComponent* Renderer::AddRenderComponent(VertexData vertexData, ShaderEntry
         renderComponent->GetShaderIndexData().push_back(CompileShader(fragmentShader, VK_SHADER_STAGE_FRAGMENT_BIT));
     }
 
-    for (const char* tesselationControlShader : shaderEntry.tesselationControlShaders)
+    if (device->GetPhysicalDevice()->GetSupportedPhysicalDeviceFeatures().tessellationShader)
     {
-        renderComponent->GetShaderIndexData().push_back(CompileShader(tesselationControlShader, VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT));
-    }
+        for (const char* tesselationControlShader : shaderEntry.tesselationControlShaders)
+        {
+            renderComponent->GetShaderIndexData().push_back(CompileShader(tesselationControlShader, VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT));
+        }
 
-    for (const char* tesselationEvaluationShader : shaderEntry.tesselationEvaluationShaders)
-    {
-        renderComponent->GetShaderIndexData().push_back(CompileShader(tesselationEvaluationShader, VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT));
+        for (const char* tesselationEvaluationShader : shaderEntry.tesselationEvaluationShaders)
+        {
+            renderComponent->GetShaderIndexData().push_back(CompileShader(tesselationEvaluationShader, VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT));
+        }
     }
 
     renderComponents.push_back(std::unique_ptr<RenderComponent>());

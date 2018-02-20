@@ -190,7 +190,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)android/utils;$(ProjectDir)tests;$(VULKAN_SDK)\Include;$(VULKAN_SDK)\spirv-tools\include;$(VULKAN_SDK)\glslang;$(VULKAN_SDK)\shaderc\third_party\glslang;$(VULKAN_SDK)\Third-Party\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)android/utils;$(ProjectDir)third-party;$(ProjectDir)tests;$(VULKAN_SDK)\Include;$(VULKAN_SDK)\spirv-tools\include;$(VULKAN_SDK)\glslang;$(VULKAN_SDK)\shaderc\third_party\glslang;$(VULKAN_SDK)\Third-Party\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalOptions>/DVULKAN_ENABLE_DEBUG %(AdditionalOptions) /DVULKAN_VR_MODE</AdditionalOptions>
     </ClCompile>
@@ -204,7 +204,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)android/utils;$(ProjectDir)tests;$(VULKAN_SDK)\Include;$(VULKAN_SDK)\spirv-tools\include;$(VULKAN_SDK)\glslang;$(VULKAN_SDK)\shaderc\third_party\glslang;$(VULKAN_SDK)\Third-Party\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)android/utils;$(ProjectDir)third-party;$(ProjectDir)tests;$(VULKAN_SDK)\Include;$(VULKAN_SDK)\spirv-tools\include;$(VULKAN_SDK)\glslang;$(VULKAN_SDK)\shaderc\third_party\glslang;$(VULKAN_SDK)\Third-Party\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/DVULKAN_DEV %(AdditionalOptions) /DVULKAN_VR_MODE</AdditionalOptions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
@@ -248,7 +248,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)android/utils;$(ProjectDir)tests;$(VULKAN_SDK)\Include;$(VULKAN_SDK)\spirv-tools\include;$(VULKAN_SDK)\glslang;$(VULKAN_SDK)\shaderc\third_party\glslang;$(VULKAN_SDK)\Third-Party\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)android/utils;$(ProjectDir)third-party;$(ProjectDir)tests;$(VULKAN_SDK)\Include;$(VULKAN_SDK)\spirv-tools\include;$(VULKAN_SDK)\glslang;$(VULKAN_SDK)\shaderc\third_party\glslang;$(VULKAN_SDK)\Third-Party\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalOptions>/DVULKAN_ENABLE_RUNTIME_DEBUG %(AdditionalOptions) /DVULKAN_VR_MODE</AdditionalOptions>
     </ClCompile>

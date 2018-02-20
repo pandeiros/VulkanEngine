@@ -1193,4 +1193,62 @@ void AndroidUtils::InitControllerApi()
     VK_LOG(LogAndroid, Debug, "GVR CONTROLLER INITIALIZED");
 }
 
+// #TODO Refactor variable names
+std::vector<char> AndroidUtils::GetFileStream(std::string fileToFind)
+{
+    AAssetManager * asset_manager = nativeApplication->activity->assetManager;
+    AAssetDir* assetDir = AAssetManager_openDir(asset_manager, "");
+    const char* filename;
+    std::vector<char> buffer;
+
+    while ((filename = AAssetDir_getNextFileName(assetDir)) != NULL)
+    {
+//        VK_LOG(LogAndroid, Error, "%s", filename);
+        //search for desired file
+        if(!strcmp(filename, fileToFind.c_str()))
+        {
+            AAsset *asset = AAssetManager_open(asset_manager, filename, AASSET_MODE_STREAMING);
+
+            //holds size of searched file
+            off64_t length = AAsset_getLength64(asset);
+            //keeps track of remaining bytes to read
+            off64_t remaining = AAsset_getRemainingLength64(asset);
+            size_t Mb = 1000 *1024; // 1Mb is maximum chunk size for compressed assets
+            size_t currChunk;
+            buffer.reserve(length);
+
+            //while we have still some data to read
+            while (remaining != 0)
+            {
+                //set proper size for our next chunk
+                if(remaining >= Mb)
+                {
+                    currChunk = Mb;
+                }
+                else
+                {
+                    currChunk = remaining;
+                }
+                char chunk[currChunk];
+
+                //read data chunk
+                if(AAsset_read(asset, chunk, currChunk) > 0) // returns less than 0 on error
+                {
+                    //and append it to our vector
+                    buffer.insert(buffer.end(),chunk, chunk + currChunk);
+                    remaining = AAsset_getRemainingLength64(asset);
+                }
+            }
+            AAsset_close(asset);
+
+//            std::istream is(&databuf);
+//            filestream(&databuf);
+        }
+    }
+
+    AAssetDir_close(assetDir);
+
+    return buffer;
+}
+
 #endif
