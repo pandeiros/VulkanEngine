@@ -121,8 +121,13 @@ private:
 public:
     InputManager* GetInputManager();
 
+    void OnAppButtonPressed(InputCode inputCode, InputEvent event, float value);
+    void RequestPerformanceDataLog();
+
 private:
     std::unique_ptr<InputManager> inputManager;
+
+    bool bPerformanceDataLogRequested = false;
 
     //////////////////////////////////////////////////////////////////////////
     // System properties

@@ -51,11 +51,20 @@ void Engine::Init(Instance* instance)
     world.reset(new World(instance->GetDevicePtr(), this));
     inputManager.reset(new InputManager);
     window = instance->GetWindow();
+
+    using namespace std::placeholders;
+    inputManager->BindEvent<float>(InputCode::GVR_BUTTON_APP, InputEventDelegate<float>(InputEvent::ON_PRESSED, std::bind(&Engine::OnAppButtonPressed, this, _1, _2, _3)));
 }
 
 void Engine::Update()
 {
-    //DebugTools::LogPerformanceData();
+    if (bPerformanceDataLogRequested)
+    {
+        VK_LOG(LogEngine, Debug, "FPS: %.0f", GetFPS());
+        DebugTools::LogPerformanceData();
+        bPerformanceDataLogRequested = false;
+    }
+
     DebugTools::ClearPerformanceData();
 
     VK_PERFORMANCE_DATA("Engine");
@@ -149,7 +158,7 @@ float Engine::GetTimeFromStart() const
 
 void Engine::UpdateInternal(float deltaTime)
 {
-    VK_PERFORMANCE_SECTION("Update");
+    VK_PERFORMANCE_SECTION("Engine update");
 
     if (!bEnabled)
     {
@@ -207,6 +216,16 @@ Window* Engine::GetWindow()
 InputManager* Engine::GetInputManager()
 {
     return inputManager.get();
+}
+
+void Engine::OnAppButtonPressed(InputCode inputCode, InputEvent event, float value)
+{
+    RequestPerformanceDataLog();
+}
+
+void Engine::RequestPerformanceDataLog()
+{
+    bPerformanceDataLogRequested = true;
 }
 
 void Engine::LogInstanceProperties()

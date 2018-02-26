@@ -105,7 +105,7 @@ void Camera::OnUpdatePosition(InputCode inputCode, InputEvent event, Vector2D va
     transform.eye += forwardVector * value.y / 3.f;
     transform.eye += rightVector * value.x / 3.f;
 
-    VK_LOG(LogEngine, Debug, "Camera: %f, %f", value.x, value.y);
+    //VK_LOG(LogEngine, Debug, "Camera: %f, %f", value.x, value.y);
 
     UpdateViewMatrix();
 }

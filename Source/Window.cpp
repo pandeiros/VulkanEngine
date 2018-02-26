@@ -97,6 +97,8 @@ void Window::Close()
 
 void Window::BeginRender()
 {
+    VK_PERFORMANCE_SECTION("Acquire next image");
+
     VK_VERIFY(vkAcquireNextImageKHR(device->GetVkDevice(), swapchain.GetVkSwapchain(), UINT64_MAX, semaphoreImageAcquired,
         VK_NULL_HANDLE, &activeSwapchainImageID));
 //    VK_VERIFY(vkWaitForFences(device, 1, &fenceDraw, VK_TRUE, UINT64_MAX));

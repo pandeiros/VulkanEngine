@@ -36,10 +36,12 @@ public:
 
     void ApplyTransformAndColor(void* data);
 
+    Vertex* vertexData;
+
 private:
     RenderComponent* renderComponent;
 
-    Transform transform;
+    Transform transform = Transform();
     glm::vec3 color;
 
     Actor* owner = nullptr;
@@ -72,7 +74,7 @@ public:
 protected:
     std::unique_ptr<SceneComponent> sceneComponent;
 
-    Transform transform;
+    Transform transform = Transform();
 };
 
 VULKAN_NS_END

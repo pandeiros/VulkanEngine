@@ -63,13 +63,17 @@ void Application::Init()
 
     instance.reset(new Instance(applicationInfo, instanceLayers, instanceExtensions));
 
-    engine->InitPhysicalDevices(instance->GetVkInstance());
-    engine->LogDeviceProperties();
-    engine->LogInstanceProperties();
+    {
+        VK_PERFORMANCE_SECTION("Engine initialization");
 
-    instance->InitDeviceAndWindow(engine->GetPhysicalDevice(0));
+        engine->InitPhysicalDevices(instance->GetVkInstance());
+        engine->LogDeviceProperties();
+        engine->LogInstanceProperties();
 
-    engine->Init(instance.get());
+        instance->InitDeviceAndWindow(engine->GetPhysicalDevice(0));
+
+        engine->Init(instance.get());
+    }
     //engine->LogDeviceProperties();
 }
 

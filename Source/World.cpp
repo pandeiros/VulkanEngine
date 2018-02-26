@@ -44,10 +44,14 @@ void World::Tick(float deltaTime)
 
         actor->Update(deltaTime);
     }
+
+    //SetDirty(true);
 }
 
 bool World::PrepareVertexData(VertexBuffer& vertexBuffer, ShaderIndexData& shaderIndexData)
 {
+    VK_PERFORMANCE_SECTION("Vertex buffer creation");
+
     if (actors.size() == 0)
     {
         return false;
@@ -65,9 +69,29 @@ bool World::PrepareVertexData(VertexBuffer& vertexBuffer, ShaderIndexData& shade
 
     shaderIndexData = actors[0]->GetSceneComponent()->GetRenderComponent()->GetShaderIndexData();
 
-    vertexBuffer.CreateExclusive(device->GetVkDevice(), 0, bufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
-    vertexBuffer.Allocate(device.get(), VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    vertexBuffer.SetStride(stride);
+    if (*vertexBuffer.GetVkBufferPtr() == VK_NULL_HANDLE)
+    {
+        vertexBuffer.CreateExclusive(device->GetVkDevice(), 0, bufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+        vertexBuffer.Allocate(device.get(), VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        vertexBuffer.SetStride(stride);
+    }
+    else
+    {
+        uint32_t offset = 0;
+        for (uint32_t i = 0; i < actors.size(); ++i)
+        {
+            SceneComponent* sceneComponent = actors[i]->GetSceneComponent();
+            RenderComponent* renderComponent = sceneComponent->GetRenderComponent();
+            void* data = renderComponent->GetData(size, stride);
+            memcpy(sceneComponent->vertexData, data, size);
+            sceneComponent->ApplyTransformAndColor(sceneComponent->vertexData);
+            //void* dstData = vertexBuffer.Copy(device->GetVkDevice(), data, offset, size);// , sceneComponent ? sceneComponent->GetTransform() : actors[i]->GetTransform());
+            //sceneComponent->ApplyTransformAndColor(dstData);
+            //offset += size;
+        }
+
+        return true;
+    }
 
     uint32_t offset = 0;
     for (uint32_t i = 0; i < actors.size(); ++i)
@@ -132,8 +156,13 @@ void World::SetCamera(CameraMode cameraMode, float yFovDegrees, float aspectRati
 
     if (cameraMode == CameraMode::DEFAULT)
     {
-        Camera* camera = new Camera(CameraMode::DEFAULT, fov, aspectRatio, 0.1f, 100.f,
-        { glm::vec3(0, 0, 3), glm::vec3(0, 0, 1), glm::vec3(0, 1, 0) }, Camera::DEFAULT_CLIP_MATRIX);
+        Camera* camera = new Camera(CameraMode::DEFAULT, fov, aspectRatio, zNear, zFar,
+        //{ glm::vec3(0, 10, 20), glm::vec3(0, 0, 1), glm::vec3(0, 1, 0) }, Camera::DEFAULT_CLIP_MATRIX);
+        //{ glm::vec3(-1.5, 1.3, 3), glm::vec3(0, 0, 1), glm::vec3(0, 1, 0) }, Camera::DEFAULT_CLIP_MATRIX);
+        { glm::vec3(-1.5, 1.3, 50), glm::vec3(0, 0, 1), glm::vec3(0, 1, 0) }, Camera::DEFAULT_CLIP_MATRIX);
+
+        engine->GetInputManager()->BindEvent<Vector2D>(InputCode::GVR_TOUCHPAD,
+            InputEventDelegate<Vector2D>(InputEvent::ON_ACTIVE, std::bind(&Camera::OnUpdatePosition, camera, _1, _2, _3)));
 
         camera->SetViewportMatrix(glm::mat4(1.f));
 
@@ -141,9 +170,9 @@ void World::SetCamera(CameraMode cameraMode, float yFovDegrees, float aspectRati
     }
     else if (cameraMode == CameraMode::VR)
     {
-        Camera* leftEyeCamera = new Camera(CameraMode::VR, fov, aspectRatio, 0.1f, 100.f,
+        Camera* leftEyeCamera = new Camera(CameraMode::VR, fov, aspectRatio, zNear, zFar,
         { glm::vec3(0, 0, 1), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0) });
-        Camera* rightEyeCamera = new Camera(CameraMode::VR, fov, aspectRatio, 0.1f, 100.f,
+        Camera* rightEyeCamera = new Camera(CameraMode::VR, fov, aspectRatio, zNear, zFar,
         { glm::vec3(0, 0, 1), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0) });
 
         engine->GetInputManager()->BindEvent<glm::mat4>(InputCode::GVR_LEFT_EYE_MATRIX,
@@ -156,9 +185,9 @@ void World::SetCamera(CameraMode cameraMode, float yFovDegrees, float aspectRati
         engine->GetInputManager()->BindEvent<Vector2D>(InputCode::GVR_TOUCHPAD,
             InputEventDelegate<Vector2D>(InputEvent::ON_ACTIVE, std::bind(&Camera::OnUpdatePosition, rightEyeCamera, _1, _2, _3)));
 
-        engine->GetInputManager()->BindEvent<float>(InputCode::GVR_BUTTON_APP,
+        engine->GetInputManager()->BindEvent<float>(InputCode::GVR_BUTTON_CLICK,
             InputEventDelegate<float>(InputEvent::ON_PRESSED, std::bind(&Camera::OnModeChange, leftEyeCamera, _1, _2, _3)));
-        engine->GetInputManager()->BindEvent<float>(InputCode::GVR_BUTTON_APP,
+        engine->GetInputManager()->BindEvent<float>(InputCode::GVR_BUTTON_CLICK,
             InputEventDelegate<float>(InputEvent::ON_PRESSED, std::bind(&Camera::OnModeChange, rightEyeCamera, _1, _2, _3)));
 
         leftEyeCamera->SetViewportMatrix(glm::translate(glm::mat4(1.f), glm::vec3(-0.5f, 0.f, 0.f)));
@@ -177,6 +206,8 @@ void World::SetLensUndistortionCoefficients(glm::vec4 coefficients)
         {
             camera->SetLensUndistortionCoefficients(coefficients);
         }
+
+        //camera->SetLensUndistortionCoefficients(coefficients);
     }
 }
 

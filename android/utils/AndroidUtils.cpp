@@ -1090,6 +1090,10 @@ void AndroidUtils::Init()
     if (vulkanApplication)
     {
         vulkanApplication->Init();
+        if (vulkanApplication->GetEngine())
+        {
+            vulkanApplication->GetEngine()->RequestPerformanceDataLog();
+        }
     }
 }
 
@@ -1119,7 +1123,7 @@ void AndroidUtils::Update()
 //        InitControllerApi();
 //    }
 
-    if (AndroidUtils::vulkanApplication && vulkanApplication->GetEngine() && !isPaused)
+    if (vulkanApplication && vulkanApplication->GetEngine() && !isPaused)
     {
         if (controllerApi)
         {

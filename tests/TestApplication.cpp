@@ -40,7 +40,7 @@ TestApplication::~TestApplication()
 
 void TestApplication::Init()
 {
-    VK_PERFORMANCE_DATA("Application init");
+    VK_PERFORMANCE_DATA("Application initialization");
 
     Application::Init();
 
@@ -61,12 +61,12 @@ void TestApplication::Init()
     //{ glm::vec3(0, 50, 10), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0) }, Camera::DEFAULT_CLIP_MATRIX);
 
 #ifdef __ANDROID__
-    engine->GetWorld()->SetCamera(CameraMode::VR, 90.f, instance->GetWindow()->GetAspectRatio(), 0.1f, 100.f);
+    engine->GetWorld()->SetCamera(CameraMode::VR, 90.f, instance->GetWindow()->GetAspectRatio(), 0.1f, 200.f);
 #else
-    engine->GetWorld()->SetCamera(CameraMode::DEFAULT, 90.f, instance->GetWindow()->GetAspectRatio(), 0.1f, 100.f);
+    engine->GetWorld()->SetCamera(CameraMode::DEFAULT, 90.f, instance->GetWindow()->GetAspectRatio(), 0.1f, 200.f);
 #endif
 
-    engine->GetWorld()->SetLensUndistortionCoefficients(glm::vec4(0.2, 0.24, 0.0, 0.0));
+    //engine->GetWorld()->SetLensUndistortionCoefficients(glm::vec4(0.2, 0.24, 0.0, 0.0));
     engine->GetRenderer()->Init();
 
 
@@ -88,111 +88,110 @@ void TestApplication::Init()
     //renderer->CreatePipelineLayout();
     //renderer->InitShaders(VULKAN_VERTEX_SHADER_TEXT, VULKAN_FRAGMENT_SHADER_TEXT);
 
-
-    RenderComponent* renderComponent = engine->GetRenderer()->AddRenderComponent(Cube::GetCubeVertexData(), Cube::GetCubeShaderEntry());
-
-    //uint32_t finalSize, size, stride;
-    //std::vector<Cube> cubes;
-    int32_t cubeCount = 50;
-
-    for (int32_t i = 0; i < cubeCount; ++i)
     {
-        for (int32_t j = 0; j < cubeCount; ++j)
+        VK_PERFORMANCE_SECTION("Scene initialization");
+
+        // Cubes
         {
-            //cubes.push_back(Cube{ 1.f, { glm::vec3(std::cos(PI / 2 * (i)) * 7, 0.f, std::sin(PI / 2 * i) * 7) } });
+            RenderComponent* renderComponent = engine->GetRenderer()->AddRenderComponent(Cube::GetCubeVertexData(), Cube::GetCubeShaderEntry());
 
-            float xArg = float(i - cubeCount / 2);
-            float yArg = float(j - cubeCount / 2);
-            float y = 10 * ((float)std::cos(xArg / cubeCount * PI * 2) + (float)std::sin(yArg * 3 / 2 / cubeCount * PI * 2));
+            //uint32_t finalSize, size, stride;
+            //std::vector<Cube> cubes;
+            int32_t cubeCount = 1;
 
-            Actor* actor = new Actor;
-            SceneComponent* sceneComponent = new SceneComponent;
-            actor->SetSceneComponent(sceneComponent);
-            sceneComponent->SetRenderComponent(renderComponent);
-
-            actor->SetTransform({ glm::vec3(xArg * 0.75f, y, yArg * 0.75f), glm::vec3(0.25f, 0.25f, 0.25f) });
-            actor->GetSceneComponent()->SetColor({ xArg / cubeCount + 0.5f, 0, yArg / cubeCount + 0.5f });
-
-            //Cube* cube = new Cube(1.f, { glm::vec3(xArg * 0.75f, y, yArg * 0.75f), glm::vec3(0.25f, 0.25f, 0.25f) });
-            //cube->SetColor({ xArg / cubeCount + 0.5f, 0, yArg / cubeCount + 0.5f });
-            //actor->SetRenderComponent(cube);
-
-            engine->GetWorld()->AddActor(actor);
-
-            //cubes.push_back(Cube{ 1.f, { glm::vec3(xArg * 0.75f, y, yArg * 0.75f), glm::vec3(0.25f, 0.25f, 0.25f)} });
-            //cubes[cubes.size() - 1].SetColor({ xArg / cubeCount + 0.5f, 0, yArg / cubeCount + 0.5f});
-        }
-    }
-
-    {
-        VertexData vertices;
-        //std::vector<uint32_t> indices;
-
-//#ifdef __ANDROID__
-//        FILE *fPtr = fopen("dodecahedron.obj", "rb");
-//        if (!fPtr)
-//        {
-//            VK_LOG(LogTestApplication, Error, "Cannot open test file");
-//        }
-//        else
-//        {
-//            fclose(fPtr);
-//        }
-//#endif
-
-        // #TODO Refactor
-#ifdef __ANDROID__
-        const std::string MODEL_PATH = "chalet.obj";
-#else
-        const std::string MODEL_PATH = "data/chalet.obj";
-#endif
-        tinyobj::attrib_t attrib;
-        std::vector<tinyobj::shape_t> shapes;
-        std::vector<tinyobj::material_t> materials;
-        std::string err;
-
-#ifdef __ANDROID__
-        std::vector<char> buffer = AndroidUtils::GetFileStream(MODEL_PATH);
-        wrap_vector_as_istream databuf(buffer);
-        std::istream is(&databuf);
-        if (tinyobj::LoadObj(&attrib, &shapes, &materials, &err, &is))
-#else
-        if (tinyobj::LoadObj(&attrib, &shapes, &materials, &err, MODEL_PATH.c_str()))
-#endif
-        {
-            for (const auto &shape : shapes)
+            for (int32_t i = 0; i < cubeCount; ++i)
             {
-                //for (uint32_t indice = 0; indice < shape.mesh.indices.size(); indice += 3) {
-                for (const auto &indice : shape.mesh.indices)
+                for (int32_t j = 0; j < cubeCount; ++j)
                 {
-                    Vertex vertex = {};
+                    //cubes.push_back(Cube{ 1.f, { glm::vec3(std::cos(PI / 2 * (i)) * 7, 0.f, std::sin(PI / 2 * i) * 7) } });
 
-                    vertex.x = attrib.vertices[3 * indice.vertex_index + 0];
-                    vertex.y = attrib.vertices[3 * indice.vertex_index + 1];
-                    vertex.z = attrib.vertices[3 * indice.vertex_index + 2];
-                    vertex.w = 1.f;
+                    float xArg = float(i - cubeCount / 2);
+                    float yArg = float(j - cubeCount / 2);
+                    float y = 10 * ((float)std::cos(xArg / cubeCount * PI * 2) + (float)std::sin(yArg * 3 / 2 / cubeCount * PI * 2));
 
-                    vertex.r = vertex.g = vertex.b = 0.8f;
-                    vertex.a = 1.f;
+                    Actor* actor = new Actor;
+                    SceneComponent* sceneComponent = new SceneComponent;
+                    actor->SetSceneComponent(sceneComponent);
+                    sceneComponent->SetRenderComponent(renderComponent);
 
-                    vertices.push_back(vertex);
-                    //indices.push_back(indices.size());
+                    actor->SetTransform({ glm::vec3(xArg * 0.75f, y, yArg * 0.75f), glm::vec3(0.25f, 0.25f, 0.25f) });
+                    actor->GetSceneComponent()->SetColor({ xArg / cubeCount + 0.5f, 0, yArg / cubeCount + 0.5f });
+
+                    //Cube* cube = new Cube(1.f, { glm::vec3(xArg * 0.75f, y, yArg * 0.75f), glm::vec3(0.25f, 0.25f, 0.25f) });
+                    //cube->SetColor({ xArg / cubeCount + 0.5f, 0, yArg / cubeCount + 0.5f });
+                    //actor->SetRenderComponent(cube);
+
+                    engine->GetWorld()->AddActor(actor);
+
+                    //cubes.push_back(Cube{ 1.f, { glm::vec3(xArg * 0.75f, y, yArg * 0.75f), glm::vec3(0.25f, 0.25f, 0.25f)} });
+                    //cubes[cubes.size() - 1].SetColor({ xArg / cubeCount + 0.5f, 0, yArg / cubeCount + 0.5f});
                 }
             }
-
-            RenderComponent *objRenderComponent = engine->GetRenderer()->AddRenderComponent(
-                    vertices, Cube::GetCubeShaderEntry());
-            Actor *actor = new Actor;
-            SceneComponent *sceneComponent = new SceneComponent;
-            actor->SetSceneComponent(sceneComponent);
-            sceneComponent->SetRenderComponent(objRenderComponent);
-            actor->GetSceneComponent()->SetColor({1.f, 1.f, 1.f});
-            actor->SetTransform({glm::vec3(0.f), glm::vec3(5.f), glm::vec3(glm::radians(-90.f), glm::radians(90.f), 0.f)});
-            engine->GetWorld()->AddActor(actor);
         }
-        else
+
+        // OBJ Loading
         {
-            VK_LOG(LogTestApplication, Error, "Cannot load OBJ file!\n%s", err.c_str());
+            VertexData vertices;
+            //std::vector<uint32_t> indices;
+
+            // #TODO Refactor
+#ifdef __ANDROID__
+            const std::string MODEL_PATH = "minicooper.obj";
+#else
+            const std::string MODEL_PATH = "data/minicooper.obj";
+#endif
+            tinyobj::attrib_t attrib;
+            std::vector<tinyobj::shape_t> shapes;
+            std::vector<tinyobj::material_t> materials;
+            std::string err;
+
+#ifdef __ANDROID__
+            // #TODO Change name of this method
+            std::vector<char> buffer = AndroidUtils::GetFileStream(MODEL_PATH);
+            wrap_vector_as_istream databuf(buffer);
+            std::istream is(&databuf);
+            if (tinyobj::LoadObj(&attrib, &shapes, &materials, &err, &is))
+#else
+            if (tinyobj::LoadObj(&attrib, &shapes, &materials, &err, MODEL_PATH.c_str()))
+#endif
+            {
+                for (const auto &shape : shapes)
+                {
+                    for (const auto &indice : shape.mesh.indices)
+                    {
+                        Vertex vertex = {};
+
+                        vertex.x = attrib.vertices[3 * indice.vertex_index + 0];
+                        vertex.y = attrib.vertices[3 * indice.vertex_index + 1];
+                        vertex.z = attrib.vertices[3 * indice.vertex_index + 2];
+                        vertex.w = 1.f;
+
+                        vertex.r = vertex.g = vertex.b = 0.8f;
+                        vertex.a = 1.f;
+
+                        vertices.push_back(vertex);
+                        //indices.push_back(indices.size());
+                    }
+                }
+
+                VK_LOG(LogTestApplication, Info, "Loaded model has %d vertices.", (uint32_t)vertices.size());
+
+                RenderComponent *objRenderComponent = engine->GetRenderer()->AddRenderComponent(
+                        vertices, Cube::GetCubeShaderEntry());
+                Actor *actor = new Actor;
+                SceneComponent *sceneComponent = new SceneComponent;
+                actor->SetSceneComponent(sceneComponent);
+                sceneComponent->SetRenderComponent(objRenderComponent);
+                actor->GetSceneComponent()->SetColor({1.f, 1.f, 1.f});
+//                actor->SetTransform({glm::vec3(0.f), glm::vec3(5.f), glm::vec3(glm::radians(-90.f), glm::radians(90.f), 0.f)}); // House
+                actor->SetTransform({glm::vec3(0.f), glm::vec3(0.1f), glm::vec3(glm::radians(-90.f), glm::radians(-75.f), 0.f)}); // Minicooper
+//                actor->SetTransform({glm::vec3(0.f), glm::vec3(1.f), glm::vec3(0.f)}); // Teapot
+                engine->GetWorld()->AddActor(actor);
+            }
+            else
+            {
+                VK_LOG(LogTestApplication, Error, "Cannot load OBJ file!\n%s", err.c_str());
+            }
         }
     }
 
@@ -234,7 +233,18 @@ void TestApplication::Init()
 
 void TestApplication::Tick(float deltaTime)
 {
+    std::chrono::duration<double> diff = std::chrono::duration_cast<std::chrono::duration<double>>(timer.now() - lastTime);
+    if (diff.count() >= 1.0)
+    {
+        lastTime = timer.now();
+        //VK_LOG(LogTestApplication, Debug, "FPS: %.0f", GetEngine()->GetFPS());
+        GetEngine()->RequestPerformanceDataLog();
+    }
+
     return;
+
+    //////////////////////////////////////////////////////////////////////////
+
     VK_PERFORMANCE_SECTION("Test application");
 
     Window* window = instance->GetWindow();

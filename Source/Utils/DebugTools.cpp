@@ -15,12 +15,30 @@ VULKAN_NS_USING;
 VK_DECLARE_LOG_CATEGORY(LogDebug);
 
 PerformanceSection::PerformanceSection(std::string name)
-    : name(name), bActive(true)
+    : name(name), bActive(true), bPersistent(false)
 {
     DebugTools::BeginPerformanceSection(*this);
 }
 
+PerformanceSection::PerformanceSection(std::string name, bool bPersistent)
+    : name(name), bActive(true), bPersistent(bPersistent)
+{
+}
+
 PerformanceSection::~PerformanceSection()
+{
+    if (!bPersistent)
+    {
+        DebugTools::EndPerformanceSection(*this);
+    }
+}
+
+void PerformanceSection::BeginSection()
+{
+    DebugTools::BeginPerformanceSection(*this);
+}
+
+void PerformanceSection::EndSection()
 {
     DebugTools::EndPerformanceSection(*this);
 }

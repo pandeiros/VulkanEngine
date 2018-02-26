@@ -36,6 +36,7 @@ VULKAN_NS_BEGIN
 #define VK_PERFORMANCE_DATA(NAME) PerformanceData performanceDataObject(NAME)
 // Can be in the same scope as other section (nesting is allowed).
 #define VK_PERFORMANCE_SECTION(NAME) PerformanceSection performanceSectionObject(NAME)
+#define VK_PERFORMANCE_SECTION_PERSISTENT(NAME) PerformanceSection performanceSection##NAME(#NAME, true)
 #else
 #define VK_PERFORMANCE_DATA(NAME)
 #define VK_PERFORMANCE_SECTION(NAME)
@@ -43,9 +44,14 @@ VULKAN_NS_BEGIN
 
 struct PerformanceSection
 {
+    PerformanceSection() {};
     PerformanceSection(std::string name);
+    PerformanceSection(std::string name, bool bPersistent);
 
     ~PerformanceSection();
+
+    void BeginSection();
+    void EndSection();
 
     void Add(PerformanceSection& performanceSection);
     void End(PerformanceSection& performanceSection, std::chrono::steady_clock* timer);
@@ -58,6 +64,7 @@ struct PerformanceSection
     std::chrono::steady_clock::time_point endTime;
 
     bool bActive;
+    bool bPersistent;
 
     std::vector<PerformanceSection> performanceSections;
 

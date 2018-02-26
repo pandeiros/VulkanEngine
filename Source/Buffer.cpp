@@ -12,6 +12,11 @@ VULKAN_NS_USING;
 
 void Buffer::CreateExclusive(VkDevice device, VkBufferCreateFlags flags, VkDeviceSize size, VkBufferUsageFlags usage)
 {
+    if (buffer)
+    {
+        Destroy(device);
+    }
+
     bufferCreateInfo = {
         VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
         nullptr,
@@ -45,6 +50,7 @@ void Buffer::CreateConcurrent(VkDevice device, VkBufferCreateFlags flags, VkDevi
 void Buffer::Destroy(VkDevice device)
 {
     vkDestroyBuffer(device, buffer, nullptr);
+    buffer = VK_NULL_HANDLE;
 
     memory.Free(device);
 }

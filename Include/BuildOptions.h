@@ -17,6 +17,7 @@
 #endif
 
 #ifdef VULKAN_ENABLE_RUNTIME_DEBUG
+#define VULKAN_ENABLE_PERFORMANCE_TESTING
 #endif
 
 // #SUPPORT Currently implementing VR mode using single viewport, because

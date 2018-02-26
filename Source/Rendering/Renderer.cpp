@@ -59,7 +59,7 @@ Renderer::~Renderer()
 
 void Renderer::Init()
 {
-    VK_PERFORMANCE_SECTION("Renderer init");
+    VK_PERFORMANCE_SECTION("Renderer initialization");
 
     for (uint32_t i = 0; i < VULKAN_DESCRIPTOR_SETS_COUNT; ++i)
     {
@@ -81,23 +81,53 @@ void Renderer::Tick(float deltaTime)
 
     // 1. If needed, rebuild vertex buffer.
 
+    //ShaderIndexData shaderIndexData;
+    //engine->GetWorld()->PrepareVertexData(vertexBuffer, shaderIndexData);
+
+    //if (pipeline != VK_NULL_HANDLE)
+    //{
+    //    vkDestroyPipeline(device->GetVkDevice(), pipeline, nullptr);
+    //    vkDestroyPipelineCache(device->GetVkDevice(), pipelineCache, nullptr);
+    //    writeDescriptorSets.clear();
+    //    vkDestroyDescriptorPool(device->GetVkDevice(), descriptorPool, nullptr);
+
+    //    for (VkPipelineShaderStageCreateInfo& shaderStage : pipelineShaderStageCreateInfo)
+    //    {
+    //        vkDestroyShaderModule(device->GetVkDevice(), shaderStage.module, nullptr);
+    //    }
+
+    //    pipelineShaderStageCreateInfo.clear();
+    //    pipelineColorBlendAttachmentState.clear();
+    //    vertexInputBindings.clear();
+    //    vertexInputAttributes.clear();
+    //    viewports.clear();
+    //    scissors.clear();
+    //}
+
     // Pipeline update.
     if (engine->GetWorld()->IsDirty())
     {
         ShaderIndexData shaderIndexData;
         if (engine->GetWorld()->PrepareVertexData(vertexBuffer, shaderIndexData))
         {
-            InitShaders(shaderIndexData);
+            engine->RequestPerformanceDataLog();
 
-            AddVertexInputBinding(0, vertexBuffer.GetStride(), VK_VERTEX_INPUT_RATE_VERTEX);
-            AddVertexInputAttribute(0, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 0);
-            // #TODO Change format when using texture.
-            AddVertexInputAttribute(1, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 16);
+            {
+                VK_PERFORMANCE_SECTION("Pipeline creation");
 
-            InitDescriptorPool();
-            InitDescriptorSet();
-            InitPipelineCache();
-            InitPipeline(engine->GetWindow()->GetSurfaceSize(), engine->GetWindow()->GetRenderPass());
+                // #TODO Temp
+                InitShaders(shaderIndexData);
+
+                AddVertexInputBinding(0, vertexBuffer.GetStride(), VK_VERTEX_INPUT_RATE_VERTEX);
+                AddVertexInputAttribute(0, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 0);
+                // #TODO Change format when using texture.
+                AddVertexInputAttribute(1, 0, VK_FORMAT_R32G32B32A32_SFLOAT, 16);
+
+                InitDescriptorPool();
+                InitDescriptorSet();
+                InitPipelineCache();
+                InitPipeline(engine->GetWindow()->GetSurfaceSize(), engine->GetWindow()->GetRenderPass());
+            }
         }
     }
 
@@ -105,80 +135,91 @@ void Renderer::Tick(float deltaTime)
     Window* window = engine->GetWindow();
     Queue& queue = device->GetQueueRef();
 
-    if (window->Update())
     {
-        std::vector<CommandBuffer>& commandBuffers = commandPool.GetCommandBuffers();
+        VK_PERFORMANCE_SECTION("Window update");
 
-        window->BeginRender();
-
-        std::vector<uint32_t> commandBufferIndexes = {};        // #TODO Refactor these.
-        for (uint32_t i = 0; i < commandBuffers.size(); ++i)
+        if (window->Update())
         {
-            commandBufferIndexes.push_back(i);
+            std::vector<CommandBuffer>& commandBuffers = commandPool.GetCommandBuffers();
 
-            //glm::mat4 mvpMatrix = engine->GetWorld()->GetCameraMatrix(i);
-            glm::mat4 viewMatrix = engine->GetWorld()->GetCamera(i)->GetViewMatrix();
-            glm::mat4 projectionMatrix = engine->GetWorld()->GetCamera(i)->GetCorrectedProjectionMatrix();
-            glm::vec4 undistortionCoefficients = engine->GetWorld()->GetCamera(i)->GetLensUndistortionCoefficients();
+            window->BeginRender();
 
-            uint32_t offset = i * 256;
-
-            Buffer& uniformBuffer = GetUniformBuffer(0); // #TODO Refactor
-            uniformBuffer.Copy(device->GetVkDevice(), &viewMatrix, offset, sizeof(viewMatrix));
-
-            offset += sizeof(viewMatrix);
-            uniformBuffer.Copy(device->GetVkDevice(), &projectionMatrix, offset, sizeof(projectionMatrix));
-
-            offset += sizeof(projectionMatrix);
-            uniformBuffer.Copy(device->GetVkDevice(), &undistortionCoefficients, offset, sizeof(undistortionCoefficients));
-
-            commandBuffers[i].Reset(0);
-            commandBuffers[i].Begin(0, nullptr);
-
+            std::vector<uint32_t> commandBufferIndexes = {};        // #TODO Refactor these.
+            for (uint32_t i = 0; i < commandBuffers.size(); ++i)
             {
-                VK_PERFORMANCE_SECTION("Render initialization");
-                uint32_t dynamicOffset = i * 256;
-                commandBuffers[i].BeginRenderPass(window->GetRenderPass(), window->GetActiveFramebuffer(), GetRenderArea(i), GetClearValues(), VK_SUBPASS_CONTENTS_INLINE);
-                BindPipeline(commandBuffers[i].GetVkCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS);
-                BindDescriptorSets(commandBuffers[i].GetVkCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, { dynamicOffset });
-                BindVertexBuffers(commandBuffers[i].GetVkCommandBuffer(), { 0 });
-                CommandSetViewports(commandBuffers[i].GetVkCommandBuffer());
-                CommandSetScissors(commandBuffers[i].GetVkCommandBuffer(), i);
+                commandBufferIndexes.push_back(i);
+
+                //glm::mat4 mvpMatrix = engine->GetWorld()->GetCameraMatrix(i);
+                glm::mat4 viewMatrix = engine->GetWorld()->GetCamera(i)->GetViewMatrix();
+                glm::mat4 projectionMatrix = engine->GetWorld()->GetCamera(i)->GetCorrectedProjectionMatrix();
+                glm::vec4 undistortionCoefficients = engine->GetWorld()->GetCamera(i)->GetLensUndistortionCoefficients();
+
+                uint32_t offset = i * 256;
+
+                Buffer& uniformBuffer = GetUniformBuffer(0); // #TODO Refactor
+                uniformBuffer.Copy(device->GetVkDevice(), &viewMatrix, offset, sizeof(viewMatrix));
+
+                offset += sizeof(viewMatrix);
+                uniformBuffer.Copy(device->GetVkDevice(), &projectionMatrix, offset, sizeof(projectionMatrix));
+
+                offset += sizeof(projectionMatrix);
+                uniformBuffer.Copy(device->GetVkDevice(), &undistortionCoefficients, offset, sizeof(undistortionCoefficients));
+
+                commandBuffers[i].Reset(0);
+                commandBuffers[i].Begin(0, nullptr);
+
+                {
+                    VK_PERFORMANCE_SECTION("Renderer resource binding");
+                    uint32_t dynamicOffset = i * 256;
+                    commandBuffers[i].BeginRenderPass(window->GetRenderPass(), window->GetActiveFramebuffer(), GetRenderArea(i), GetClearValues(), VK_SUBPASS_CONTENTS_INLINE);
+                    BindPipeline(commandBuffers[i].GetVkCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS);
+                    BindDescriptorSets(commandBuffers[i].GetVkCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, { dynamicOffset });
+                    BindVertexBuffers(commandBuffers[i].GetVkCommandBuffer(), { 0 });
+                    CommandSetViewports(commandBuffers[i].GetVkCommandBuffer());
+                    CommandSetScissors(commandBuffers[i].GetVkCommandBuffer(), i);
+                }
+
+                // #REFACTOR
+                {
+                    //VK_PERFORMANCE_SECTION("Draw");
+                    VK_PERFORMANCE_SECTION("Draw command");
+                    vkCmdDraw(commandBuffers[i].GetVkCommandBuffer(), vertexBuffer.GetVertexCount(), 1, 0, 0);
+                }
+
+                commandBuffers[i].EndRenderPass();
+                commandBuffers[i].End();
             }
 
-            // #REFACTOR
             {
-                VK_PERFORMANCE_SECTION("Draw");
-                vkCmdDraw(commandBuffers[i].GetVkCommandBuffer(), vertexBuffer.GetVertexCount(), 1, 0, 0);
-            }
+                VK_PERFORMANCE_SECTION("Queue submission");
 
-            commandBuffers[i].EndRenderPass();
-            commandBuffers[i].End();
+                // #TODO Clean this up
+                VkFence fence = window->GetFence();
+                vkResetFences(device->GetVkDevice(), 1, &fence);
+
+                //std::vector<VkCommandBuffer> commandBuffers = { commandBuffer.GetVkCommandBuffer() };
+                std::vector<VkSemaphore> waitSemaphores = { window->GetSemaphore() };
+
+                VkPipelineStageFlags pipelineStageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+                queue.Submit(&pipelineStageFlags, waitSemaphores, commandPool.GetVkCommandBuffers(commandBufferIndexes),
+                {}, window->GetFence());
+
+                window->EndRender({}, { window->GetFence() });
+            }
+        }
+        else
+        {
+            SetUpdateEnabled(false);
+            SetPendingKill(true);
         }
 
-        // #TODO Clean this up
-        VkFence fence = window->GetFence();
-        vkResetFences(device->GetVkDevice(), 1, &fence);
-
-        //std::vector<VkCommandBuffer> commandBuffers = { commandBuffer.GetVkCommandBuffer() };
-        std::vector<VkSemaphore> waitSemaphores = { window->GetSemaphore() };
-
-        VkPipelineStageFlags pipelineStageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        queue.Submit(&pipelineStageFlags, waitSemaphores, commandPool.GetVkCommandBuffers(commandBufferIndexes),
-        {}, window->GetFence());
-
-        window->EndRender({}, { window->GetFence() });
+        {
+            VK_PERFORMANCE_SECTION("Queue wait idle");
+            queue.WaitIdle();
+        }
     }
-    else
-    {
-        SetUpdateEnabled(false);
-        SetPendingKill(true);
-    }
-
-    queue.WaitIdle();
 
     // Cleanup
-
 }
 
 Buffer& Renderer::GetUniformBuffer(uint32_t index)
@@ -403,7 +444,7 @@ void Renderer::InitPipeline(VkExtent2D size, VkRenderPass renderPass)
         VK_FALSE,
         VK_FALSE,
         polygonMode,
-        VK_CULL_MODE_BACK_BIT,
+        VK_CULL_MODE_BACK_BIT, // VK_CULL_MODE_NONE
         VK_FRONT_FACE_CLOCKWISE,
         VK_FALSE,
         0,
@@ -759,6 +800,8 @@ std::vector<VkClearValue> Renderer::GetClearValues()
 
 RenderComponent* Renderer::AddRenderComponent(VertexData vertexData, ShaderEntry shaderEntry)
 {
+    VK_PERFORMANCE_SECTION("Shader compilation");
+
     RenderComponent* renderComponent = new RenderComponent;
 
     renderComponent->SetVertexData(vertexData);

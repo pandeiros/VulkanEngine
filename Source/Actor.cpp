@@ -38,7 +38,7 @@ void SceneComponent::ApplyTransformAndColor(void* data)
     uint32_t size, stride;
     renderComponent->GetData(size, stride);
 
-    Vertex* vertexData = static_cast<Vertex*>(data);
+    vertexData = static_cast<Vertex*>(data);
     uint32_t vertexCount = size / sizeof(Vertex);
     Transform transform = GetTransform();
 

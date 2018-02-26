@@ -232,6 +232,6 @@ void PhysicalDevice::CheckRequiredFeatures(VkPhysicalDeviceFeatures& requiredFea
     {
         VkBool32 supported = *(supportedFeaturesPtr + i);
         VkBool32 required = *(requiredFeaturesPtr + i);
-        VK_ASSERT(!((!supported) && (required)), "Found not supported feature in required features at %d offset.", i);
+        VK_ASSERT(!((!supported) && (required)), "Found not supported feature in required features at offset %d.", i);
     }
 }
