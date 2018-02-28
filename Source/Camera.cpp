@@ -114,7 +114,8 @@ void Camera::OnModeChange(InputCode inputCode, InputEvent event, float value)
 {
     if (event == InputEvent::ON_PRESSED)
     {
-        bUndistortionEnabled = !bUndistortionEnabled;
+        //bUndistortionEnabled = !bUndistortionEnabled;
+        bRotationEnabled = !bRotationEnabled;
     }
 }
 

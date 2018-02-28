@@ -215,7 +215,7 @@ void Window::CreateSwapchain()
     uint32_t desiredSwapchainImageCount = Math::Clamp(2u, surfaceCapabilities.minImageCount, surfaceCapabilities.maxImageCount);
 
     // Present mode
-    VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
+    VkPresentModeKHR presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
 
     // #SUPPORT Current Android driver supports only FIFO mode.
 #ifndef __ANDROID__

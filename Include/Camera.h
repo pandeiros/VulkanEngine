@@ -99,6 +99,8 @@ private:
     bool bUndistortionEnabled = false;
 
     CameraMode cameraMode;
+
+    bool bRotationEnabled = false;;
 };
 
 VULKAN_NS_END

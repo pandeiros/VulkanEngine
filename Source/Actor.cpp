@@ -35,25 +35,40 @@ Transform SceneComponent::GetTransform() const
 
 void SceneComponent::ApplyTransformAndColor(void* data)
 {
-    uint32_t size, stride;
-    renderComponent->GetData(size, stride);
-
     vertexData = static_cast<Vertex*>(data);
+
+    UpdateData();
+}
+
+void SceneComponent::UpdateData()
+{
+    if (!vertexData)
+    {
+        return;
+    }
+
+    uint32_t size, stride;
+    void* data = renderComponent->GetData(size, stride);
+    Vertex* originVertexData = static_cast<Vertex*>(data);
+
     uint32_t vertexCount = size / sizeof(Vertex);
     Transform transform = GetTransform();
 
     for (uint32_t i = 0; i < vertexCount; ++i)
     {
-        (vertexData + i)->x *= transform.scale.x;
-        (vertexData + i)->y *= transform.scale.y;
-        (vertexData + i)->z *= transform.scale.z;
+        (vertexData + i)->x = (originVertexData + i)->x * transform.scale.x;
+        (vertexData + i)->y = (originVertexData + i)->y * transform.scale.y;
+        (vertexData + i)->z = (originVertexData + i)->z * transform.scale.z;
 
-        glm::quat quatRotation = glm::quat(transform.rotation);
-        glm::vec3 vertex = glm::vec3((vertexData + i)->x, (vertexData + i)->y, (vertexData + i)->z);
-        vertex = quatRotation * vertex;
-        (vertexData + i)->x = vertex.x;
-        (vertexData + i)->y = vertex.y;
-        (vertexData + i)->z = vertex.z;
+        if (!bRotationSet)
+        {
+            glm::quat quatRotation = glm::quat(transform.rotation);
+            glm::vec3 vertex = glm::vec3((vertexData + i)->x, (vertexData + i)->y, (vertexData + i)->z);
+            vertex = quatRotation * vertex;
+            (vertexData + i)->x = vertex.x;
+            (vertexData + i)->y = vertex.y;
+            (vertexData + i)->z = vertex.z;
+        }
 
         (vertexData + i)->x += transform.position.x;
         (vertexData + i)->y += transform.position.y;
@@ -63,6 +78,8 @@ void SceneComponent::ApplyTransformAndColor(void* data)
         (vertexData + i)->g = color.y;
         (vertexData + i)->b = color.z;
     }
+
+    bRotationSet = true;
 }
 
 void Actor::SetSceneComponent(SceneComponent* sceneComponent)
@@ -85,3 +102,45 @@ Transform Actor::GetTransform() const
 {
     return transform;
 }
+
+void Actor::SetScale(glm::vec3 scale)
+{
+    transform.scale = scale;
+}
+
+void Actor::SetPosition(glm::vec3 position)
+{
+    transform.position = position;
+}
+
+void Actor::SetRotation(glm::vec3 rotation)
+{
+    transform.rotation = rotation;
+}
+
+void TestActor::Tick(float deltaTime)
+{
+    if (timer == 0.f)
+    {
+        int rand = std::rand() % 1000;
+        timer = float(rand) / 100.f;
+    }
+
+    timer += deltaTime;
+
+    glm::vec3 deltaPos = (bAnimSwitch ? destPos : originPos) - transform.position;
+    transform.position += deltaPos * deltaTime;
+
+    if (!bAnimSwitch)
+    {
+        transform.position.y += std::sin(timer / 2.f) * 0.01f;
+    }
+
+    sceneComponent->UpdateData();
+}
+
+void TestActor::OnModeChange(InputCode inputCode, InputEvent event, float value)
+{
+    bAnimSwitch = !bAnimSwitch;
+}
+

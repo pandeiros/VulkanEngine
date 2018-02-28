@@ -17,6 +17,7 @@ World::World(DevicePtr device, Engine* engine)
     : VulkanClass (device), engine(engine)
 {
     SetUpdateEnabled(true);
+    SetDirty(true);
 }
 
 World::~World()
@@ -39,7 +40,7 @@ void World::Tick(float deltaTime)
     {
         if (actor->IsDirty())
         {
-            SetDirty(true);
+            //SetDirty(true);
         }
 
         actor->Update(deltaTime);
@@ -159,7 +160,7 @@ void World::SetCamera(CameraMode cameraMode, float yFovDegrees, float aspectRati
         Camera* camera = new Camera(CameraMode::DEFAULT, fov, aspectRatio, zNear, zFar,
         //{ glm::vec3(0, 10, 20), glm::vec3(0, 0, 1), glm::vec3(0, 1, 0) }, Camera::DEFAULT_CLIP_MATRIX);
         //{ glm::vec3(-1.5, 1.3, 3), glm::vec3(0, 0, 1), glm::vec3(0, 1, 0) }, Camera::DEFAULT_CLIP_MATRIX);
-        { glm::vec3(-1.5, 1.3, 50), glm::vec3(0, 0, 1), glm::vec3(0, 1, 0) }, Camera::DEFAULT_CLIP_MATRIX);
+        { glm::vec3(-3, 1.3, 15), glm::vec3(0, 0, 1), glm::vec3(0, 1, 0) }, Camera::DEFAULT_CLIP_MATRIX);
 
         engine->GetInputManager()->BindEvent<Vector2D>(InputCode::GVR_TOUCHPAD,
             InputEventDelegate<Vector2D>(InputEvent::ON_ACTIVE, std::bind(&Camera::OnUpdatePosition, camera, _1, _2, _3)));
@@ -185,9 +186,9 @@ void World::SetCamera(CameraMode cameraMode, float yFovDegrees, float aspectRati
         engine->GetInputManager()->BindEvent<Vector2D>(InputCode::GVR_TOUCHPAD,
             InputEventDelegate<Vector2D>(InputEvent::ON_ACTIVE, std::bind(&Camera::OnUpdatePosition, rightEyeCamera, _1, _2, _3)));
 
-        engine->GetInputManager()->BindEvent<float>(InputCode::GVR_BUTTON_CLICK,
+        engine->GetInputManager()->BindEvent<float>(InputCode::GVR_BUTTON_APP,
             InputEventDelegate<float>(InputEvent::ON_PRESSED, std::bind(&Camera::OnModeChange, leftEyeCamera, _1, _2, _3)));
-        engine->GetInputManager()->BindEvent<float>(InputCode::GVR_BUTTON_CLICK,
+        engine->GetInputManager()->BindEvent<float>(InputCode::GVR_BUTTON_APP,
             InputEventDelegate<float>(InputEvent::ON_PRESSED, std::bind(&Camera::OnModeChange, rightEyeCamera, _1, _2, _3)));
 
         leftEyeCamera->SetViewportMatrix(glm::translate(glm::mat4(1.f), glm::vec3(-0.5f, 0.f, 0.f)));
