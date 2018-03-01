@@ -87,8 +87,8 @@ void Instance::InitDeviceAndWindow(PhysicalDevice* physicalDevice)
     AndroidGetWindowSize(width, height);
     VK_ASSERT(width > 0 && height > 0, "Invalid window size.");
 #elif _WIN32
-    height = 2000;
-    width = 2000;
+    height = 768;
+    width = 1386;
 #endif
 
     window.reset(new Window(device, instance, { "Vulkan Engine", { (uint32_t)width, (uint32_t)height } }));

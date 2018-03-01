@@ -160,7 +160,8 @@ void World::SetCamera(CameraMode cameraMode, float yFovDegrees, float aspectRati
         Camera* camera = new Camera(CameraMode::DEFAULT, fov, aspectRatio, zNear, zFar,
         //{ glm::vec3(0, 10, 20), glm::vec3(0, 0, 1), glm::vec3(0, 1, 0) }, Camera::DEFAULT_CLIP_MATRIX);
         //{ glm::vec3(-1.5, 1.3, 3), glm::vec3(0, 0, 1), glm::vec3(0, 1, 0) }, Camera::DEFAULT_CLIP_MATRIX);
-        { glm::vec3(-3, 1.3, 15), glm::vec3(0, 0, 1), glm::vec3(0, 1, 0) }, Camera::DEFAULT_CLIP_MATRIX);
+        //{ glm::vec3(-3, 1.3, 15), glm::vec3(0, 0, 1), glm::vec3(0, 1, 0) }, Camera::DEFAULT_CLIP_MATRIX);
+        { glm::vec3(-3, 1.3, 40), glm::vec3(0, 0, 1), glm::vec3(0, 1, 0) }, Camera::DEFAULT_CLIP_MATRIX);
 
         engine->GetInputManager()->BindEvent<Vector2D>(InputCode::GVR_TOUCHPAD,
             InputEventDelegate<Vector2D>(InputEvent::ON_ACTIVE, std::bind(&Camera::OnUpdatePosition, camera, _1, _2, _3)));

@@ -4,9 +4,11 @@ file(GLOB VULKAN_ENGINE_RENDERING_SOURCE source/Rendering/*.cpp)
 file(GLOB VULKAN_ENGINE_SOURCE source/*.cpp)
 file(GLOB VULKAN_ENGINE_TEST_SOURCE tests/*.cpp)
 file(GLOB VULKAN_ENGINE_ANDROID_SOURCE android/utils/*.cpp)
+file(GLOB VULKAN_ENGINE_THIRD_PARTY_TINYOBJLOADER_SOURCE third-party/tinyobjloader/tin_obj_loader.cc)
 
 set(INCLUDE_DIR ${INCLUDE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(TEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+set(THIRD_PARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third-party")
 
 set(ANDROID_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android/utils")
 
@@ -31,7 +33,7 @@ set_target_properties(lib_gvr PROPERTIES IMPORTED_LOCATION
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11  -Werror -D__ANDROID__ -DVK_USE_PLATFORM_ANDROID_KHR -DVULKAN_ENABLE_DEBUG -DVULKAN_VR_MODE ${GVR_FLAGS}")
 
 add_library(${VULKAN_ENGINE_NAME} STATIC ${VULKAN_ENGINE_UTILS_SOURCE} ${VULKAN_ENGINE_PLATFORM_SOURCE} ${VULKAN_ENGINE_RENDERING_SOURCE}
-                                        ${VULKAN_ENGINE_SOURCE} ${VULKAN_ENGINE_ANDROID_SOURCE})
+                                        ${VULKAN_ENGINE_SOURCE} ${VULKAN_ENGINE_ANDROID_SOURCE} ${VULKAN_ENGINE_THIRD_PARTY_TINYOBJLOADER_SOURCE})
 
 if (ANDROID)
     add_library(native_app_glue STATIC
@@ -40,6 +42,7 @@ if (ANDROID)
     target_include_directories(${VULKAN_ENGINE_NAME} PRIVATE
                                 ${INCLUDE_DIR}
                                 ${ANDROID_INCLUDE_DIR}
+                                ${THIRD_PARTY_DIR}
                                 ${ANDROID_NDK}/sources/android/native_app_glue
                                 ${CMAKE_CURRENT_SOURCE_DIR}/android/vulkan_wrapper
                                 ${CMAKE_CURRENT_SOURCE_DIR}/data

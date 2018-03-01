@@ -67,7 +67,7 @@ static const char* VULKAN_VERTEX_SHADER_TEXT =
     "    float maxRadiusSquared = 100.0;\n"
     "    pos = myUniformValues.modelViewMatrix * pos;\n"
     "    float r2 = clamp(dot(pos.xy, pos.xy) / (pos.z * pos.z), 0, maxRadiusSquared);\n"
-    "    pos.xy *= 1 + (myUniformValues.undistortion.x + myUniformValues.undistortion.y * r2) * r2;\n"
+    "    pos.xy *= 1 - (myUniformValues.undistortion.x + myUniformValues.undistortion.y * r2) * r2;\n"
     "    return pos;\n"
     "}\n"
     "void main() {\n"

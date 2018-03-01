@@ -94,197 +94,197 @@ void TestApplication::Init()
         RenderComponent* cubeRenderComponent = engine->GetRenderer()->AddRenderComponent(Cube::GetCubeVertexData(), Cube::GetCubeShaderEntry());
 
         // Floor
-        {
-
-            int32_t cubes = 10;
-
-            for (int32_t i = 0; i < cubes; ++i)
-            {
-                for (int32_t j = 0; j < cubes; ++j)
-                {
-                    float baseX = (i - cubes / 2) * 10.f;
-                    float baseZ = (j - cubes / 2) * 10.f;
-
-                    Actor* actor = new Actor;
-                    SceneComponent* sceneComponent = new SceneComponent;
-                    actor->SetSceneComponent(sceneComponent);
-
-                    sceneComponent->SetRenderComponent(cubeRenderComponent);
-                    sceneComponent->SetColor({ 0.2f, 0.2f, 0.2f });
-
-                    actor->SetScale({ 5.f, 1.f, 5.f });
-                    actor->SetPosition({ baseX, -2.f, baseZ });
-                    engine->GetWorld()->AddActor(actor);
-                }
-            }
-        }
-
-        // Walls
-        {
-            std::srand(std::time(nullptr)); // use current time as seed for random generator
-            uint32_t horizontalCubes = 11;
-            uint32_t verticalCubes = 5;
-            float radius = (float)(horizontalCubes + 1) / 2.f;
-
-            std::vector<glm::vec3> positions;
-
-            for (int32_t i = 0; i < 4; ++i)
-            {
-                float baseX = std::sin(i * PI / 2.f) * radius;
-                float baseZ = std::cos(i * PI / 2.f) * radius;
-
-                for (int32_t j = 0; j < horizontalCubes; ++j)
-                {
-                    int32_t column = j - horizontalCubes / 2;
-
-                    for (int32_t k = 0; k < verticalCubes; ++k)
-                    {
-                        int rand = std::rand() % 100;
-                        //if (rand < 15)
-                        //{
-                        //    continue;
-                        //}
-
-                        glm::vec3 pos(baseX + (baseZ / radius) * column, k, baseZ + (baseX / radius) * column);
-                        TestActor* actor = new TestActor;
-                        SceneComponent* sceneComponent = new SceneComponent;
-                        actor->SetSceneComponent(sceneComponent);
-
-                        sceneComponent->SetRenderComponent(cubeRenderComponent);
-
-                        float jMapped = Math::MapToRange(j, 0.f, horizontalCubes - 1, 0.f, 1.f);
-                        float kMapped = Math::MapToRange(k, 0.f, verticalCubes - 1, 0.f, 1.f);
-                        float xMapped = Math::MapToRange(baseX / radius, -1.f, 1.f, 0.f, 1.f);
-                        float zMapped = Math::MapToRange(baseZ / radius, -1.f, 1.f, 0.f, 1.f);
-                        float r = xMapped * (jMapped + kMapped) / 2.f;
-                        float g = zMapped * (jMapped + kMapped) / 2.f;
-                        float b = (1.f - (xMapped + zMapped) / 2.f) * (jMapped + kMapped) / 2.f;
-
-                        sceneComponent->SetColor({ r, g, b });
-
-                        actor->SetScale({ 0.5f, 0.5f, 0.5f });
-
-                        actor->destPos = pos;
-                        actor->originPos = glm::vec3(std::rand() % 200 - 100, std::rand() % 5, std::rand() % 200 - 100);
-                        actor->SetPosition(actor->originPos);
-                        actor->SetUpdateEnabled(true);
-                        positions.push_back(pos);
-
-                        using namespace std::placeholders;
-                        engine->GetInputManager()->BindEvent<float>(InputCode::GVR_BUTTON_CLICK,
-                            InputEventDelegate<float>(InputEvent::ON_PRESSED, std::bind(&TestActor::OnModeChange, actor, _1, _2, _3)));
-
-                        engine->GetWorld()->AddActor(actor);
-                    }
-                }
-            }
-        }
-
-        // OBJ Loading
-        {
-            VertexData vertices;
-            //std::vector<uint32_t> indices;
-
-            // #TODO Refactor
-#ifdef __ANDROID__
-            const std::string MODEL_PATH = "minicooper.obj";
-#else
-            const std::string MODEL_PATH = "data/minicooper.obj";
-#endif
-            tinyobj::attrib_t attrib;
-            std::vector<tinyobj::shape_t> shapes;
-            std::vector<tinyobj::material_t> materials;
-            std::string err;
-
-#ifdef __ANDROID__
-            // #TODO Change name of this method
-            std::vector<char> buffer = AndroidUtils::GetFileStream(MODEL_PATH);
-            wrap_vector_as_istream databuf(buffer);
-            std::istream is(&databuf);
-            if (tinyobj::LoadObj(&attrib, &shapes, &materials, &err, &is))
-#else
-            if (tinyobj::LoadObj(&attrib, &shapes, &materials, &err, MODEL_PATH.c_str()))
-#endif
-            {
-                for (const auto &shape : shapes)
-                {
-                    for (const auto &indice : shape.mesh.indices)
-                    {
-                        Vertex vertex = {};
-
-                        vertex.x = attrib.vertices[3 * indice.vertex_index + 0];
-                        vertex.y = attrib.vertices[3 * indice.vertex_index + 1];
-                        vertex.z = attrib.vertices[3 * indice.vertex_index + 2];
-                        vertex.w = 1.f;
-
-                        vertex.r = vertex.g = vertex.b = 0.8f;
-                        vertex.a = 1.f;
-
-                        vertices.push_back(vertex);
-                        //indices.push_back(indices.size());
-                    }
-                }
-
-                VK_LOG(LogTestApplication, Info, "Loaded model has %d vertices.", (uint32_t)vertices.size());
-
-                RenderComponent *objRenderComponent = engine->GetRenderer()->AddRenderComponent(
-                    vertices, Cube::GetCubeShaderEntry());
-                Actor *actor = new Actor;
-                SceneComponent *sceneComponent = new SceneComponent;
-                actor->SetSceneComponent(sceneComponent);
-                sceneComponent->SetRenderComponent(objRenderComponent);
-                actor->GetSceneComponent()->SetColor({ 1.f, 0.1f, 0.5f });
-                //actor->SetTransform({glm::vec3(0.f), glm::vec3(5.f), glm::vec3(glm::radians(-90.f), glm::radians(90.f), 0.f)}); // House
-                actor->SetTransform({glm::vec3(0.f, -1.f, 0.f), glm::vec3(0.05f), glm::vec3(glm::radians(-90.f), glm::radians(-75.f), 0.f)}); // Minicooper
-                //actor->SetTransform({ glm::vec3(0.f), glm::vec3(1.f), glm::vec3(0.f) }); // Teapot
-                engine->GetWorld()->AddActor(actor);
-                actor->SetUpdateEnabled(false);
-            }
-            else
-            {
-                VK_LOG(LogTestApplication, Error, "Cannot load OBJ file!\n%s", err.c_str());
-            }
-        }
-
-
-        //// Cubes
         //{
-        //    RenderComponent* renderComponent = engine->GetRenderer()->AddRenderComponent(Cube::GetCubeVertexData(), Cube::GetCubeShaderEntry());
 
-        //    //uint32_t finalSize, size, stride;
-        //    //std::vector<Cube> cubes;
-        //    int32_t cubeCount = 0;
+        //    int32_t cubes = 10;
 
-        //    for (int32_t i = 0; i < cubeCount; ++i)
+        //    for (int32_t i = 0; i < cubes; ++i)
         //    {
-        //        for (int32_t j = 0; j < cubeCount; ++j)
+        //        for (int32_t j = 0; j < cubes; ++j)
         //        {
-        //            //cubes.push_back(Cube{ 1.f, { glm::vec3(std::cos(PI / 2 * (i)) * 7, 0.f, std::sin(PI / 2 * i) * 7) } });
-
-        //            float xArg = float(i - cubeCount / 2);
-        //            float yArg = float(j - cubeCount / 2);
-        //            float y = 10 * ((float)std::cos(xArg / cubeCount * PI * 2) + (float)std::sin(yArg * 3 / 2 / cubeCount * PI * 2));
+        //            float baseX = (i - cubes / 2) * 10.f;
+        //            float baseZ = (j - cubes / 2) * 10.f;
 
         //            Actor* actor = new Actor;
         //            SceneComponent* sceneComponent = new SceneComponent;
         //            actor->SetSceneComponent(sceneComponent);
-        //            sceneComponent->SetRenderComponent(renderComponent);
 
-        //            //actor->SetTransform({ glm::vec3(xArg * 0.75f, y, yArg * 0.75f), glm::vec3(0.25f, 0.25f, 0.25f) });
-        //            //actor->GetSceneComponent()->SetColor({ xArg / cubeCount + 0.5f, 0, yArg / cubeCount + 0.5f });
-        //            actor->GetSceneComponent()->SetColor(glm::vec3(1.f));
+        //            sceneComponent->SetRenderComponent(cubeRenderComponent);
+        //            sceneComponent->SetColor({ 0.2f, 0.2f, 0.2f });
 
-        //            //Cube* cube = new Cube(1.f, { glm::vec3(xArg * 0.75f, y, yArg * 0.75f), glm::vec3(0.25f, 0.25f, 0.25f) });
-        //            //cube->SetColor({ xArg / cubeCount + 0.5f, 0, yArg / cubeCount + 0.5f });
-        //            //actor->SetRenderComponent(cube);
-
+        //            actor->SetScale({ 5.f, 1.f, 5.f });
+        //            actor->SetPosition({ baseX, -2.f, baseZ });
         //            engine->GetWorld()->AddActor(actor);
-
-        //            //cubes.push_back(Cube{ 1.f, { glm::vec3(xArg * 0.75f, y, yArg * 0.75f), glm::vec3(0.25f, 0.25f, 0.25f)} });
-        //            //cubes[cubes.size() - 1].SetColor({ xArg / cubeCount + 0.5f, 0, yArg / cubeCount + 0.5f});
         //        }
         //    }
         //}
+
+        // Walls
+        //{
+        //    std::srand(std::time(nullptr)); // use current time as seed for random generator
+        //    uint32_t horizontalCubes = 11;
+        //    uint32_t verticalCubes = 5;
+        //    float radius = (float)(horizontalCubes + 1) / 2.f;
+
+        //    std::vector<glm::vec3> positions;
+
+        //    for (int32_t i = 0; i < 4; ++i)
+        //    {
+        //        float baseX = std::sin(i * PI / 2.f) * radius;
+        //        float baseZ = std::cos(i * PI / 2.f) * radius;
+
+        //        for (int32_t j = 0; j < horizontalCubes; ++j)
+        //        {
+        //            int32_t column = j - horizontalCubes / 2;
+
+        //            for (int32_t k = 0; k < verticalCubes; ++k)
+        //            {
+        //                int rand = std::rand() % 100;
+        //                //if (rand < 15)
+        //                //{
+        //                //    continue;
+        //                //}
+
+        //                glm::vec3 pos(baseX + (baseZ / radius) * column, k, baseZ + (baseX / radius) * column);
+        //                TestActor* actor = new TestActor;
+        //                SceneComponent* sceneComponent = new SceneComponent;
+        //                actor->SetSceneComponent(sceneComponent);
+
+        //                sceneComponent->SetRenderComponent(cubeRenderComponent);
+
+        //                float jMapped = Math::MapToRange(j, 0.f, horizontalCubes - 1, 0.f, 1.f);
+        //                float kMapped = Math::MapToRange(k, 0.f, verticalCubes - 1, 0.f, 1.f);
+        //                float xMapped = Math::MapToRange(baseX / radius, -1.f, 1.f, 0.f, 1.f);
+        //                float zMapped = Math::MapToRange(baseZ / radius, -1.f, 1.f, 0.f, 1.f);
+        //                float r = xMapped * (jMapped + kMapped) / 2.f;
+        //                float g = zMapped * (jMapped + kMapped) / 2.f;
+        //                float b = (1.f - (xMapped + zMapped) / 2.f) * (jMapped + kMapped) / 2.f;
+
+        //                sceneComponent->SetColor({ r, g, b });
+
+        //                actor->SetScale({ 0.5f, 0.5f, 0.5f });
+
+        //                actor->destPos = pos;
+        //                actor->originPos = glm::vec3(std::rand() % 200 - 100, std::rand() % 5, std::rand() % 200 - 100);
+        //                actor->SetPosition(actor->originPos);
+        //                actor->SetUpdateEnabled(true);
+        //                positions.push_back(pos);
+
+        //                using namespace std::placeholders;
+        //                engine->GetInputManager()->BindEvent<float>(InputCode::GVR_BUTTON_CLICK,
+        //                    InputEventDelegate<float>(InputEvent::ON_PRESSED, std::bind(&TestActor::OnModeChange, actor, _1, _2, _3)));
+
+        //                engine->GetWorld()->AddActor(actor);
+        //            }
+        //        }
+        //    }
+        //}
+
+        // OBJ Loading
+//        {
+//            VertexData vertices;
+//            //std::vector<uint32_t> indices;
+//
+//            // #TODO Refactor
+//#ifdef __ANDROID__
+//            const std::string MODEL_PATH = "minicooper.obj";
+//#else
+//            const std::string MODEL_PATH = "data/minicooper.obj";
+//#endif
+//            tinyobj::attrib_t attrib;
+//            std::vector<tinyobj::shape_t> shapes;
+//            std::vector<tinyobj::material_t> materials;
+//            std::string err;
+//
+//#ifdef __ANDROID__
+//            // #TODO Change name of this method
+//            std::vector<char> buffer = AndroidUtils::GetFileStream(MODEL_PATH);
+//            wrap_vector_as_istream databuf(buffer);
+//            std::istream is(&databuf);
+//            if (tinyobj::LoadObj(&attrib, &shapes, &materials, &err, &is))
+//#else
+//            if (tinyobj::LoadObj(&attrib, &shapes, &materials, &err, MODEL_PATH.c_str()))
+//#endif
+//            {
+//                for (const auto &shape : shapes)
+//                {
+//                    for (const auto &indice : shape.mesh.indices)
+//                    {
+//                        Vertex vertex = {};
+//
+//                        vertex.x = attrib.vertices[3 * indice.vertex_index + 0];
+//                        vertex.y = attrib.vertices[3 * indice.vertex_index + 1];
+//                        vertex.z = attrib.vertices[3 * indice.vertex_index + 2];
+//                        vertex.w = 1.f;
+//
+//                        vertex.r = vertex.g = vertex.b = 0.8f;
+//                        vertex.a = 1.f;
+//
+//                        vertices.push_back(vertex);
+//                        //indices.push_back(indices.size());
+//                    }
+//                }
+//
+//                VK_LOG(LogTestApplication, Info, "Loaded model has %d vertices.", (uint32_t)vertices.size());
+//
+//                RenderComponent *objRenderComponent = engine->GetRenderer()->AddRenderComponent(
+//                    vertices, Cube::GetCubeShaderEntry());
+//                Actor *actor = new Actor;
+//                SceneComponent *sceneComponent = new SceneComponent;
+//                actor->SetSceneComponent(sceneComponent);
+//                sceneComponent->SetRenderComponent(objRenderComponent);
+//                actor->GetSceneComponent()->SetColor({ 1.f, 0.1f, 0.5f });
+//                //actor->SetTransform({glm::vec3(0.f), glm::vec3(5.f), glm::vec3(glm::radians(-90.f), glm::radians(90.f), 0.f)}); // House
+//                actor->SetTransform({glm::vec3(0.f, -1.f, 0.f), glm::vec3(0.05f), glm::vec3(glm::radians(-90.f), glm::radians(-75.f), 0.f)}); // Minicooper
+//                //actor->SetTransform({ glm::vec3(0.f), glm::vec3(1.f), glm::vec3(0.f) }); // Teapot
+//                engine->GetWorld()->AddActor(actor);
+//                actor->SetUpdateEnabled(false);
+//            }
+//            else
+//            {
+//                VK_LOG(LogTestApplication, Error, "Cannot load OBJ file!\n%s", err.c_str());
+//            }
+//        }
+
+
+        //// Cubes
+        {
+            RenderComponent* renderComponent = engine->GetRenderer()->AddRenderComponent(Cube::GetCubeVertexData(), Cube::GetCubeShaderEntry());
+
+            //uint32_t finalSize, size, stride;
+            //std::vector<Cube> cubes;
+            int32_t cubeCount = 100;
+
+            for (int32_t i = 0; i < cubeCount; ++i)
+            {
+                for (int32_t j = 0; j < cubeCount; ++j)
+                {
+                    //cubes.push_back(Cube{ 1.f, { glm::vec3(std::cos(PI / 2 * (i)) * 7, 0.f, std::sin(PI / 2 * i) * 7) } });
+
+                    float xArg = float(i - cubeCount / 2);
+                    float yArg = float(j - cubeCount / 2);
+                    float y = 10 * ((float)std::cos(xArg / cubeCount * PI * 2) + (float)std::sin(yArg * 3 / 2 / cubeCount * PI * 2));
+
+                    Actor* actor = new Actor;
+                    SceneComponent* sceneComponent = new SceneComponent;
+                    actor->SetSceneComponent(sceneComponent);
+                    sceneComponent->SetRenderComponent(renderComponent);
+
+                    actor->SetTransform({ glm::vec3(xArg * 0.75f, y, yArg * 0.75f), glm::vec3(0.25f, 0.25f, 0.25f) });
+                    actor->GetSceneComponent()->SetColor({ xArg / cubeCount + 0.5f, 0, yArg / cubeCount + 0.5f });
+                    //actor->GetSceneComponent()->SetColor(glm::vec3(1.f));
+
+                    //Cube* cube = new Cube(1.f, { glm::vec3(xArg * 0.75f, y, yArg * 0.75f), glm::vec3(0.25f, 0.25f, 0.25f) });
+                    //cube->SetColor({ xArg / cubeCount + 0.5f, 0, yArg / cubeCount + 0.5f });
+                    //actor->SetRenderComponent(cube);
+
+                    engine->GetWorld()->AddActor(actor);
+
+                    //cubes.push_back(Cube{ 1.f, { glm::vec3(xArg * 0.75f, y, yArg * 0.75f), glm::vec3(0.25f, 0.25f, 0.25f)} });
+                    //cubes[cubes.size() - 1].SetColor({ xArg / cubeCount + 0.5f, 0, yArg / cubeCount + 0.5f});
+                }
+            }
+        }
     }
 
     //cubesToDraw = cubeCount * cubeCount;

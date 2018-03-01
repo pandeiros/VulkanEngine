@@ -153,7 +153,7 @@ private:
     std::vector<VkVertexInputBindingDescription> vertexInputBindings;
     std::vector<VkVertexInputAttributeDescription> vertexInputAttributes;
 
-    VkPolygonMode polygonMode = VK_POLYGON_MODE_FILL;
+    VkPolygonMode polygonMode = VK_POLYGON_MODE_LINE;
     VkPrimitiveTopology primitiveTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 
     //////////////////////////////////////////////////////////////////////////
