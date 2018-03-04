@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #include "Image.h"
@@ -116,8 +116,6 @@ void SparseImage::Create(VkDevice device, VkImageCreateFlags flags, VkImageType 
     uint32_t mipLevels, uint32_t arrayLayers, VkSampleCountFlagBits samples, VkImageTiling tiling, VkImageUsageFlags usage,
     VkSharingMode sharingMode, std::vector<uint32_t> queueFamilyIndices, VkImageLayout initialLayout)
 {
-    //Image::Create(device, flags, type, format, extent, mipLevels, arrayLayers, samples, tiling, usage, sharingMode, queueFamilyIndices, initialLayout);
-
     CheckExtent(type, extent);
 
     imageCreateInfo = {

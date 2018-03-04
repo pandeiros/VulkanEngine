@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #pragma once
@@ -58,8 +58,6 @@ public:
 
     void SetCamera(CameraMode cameraMode, float yFovDegrees, float aspectRatio, float zNear, float zFar);
     void SetLensUndistortionCoefficients(glm::vec4 coefficients);
-
-    //void AddCamera(Camera* camera);
 
 private:
     std::vector<std::unique_ptr<Camera>> cameras;

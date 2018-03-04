@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #include "PhysicalDevice.h"
@@ -52,11 +52,6 @@ void PhysicalDevice::Init()
     vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, nullptr);
     availableDeviceExtensions.resize(extensionCount);
     vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, availableDeviceExtensions.data());
-
-    //uint32_t displayPropertiesCount = 0;
-    //vkGetPhysicalDeviceDisplayPropertiesKHR(physicalDevice, &displayPropertiesCount, nullptr);
-    //displayProperties.resize(displayPropertiesCount);
-    //vkGetPhysicalDeviceDisplayPropertiesKHR(physicalDevice, &displayPropertiesCount, displayProperties.data());
 }
 
 VkPhysicalDevice PhysicalDevice::GetVkPhysicalDevice() const

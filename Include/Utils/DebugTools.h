@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #pragma once
@@ -29,6 +29,7 @@ VULKAN_NS_BEGIN
     DebugTools::Assert(__FILE__, __LINE__, Condition, Format, ##__VA_ARGS__);
 
 #define VK_VERIFY(RESULT) DebugTools::Verify(RESULT)
+#define VK_PLATFORM_NOT_SUPPORTED VK_ASSERT(false, "Platform not supported.")
 
 #ifdef VULKAN_ENABLE_PERFORMANCE_TESTING
 

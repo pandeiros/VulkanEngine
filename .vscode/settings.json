@@ -8,6 +8,7 @@
         "utility": "cpp",
         "xlocmon": "cpp",
         "xlocnum": "cpp",
-        "xloctime": "cpp"
+        "xloctime": "cpp",
+        "iosfwd": "cpp"
     }
 }

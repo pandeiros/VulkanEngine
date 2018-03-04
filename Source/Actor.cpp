@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #include "Actor.h"
@@ -117,30 +117,3 @@ void Actor::SetRotation(glm::vec3 rotation)
 {
     transform.rotation = rotation;
 }
-
-void TestActor::Tick(float deltaTime)
-{
-    if (timer == 0.f)
-    {
-        int rand = std::rand() % 1000;
-        timer = float(rand) / 100.f;
-    }
-
-    timer += deltaTime;
-
-    glm::vec3 deltaPos = (bAnimSwitch ? destPos : originPos) - transform.position;
-    transform.position += deltaPos * deltaTime;
-
-    if (!bAnimSwitch)
-    {
-        transform.position.y += std::sin(timer / 2.f) * 0.01f;
-    }
-
-    sceneComponent->UpdateData();
-}
-
-void TestActor::OnModeChange(InputCode inputCode, InputEvent event, float value)
-{
-    bAnimSwitch = !bAnimSwitch;
-}
-

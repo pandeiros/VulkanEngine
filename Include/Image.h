@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #pragma once
@@ -20,14 +20,8 @@ VULKAN_NS_BEGIN
 class Image
 {
 public:
-    /**
-     * Default constructor.
-     */
     Image() = default;
 
-    /**
-     * Default destructor.
-     */
     ~Image() = default;
 
     virtual void Create(VkDevice device, VkImageCreateFlags flags, VkImageType type, VkFormat format, VkExtent3D extent,
@@ -60,14 +54,8 @@ protected:
 class SparseImage : public Image
 {
 public:
-    /**
-     * Default constructor.
-     */
     SparseImage() = default;
 
-    /**
-     * Default destructor.
-     */
     ~SparseImage() = default;
 
     virtual void Create(VkDevice device, VkImageCreateFlags flags, VkImageType type, VkFormat format, VkExtent3D extent,

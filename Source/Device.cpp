@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #include "Device.h"
@@ -117,16 +117,16 @@ uint32_t Device::GetMemoryTypeForImage(const VkMemoryRequirements memoryRequirem
     return selectedType;
 }
 
-void Device::BindBufferMemory(VkBuffer buffer, VkDeviceMemory memory, VkDeviceSize size)
+void Device::BindBufferMemory(VkBuffer buffer, VkDeviceMemory memory, VkDeviceSize offset)
 {
     // #TODO FIX 0 to offset
-    VK_VERIFY(vkBindBufferMemory(device, buffer, memory, 0));
+    VK_VERIFY(vkBindBufferMemory(device, buffer, memory, offset));
 }
 
-void Device::BindImageMemory(VkImage image, VkDeviceMemory memory, VkDeviceSize size)
+void Device::BindImageMemory(VkImage image, VkDeviceMemory memory, VkDeviceSize offset)
 {
     // #TODO FIX size to offset
-    VK_VERIFY(vkBindImageMemory(device, image, memory, size));
+    VK_VERIFY(vkBindImageMemory(device, image, memory, offset));
 }
 
 void Device::WaitIdle()

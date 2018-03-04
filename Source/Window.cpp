@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #include "Window.h"
@@ -48,41 +48,6 @@ Window::~Window()
     SetPendingKill(true);
 }
 
-//void Window::Create(Instance* instance, const WindowCreateInfo& windowCreateInfo)
-//{
-//    instance = instance;
-//    this->windowCreateInfo = windowCreateInfo;
-//
-//    CreateOSWindow();
-//    CreateSurface();
-//    CreateSwapchain();
-//    CreateSwapchainImages();
-//    CreateDepthStencilImage();
-//    CreateRenderPass();
-//    CreateFramebuffer();
-//    CreateSynchronization();
-//}
-
-//void Window::Destroy()
-//{
-//    if (instance)
-//    {
-//        device->GetQueueRef().WaitIdle();
-//
-//        DestroySynchronization();
-//        DestroyFramebuffer();
-//        DestroyRenderPass();
-//        DestroyDepthStencilImage();
-//        DestroySwapchainImages();
-//        DestroySwapchain();
-//        DestroySurface();
-//        DestroyOSWindow();
-//    }
-//
-//    instance = VK_NULL_HANDLE;
-//    bPendingKill = false;
-//}
-
 bool Window::Update()
 {
     UpdateOSWindow();
@@ -101,14 +66,11 @@ void Window::BeginRender()
 
     VK_VERIFY(vkAcquireNextImageKHR(device->GetVkDevice(), swapchain.GetVkSwapchain(), UINT64_MAX, semaphoreImageAcquired,
         VK_NULL_HANDLE, &activeSwapchainImageID));
-//    VK_VERIFY(vkWaitForFences(device, 1, &fenceDraw, VK_TRUE, UINT64_MAX));
-//    VK_VERIFY(vkResetFences(device, 1, &fenceDraw));
 
     device->GetQueueRef().WaitIdle();
-    //VK_VERIFY(vkQueueWaitIdle(cacheddevice->GetQueueRef().GetVkQueueRef()));
 }
 
-void Window::EndRender(std::vector<VkSemaphore> waitSemaphores, std::vector<VkFence> waitFences)
+void Window::Present(std::vector<VkSemaphore> waitSemaphores, std::vector<VkFence> waitFences)
 {
     VkResult presentResult = VkResult::VK_RESULT_MAX_ENUM;
 
@@ -153,6 +115,16 @@ VkFramebuffer Window::GetActiveFramebuffer()
     return framebuffers[activeSwapchainImageID].GetVkFramebuffer();
 }
 
+VkSemaphore Window::GetSemaphore()
+{
+    return semaphoreImageAcquired;
+}
+
+VkFence Window::GetFence()
+{
+    return fenceDraw;
+}
+
 void Window::CreateSurface()
 {
     CreateOSSurface();
@@ -193,11 +165,6 @@ void Window::CreateSwapchain()
 
     VK_VERIFY(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &surfaceCapabilities));
 
-    //uint32_t presentModeCount = 0;
-    //VK_VERIFY(vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, nullptr));
-    //std::vector<VkPresentModeKHR> presentModes(presentModeCount);
-    //VK_VERIFY(vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, presentModes.data()));
-
     if (surfaceCapabilities.currentExtent.width < UINT32_MAX)
     {
         windowCreateInfo.surfaceSize = surfaceCapabilities.currentExtent;
@@ -215,10 +182,8 @@ void Window::CreateSwapchain()
     uint32_t desiredSwapchainImageCount = Math::Clamp(2u, surfaceCapabilities.minImageCount, surfaceCapabilities.maxImageCount);
 
     // Present mode
-    VkPresentModeKHR presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+    VkPresentModeKHR presentMode = VK_PRESENT_MODE_FIFO_KHR;
 
-    // #SUPPORT Current Android driver supports only FIFO mode.
-#ifndef __ANDROID__
     uint32_t presentModeCount = 0;
     VK_VERIFY(vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, nullptr));
     std::vector<VkPresentModeKHR> presentModes(presentModeCount);
@@ -231,7 +196,6 @@ void Window::CreateSwapchain()
             presentMode = mode;
         }
     }
-#endif
 
     // Pre-transform.
     VkSurfaceTransformFlagBitsKHR preTransform;

@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #include "InputManager.h"
@@ -13,23 +13,6 @@ VULKAN_NS_USING;
 InputManager::InputManager()
 {
     InitInputs();
-
-    headMatrix = leftEyeMatrix = rightEyeMatrix = glm::mat4(1.f);
-}
-
-glm::mat4 InputManager::GetHeadMatrix()
-{
-    return headMatrix;
-}
-
-glm::mat4 InputManager::GetLeftEyeMatrix()
-{
-    return leftEyeMatrix;
-}
-
-glm::mat4 InputManager::GetRightEyeMatrix()
-{
-    return rightEyeMatrix;
 }
 
 void InputManager::InitInputs()
@@ -57,8 +40,6 @@ void InputManager::UpdateGVRControllerState(gvr::ControllerApi* controllerApi)
     controllerPos.x = Math::MapToRange(controllerPos.x, 0.f, 1.f, -1.f, 1.f);
     controllerPos.y = Math::MapToRange(controllerPos.y, 0.f, 1.f, -1.f, 1.f);
 
-    //VK_LOG(LogInputManager, Debug, "Camera: %f, %f, %s", controllerPos.x, controllerPos.y, controllerState.IsTouching() ? "touching" : "notttt");
-
     vector2DData.UpdateMappings(InputCode::GVR_TOUCHPAD, controllerState.IsTouching() ? InputState::DOWN : InputState::UP, controllerPos);
 }
 
@@ -67,11 +48,11 @@ void InputManager::UpdateGVRHeadPose(gvr::GvrApi* gvrApi)
     // Obtain the latest, predicted head pose.
     gvr::ClockTimePoint timePoint = gvrApi->GetTimePointNow();
 
-    // #TODO Temporary rotation correction.
-    glm::mat4 headMatrix = glm::rotate(Math::Transpose(gvrApi->GetHeadSpaceFromStartSpaceTransform(timePoint)), glm::radians(90.f), glm::vec3(0.f, 0.f, -1.f));
-    //glm::mat4 headMatrix = Math::Transpose(gvrApi->GetHeadSpaceFromStartSpaceTransform(timePoint));
+    glm::mat4 headMatrix = Math::Transpose(gvrApi->GetHeadSpaceFromStartSpaceTransform(timePoint));
 
-    //VK_LOG(LogInputManager, Debug, "head matrix %s", glm::to_string(headMatrix).c_str());
+#ifdef VULKAN_FIX_ANDROID_TRANSPOSE
+    headMatrix = glm::rotate(headMatrix, glm::radians(90.f), glm::vec3(0.f, 0.f, -1.f));
+#endif
 
     matrixData.UpdateMappings(InputCode::GVR_HEAD_MATRIX, InputState::ACTIVE, headMatrix);
     matrixData.UpdateMappings(InputCode::GVR_LEFT_EYE_MATRIX, InputState::ACTIVE, Math::Transpose(gvrApi->GetEyeFromHeadMatrix(GVR_LEFT_EYE)) * headMatrix);

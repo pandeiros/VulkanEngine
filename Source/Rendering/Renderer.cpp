@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #include "Rendering/Renderer.h"
@@ -79,31 +79,6 @@ void Renderer::Tick(float deltaTime)
 {
     VK_PERFORMANCE_SECTION("Renderer update");
 
-    // 1. If needed, rebuild vertex buffer.
-
-    //ShaderIndexData shaderIndexData;
-    //engine->GetWorld()->PrepareVertexData(vertexBuffer, shaderIndexData);
-
-    //if (pipeline != VK_NULL_HANDLE)
-    //{
-    //    vkDestroyPipeline(device->GetVkDevice(), pipeline, nullptr);
-    //    vkDestroyPipelineCache(device->GetVkDevice(), pipelineCache, nullptr);
-    //    writeDescriptorSets.clear();
-    //    vkDestroyDescriptorPool(device->GetVkDevice(), descriptorPool, nullptr);
-
-    //    for (VkPipelineShaderStageCreateInfo& shaderStage : pipelineShaderStageCreateInfo)
-    //    {
-    //        vkDestroyShaderModule(device->GetVkDevice(), shaderStage.module, nullptr);
-    //    }
-
-    //    pipelineShaderStageCreateInfo.clear();
-    //    pipelineColorBlendAttachmentState.clear();
-    //    vertexInputBindings.clear();
-    //    vertexInputAttributes.clear();
-    //    viewports.clear();
-    //    scissors.clear();
-    //}
-
     // Pipeline update.
     if (engine->GetWorld()->IsDirty())
     {
@@ -115,7 +90,6 @@ void Renderer::Tick(float deltaTime)
             {
                 VK_PERFORMANCE_SECTION("Pipeline creation");
 
-                // #TODO Temp
                 InitShaders(shaderIndexData);
 
                 AddVertexInputBinding(0, vertexBuffer.GetStride(), VK_VERTEX_INPUT_RATE_VERTEX);
@@ -144,19 +118,18 @@ void Renderer::Tick(float deltaTime)
 
             window->BeginRender();
 
-            std::vector<uint32_t> commandBufferIndexes = {};        // #TODO Refactor these.
+            std::vector<uint32_t> commandBufferIndexes = {};
             for (uint32_t i = 0; i < commandBuffers.size(); ++i)
             {
                 commandBufferIndexes.push_back(i);
 
-                //glm::mat4 mvpMatrix = engine->GetWorld()->GetCameraMatrix(i);
                 glm::mat4 viewMatrix = engine->GetWorld()->GetCamera(i)->GetViewMatrix();
                 glm::mat4 projectionMatrix = engine->GetWorld()->GetCamera(i)->GetCorrectedProjectionMatrix();
                 glm::vec4 undistortionCoefficients = engine->GetWorld()->GetCamera(i)->GetLensUndistortionCoefficients();
 
                 uint32_t offset = i * 256;
 
-                Buffer& uniformBuffer = GetUniformBuffer(0); // #TODO Refactor
+                Buffer& uniformBuffer = GetUniformBuffer(0);
                 uniformBuffer.Copy(device->GetVkDevice(), &viewMatrix, offset, sizeof(viewMatrix));
 
                 offset += sizeof(viewMatrix);
@@ -179,9 +152,7 @@ void Renderer::Tick(float deltaTime)
                     CommandSetScissors(commandBuffers[i].GetVkCommandBuffer(), i);
                 }
 
-                // #REFACTOR
                 {
-                    //VK_PERFORMANCE_SECTION("Draw");
                     VK_PERFORMANCE_SECTION("Draw command");
                     vkCmdDraw(commandBuffers[i].GetVkCommandBuffer(), vertexBuffer.GetVertexCount(), 1, 0, 0);
                 }
@@ -193,18 +164,16 @@ void Renderer::Tick(float deltaTime)
             {
                 VK_PERFORMANCE_SECTION("Queue submission");
 
-                // #TODO Clean this up
                 VkFence fence = window->GetFence();
                 vkResetFences(device->GetVkDevice(), 1, &fence);
 
-                //std::vector<VkCommandBuffer> commandBuffers = { commandBuffer.GetVkCommandBuffer() };
                 std::vector<VkSemaphore> waitSemaphores = { window->GetSemaphore() };
 
                 VkPipelineStageFlags pipelineStageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
                 queue.Submit(&pipelineStageFlags, waitSemaphores, commandPool.GetVkCommandBuffers(commandBufferIndexes),
                 {}, window->GetFence());
 
-                window->EndRender({}, { window->GetFence() });
+                window->Present({}, { window->GetFence() });
             }
         }
         else
@@ -252,39 +221,6 @@ void Renderer::CreateDescriptorSetLayout()
         VK_SHADER_STAGE_VERTEX_BIT,
         nullptr
     });
-
-    //// Tessellation control shader.
-    //layoutBindings.push_back(
-    //{
-    //    1,
-    //    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-    //    1,
-    //    VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT,
-    //    nullptr
-    //});
-
-    //// Tessellation evaluation shader.
-    //layoutBindings.push_back(
-    //{
-    //    2,
-    //    VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
-    //    1,
-    //    VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
-    //    nullptr
-    //});
-
-    //// Texture.
-    //if (bTextureEnabled)
-    //{
-    //    layoutBindings.push_back(
-    //    {
-    //        1,
-    //        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
-    //        1,
-    //        VK_SHADER_STAGE_FRAGMENT_BIT,
-    //        nullptr
-    //    });
-    //}
 
     descriptorSetLayoutCreateInfo = {
         VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
@@ -339,7 +275,6 @@ void Renderer::InitDescriptorSet()
     VK_VERIFY(vkAllocateDescriptorSets(device->GetVkDevice(), &descriptorSetAllocateInfo, descriptorSets.data()));
 
     for (uint32_t i = 0; i < VULKAN_DESCRIPTOR_SETS_COUNT; ++i)
-    //for (uint32_t i = 0; i < 3; ++i)
     {
         writeDescriptorSets.push_back({
             VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
@@ -450,7 +385,7 @@ void Renderer::InitPipeline(VkExtent2D size, VkRenderPass renderPass)
         0,
         0,
         0,
-        1.f
+        5.f
     };
 
     pipelineColorBlendAttachmentState.push_back({
@@ -611,8 +546,6 @@ size_t Renderer::CompileShader(const char* shaderText, VkShaderStageFlagBits sha
     size_t hash = std::hash<std::string>{}(shaderText);
     ShaderCache shaderCache{ hash };
     if (shaderCacheData.find(hash) == shaderCacheData.end())
-    //auto iterator = std::find(shaderCacheData.begin(), shaderCacheData.end(), shaderCache);
-    //if (iterator == shaderCacheData.end())
     {
         ShaderTools::InitGLSLang();
 
@@ -631,77 +564,6 @@ size_t Renderer::CompileShader(const char* shaderText, VkShaderStageFlagBits sha
 
     return hash;
 }
-
-//void Renderer::InitShaders(const char* vertexShaderText, const char* fragmentShaderText)
-//{
-//    VK_PERFORMANCE_SECTION("Initialize Shaders");
-//
-//    if (!(vertexShaderText || fragmentShaderText))
-//    {
-//        VK_LOG(LogRenderer, Error, "Invalid shaders!");
-//        return;
-//    }
-//
-//    ShaderTools::InitGLSLang();
-//
-//    VkShaderModuleCreateInfo moduleCreateInfo;
-//
-//    if (vertexShaderText)
-//    {
-//        std::vector<unsigned int> vertexSPIRV;
-//
-//        pipelineShaderStageCreateInfo.push_back({
-//            VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-//            nullptr,
-//            0,
-//            VK_SHADER_STAGE_VERTEX_BIT,
-//            VK_NULL_HANDLE,
-//            "main",
-//            nullptr
-//            });
-//
-//        VK_ASSERT(ShaderTools::glslToSPIRV(VK_SHADER_STAGE_VERTEX_BIT, vertexShaderText, vertexSPIRV), "Cannot convert shader to SPIR-V.\n%s", vertexShaderText);
-//
-//        moduleCreateInfo = {
-//            VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
-//            nullptr,
-//            0,
-//            vertexSPIRV.size() * sizeof(unsigned int),
-//            vertexSPIRV.data()
-//        };
-//
-//        VK_VERIFY(vkCreateShaderModule(device->GetVkDevice(), &moduleCreateInfo, NULL, &pipelineShaderStageCreateInfo[0].module));
-//    }
-//
-//    if (fragmentShaderText)
-//    {
-//        std::vector<unsigned int> fragmentSPIRV;
-//
-//        pipelineShaderStageCreateInfo.push_back({
-//            VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-//            nullptr,
-//            0,
-//            VK_SHADER_STAGE_FRAGMENT_BIT,
-//            VK_NULL_HANDLE,
-//            "main",
-//            nullptr
-//            });
-//
-//        VK_ASSERT(ShaderTools::glslToSPIRV(VK_SHADER_STAGE_FRAGMENT_BIT, fragmentShaderText, fragmentSPIRV), "Cannot convert shader to SPIR-V.\n%s", fragmentShaderText);
-//
-//        moduleCreateInfo = {
-//            VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
-//            nullptr,
-//            0,
-//            fragmentSPIRV.size() * sizeof(unsigned int),
-//            fragmentSPIRV.data()
-//        };
-//
-//        VK_VERIFY(vkCreateShaderModule(device->GetVkDevice(), &moduleCreateInfo, NULL, &pipelineShaderStageCreateInfo[1].module));
-//    }
-//
-//    ShaderTools::FinalizeGLSLang();
-//}
 
 void Renderer::InitShaders(ShaderIndexData& shaderIndexData)
 {
@@ -738,8 +600,6 @@ void Renderer::InitShaders(ShaderIndexData& shaderIndexData)
             "main",
             nullptr
         });
-
-        //VK_ASSERT(ShaderTools::glslToSPIRV(VK_SHADER_STAGE_VERTEX_BIT, vertexShaderText, vertexSPIRV), "Cannot convert shader to SPIR-V.\n%s", vertexShaderText);
 
         VkShaderModuleCreateInfo moduleCreateInfo = {};
 

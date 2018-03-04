@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #include "Platforms/Win32/Window_Win32.h"
@@ -28,9 +28,6 @@ LRESULT CALLBACK WindowsEventHandler(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM
             window->Close();
             break;
         case WM_SIZE:
-            // We get here if the window has changed size, we should rebuild most
-            // of our window resources before rendering to this window again
-            // (no need for this if our window sizing by hand is disabled).
             break;
         default:
             return (DefWindowProc(hWnd, uMsg, wParam, lParam));
@@ -46,7 +43,7 @@ void Window::CreateOSWindow()
     VK_ASSERT(vkGetPhysicalDeviceWin32PresentationSupportKHR(physicalDevice->GetVkPhysicalDevice(),
         physicalDevice->GetGraphicsQueueFamilyIndex()), "Queue family does not support presentation.");
 
-    WNDCLASSEX win_class {};
+    WNDCLASSEX winClass {};
 
     VK_ASSERT(windowCreateInfo.surfaceSize.width > 0, "Surface width is equal to 0!");
     VK_ASSERT(windowCreateInfo.surfaceSize.height > 0, "Surface height is equal to 0!");
@@ -56,28 +53,28 @@ void Window::CreateOSWindow()
     ++win32ClassIdCounter;
 
     // Initialize the window class structure.
-    win_class.cbSize = sizeof(WNDCLASSEX);
-    win_class.style = CS_HREDRAW | CS_VREDRAW;
-    win_class.lpfnWndProc = WindowsEventHandler;
-    win_class.cbClsExtra = 0;
-    win_class.cbWndExtra = 0;
-    win_class.hInstance = win32Instance;
-    win_class.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-    win_class.hCursor = LoadCursor(NULL, IDC_ARROW);
-    win_class.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
-    win_class.lpszMenuName = NULL;
-    win_class.lpszClassName = win32ClassName.c_str();
-    win_class.hIconSm = LoadIcon(NULL, IDI_WINLOGO);
+    winClass.cbSize = sizeof(WNDCLASSEX);
+    winClass.style = CS_HREDRAW | CS_VREDRAW;
+    winClass.lpfnWndProc = WindowsEventHandler;
+    winClass.cbClsExtra = 0;
+    winClass.cbWndExtra = 0;
+    winClass.hInstance = win32Instance;
+    winClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+    winClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+    winClass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
+    winClass.lpszMenuName = NULL;
+    winClass.lpszClassName = win32ClassName.c_str();
+    winClass.hIconSm = LoadIcon(NULL, IDI_WINLOGO);
 
     // Register window class.
-    VK_ASSERT(RegisterClassEx(&win_class), "Cannot register window class.");
+    VK_ASSERT(RegisterClassEx(&winClass), "Cannot register window class.");
 
-    DWORD ex_style = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
+    DWORD exStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
     DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX; // | WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
 
     // Create window with the registered class:
     RECT wr = {0, 0, LONG(windowCreateInfo.surfaceSize.width), LONG(windowCreateInfo.surfaceSize.height)};
-    AdjustWindowRectEx(&wr, style, FALSE, ex_style);
+    AdjustWindowRectEx(&wr, style, FALSE, exStyle);
     win32Window = CreateWindowEx(0,
         win32ClassName.c_str(),		            // class name
         windowCreateInfo.windowName.c_str(),    // app name

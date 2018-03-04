@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #include "Rendering/ShaderTools.h"
@@ -11,6 +11,7 @@
 #include <glslang/Public/ShaderLang.h>
 #include <SPIRV/GlslangToSpv.h>
 
+VK_DECLARE_LOG_CATEGORY(LogShaderTools);
 
 VULKAN_NS_USING;
 
@@ -172,50 +173,49 @@ bool ShaderTools::glslToSPIRV(VkShaderStageFlagBits shaderStage, const char* sha
     {
         puts(shader.getInfoLog());
         puts(shader.getInfoDebugLog());
-        return false;  // something didn't work
+        return false;
     }
 
     program.addShader(&shader);
 
-    //
-    // Program-level processing...
-    //
-
     if (!program.link(messages))
     {
-        // #TODO Change this to VK_LOG
-        puts(shader.getInfoLog());
-        puts(shader.getInfoDebugLog());
-        fflush(stdout);
+        VK_LOG(LogShaderTools, Error, "Error while linking shader program.\n%s\n%s", shader.getInfoLog(), shader.getInfoDebugLog());
+
         return false;
     }
 
     glslang::GlslangToSpv(*program.getIntermediate(stage), spirvData);
 
 #else
-    // On Android, use shaderc instead.
     shaderc::Compiler compiler;
-    shaderc::SpvCompilationResult module =
-        compiler.CompileGlslToSpv(shaderText, strlen(shaderText), MapShadercType(shaderStage), "shader");
-    if (module.GetCompilationStatus() != shaderc_compilation_status_success) {
-        LOGE("Error: Id=%d, Msg=%s", module.GetCompilationStatus(), module.GetErrorMessage().c_str());
+    shaderc::SpvCompilationResult module = compiler.CompileGlslToSpv(shaderText, strlen(shaderText), MapShadercType(shaderStage), "shader");
+
+    if (module.GetCompilationStatus() != shaderc_compilation_status_success)
+    {
+        VK_LOG(LogShaderTools, Error, "Error: Id=%d, Msg=%s", (uint32_t)module.GetCompilationStatus(), module.GetErrorMessage().c_str());
+
         return false;
     }
     spirvData.assign(module.cbegin(), module.cend());
 #endif
+
     return true;
 }
 
-// #REFACTOR
 #ifdef __ANDROID__
 shaderc_shader_kind ShaderTools::MapShadercType(VkShaderStageFlagBits vkShader)
 {
-    for (auto shader : shader_map_table) {
-        if (shader.vkshader_type == vkShader) {
-            return shader.shaderc_type;
+    for (auto shader : shaderMapTable)
+    {
+        if (shader.vkShaderType == vkShader)
+        {
+            return shader.shadercType;
         }
     }
-    assert(false);
+
+    VK_ASSERT(false, "Cannot map value %d of type VkShaderStageFlagBits to shaderc shader type.", (uint32_t)vkShader);
+
     return shaderc_glsl_infer_from_source;
 }
 #endif

@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #include "CommandBuffer.h"
@@ -24,23 +24,6 @@ VkCommandBuffer* VULKAN_NS_NAME::CommandBuffer::GetVkCommandBufferPtr()
 {
     return &commandBuffer;
 }
-
-//VkCommandBuffer& CommandBuffer::GetVkCommandBuffer()
-//{
-//    return commandBuffer;
-//}
-
-//void CommandBuffer::Begin(VkCommandBufferUsageFlags flags, const VkCommandBufferInheritanceInfo inheritanceInfo)
-//{
-//    const VkCommandBufferBeginInfo commandBufferBeginInfo = {
-//        VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
-//        nullptr,
-//        flags,
-//        &inheritanceInfo
-//    };
-//
-//    VK_VERIFY(vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo));
-//}
 
 void CommandBuffer::Begin(VkCommandBufferUsageFlags flags, const VkCommandBufferInheritanceInfo* inheritanceInfo)
 {
@@ -86,7 +69,6 @@ void CommandBuffer::EndRenderPass()
 
 void CommandBuffer::CopyBufferData(VkBuffer srcBuffer, VkBuffer dstBuffer, std::vector<VkBufferCopy> regions)
 {
-    // #TODO Check data beforehand (page 104 from Vulkan book).
     vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, (uint32_t)regions.size(), regions.data());
 }
 

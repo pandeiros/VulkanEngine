@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #pragma once
@@ -20,14 +20,8 @@ VULKAN_NS_BEGIN
 class ImageView
 {
 public:
-    /**
-     * Default constructor.
-     */
     ImageView() = default;
 
-    /**
-     * Default destructor.
-     */
     ~ImageView() = default;
 
     void Create(VkDevice device, VkImageViewCreateFlags flags, VkImage image, VkImageViewType viewType,

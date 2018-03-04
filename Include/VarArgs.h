@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #pragma once
@@ -16,15 +16,12 @@
 
 static inline int			CheckVA(int i)              { return i; }
 static inline uint32_t		CheckVA(uint32_t ui)        { return ui; }
-//static inline uint64		CheckVA(uint64 qw)          { return qw; }
-//static inline int64		CheckVA(int64 sqw)          { return sqw; }
 static inline float		    CheckVA(float f)            { return f; }
 static inline double		CheckVA(double d)           { return d; }
 static inline long		    CheckVA(long l)             { return l; }
 static inline long		    CheckVA(unsigned long ul)   { return ul; }
 static inline char			CheckVA(char c)             { return c; }
 static inline const char*   CheckVA(std::string s)      { return s.c_str(); }
-//static inline void*			CheckVA(char* s)            { return (void*)s; }
 static inline char*			CheckVA(char* s)            { return s; }
 static inline bool		    CheckVA(bool b)             { return b; }
 template<class T> T*		CheckVA(T* p)               { return p; }
@@ -33,7 +30,6 @@ template<class T> const T*	CheckVA(const T* p)         { return p; }
 #ifndef __ANDROID__
 static inline size_t        CheckVA(size_t u)           { return u; }
 #endif
-
 
 #define VARARG_DECL( FuncRet, StaticFuncRet, Return, FuncName, Pure, FormatType, ExtraDecl, ExtraCall )	\
 	FuncRet FuncName##__VA( ExtraDecl FormatType Format, ... ) Pure;  \

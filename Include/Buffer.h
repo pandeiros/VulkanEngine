@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #pragma once
@@ -24,14 +24,8 @@ VULKAN_NS_BEGIN
 class Buffer
 {
 public:
-    /**
-      * Default constructor.
-      */
     Buffer() = default;
 
-    /**
-      * Default destructor.
-      */
     ~Buffer() = default;
 
     virtual void CreateExclusive(VkDevice device, VkBufferCreateFlags flags, VkDeviceSize size, VkBufferUsageFlags usage);
@@ -71,14 +65,8 @@ protected:
 class SparseBuffer : public Buffer
 {
 public:
-    /**
-     * Default constructor.
-     */
     SparseBuffer() = default;
 
-    /**
-     * Default destructor.
-     */
     ~SparseBuffer() = default;
 
     // #TODO Add SparseBufferMemoryBind

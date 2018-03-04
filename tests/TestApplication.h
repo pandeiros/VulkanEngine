@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #pragma once
@@ -11,6 +11,7 @@
 #include "Application.h"
 #include "Buffer.h"
 #include "CommandPool.h"
+#include "Actor.h"
 
 #ifdef __ANDROID__
 #include "gvr.h"
@@ -48,15 +49,24 @@ private:
     float colorRotator = 0.f;
     std::chrono::steady_clock timer;
     std::chrono::steady_clock::time_point lastTime;
+};
 
-    uint32_t cubesToDraw = 0;
-    const uint32_t PERLIN_NODE_COUNT = 20;
-    //float PerlinGradientMap[]
+/**
+ * @class Actor
+ */
+class TestActor : public Actor
+{
+public:
+    virtual void Tick(float deltaTime);
 
-#ifdef __ANDROID__
-    // GVR Controller
-    gvr::ControllerState controller_state;
-#endif
+    void OnModeChange(InputCode inputCode, InputEvent event, float value);
+
+    glm::vec3 originPos;
+    glm::vec3 destPos;
+
+    bool bAnimSwitch = false;
+
+    float timer = 0.f;
 };
 
 VULKAN_NS_END

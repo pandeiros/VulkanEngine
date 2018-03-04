@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #pragma once
@@ -22,15 +22,11 @@ class CommandBuffer
 public:
     CommandBuffer(VkCommandBuffer commandBuffer);
 
-    /**
-     * Default destructor.
-     */
     ~CommandBuffer() = default;
 
     VkCommandBuffer GetVkCommandBuffer();
     VkCommandBuffer* GetVkCommandBufferPtr();
 
-    //void Begin(VkCommandBufferUsageFlags flags, const VkCommandBufferInheritanceInfo inheritanceInfo);
     void Begin(VkCommandBufferUsageFlags flags, const VkCommandBufferInheritanceInfo* inheritanceInfo);
     void Reset(VkCommandBufferResetFlags flags);
     void End();

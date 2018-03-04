@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #pragma once
@@ -40,31 +40,19 @@ public:
 
     ~Window();
 
-    //void Init() override;
-    //void Create(Instance* instance, const WindowCreateInfo& windowCreateInfo);
-    //void Destroy();
-
     bool Update();
     void Close();
 
     void BeginRender();
-    // #TODO Maybe rename this to Present or sth
-    void EndRender(std::vector<VkSemaphore> WaitSemaphores, std::vector<VkFence> waitFences);
+    void Present(std::vector<VkSemaphore> WaitSemaphores, std::vector<VkFence> waitFences);
 
     float GetAspectRatio();
     VkExtent2D GetSurfaceSize();
     VkRenderPass GetRenderPass();
     VkFramebuffer GetActiveFramebuffer();
 
-    // #TODO Clean this up
-    VkSemaphore GetSemaphore()
-    {
-        return semaphoreImageAcquired;
-    }
-    VkFence GetFence()
-    {
-        return fenceDraw;
-    }
+    VkSemaphore GetSemaphore();
+    VkFence GetFence();
 
 private:
     WindowCreateInfo windowCreateInfo = {};
@@ -138,7 +126,6 @@ private:
     void DestroySynchronization();
 
     VkFence fenceDraw = VK_NULL_HANDLE;
-    //VkFence fenceSwapchainImageAvailable = VK_NULL_HANDLE;
     VkSemaphore semaphoreImageAcquired = VK_NULL_HANDLE;
 
     //////////////////////////////////////////////////////////////////////////
@@ -159,8 +146,6 @@ private:
     HWND win32Window = NULL;
     std::string win32ClassName;
     static uint64_t win32ClassIdCounter;
-#elif __ANDROID__
-    //PFN_vkCreateAndroidSurfaceKHR vkCreateAndroidSurfaceKHR;
 #endif
 };
 

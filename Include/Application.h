@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #pragma once
@@ -25,9 +25,6 @@ class Application : public VulkanClass
 public:
     Application(const char* applicationName, uint32_t applicationVersion, uint32_t apiVersion);
 
-    /**
-     * Default destructor.
-     */
     ~Application();
 
     virtual void Init() override;

@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #pragma once
@@ -47,7 +47,6 @@ static const Transform DEFAULT_TRANSFORM = Transform(glm::vec3(0.f, 0.f, 0.f), g
 class RenderComponent
 {
 public:
-    //void UpdateVertices();
     void* GetData(uint32_t& dataSize, uint32_t& dataStride);
 
     void SetVertexData(VertexData& vertexData);

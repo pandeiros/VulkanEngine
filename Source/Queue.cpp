@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #include "Queue.h"
@@ -13,11 +13,6 @@ VkQueue Queue::GetVkQueue()
 {
     return queue;
 }
-
-//VkQueue& Queue::GetVkQueueRef()
-//{
-//    return queue;
-//}
 
 VkQueue* Queue::GetVkQueuePtr()
 {

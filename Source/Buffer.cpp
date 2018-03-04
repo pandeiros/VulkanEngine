@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #include "Buffer.h"
@@ -62,34 +62,13 @@ void Buffer::Allocate(Device* device, const VkMemoryPropertyFlags requiredProper
 
     memory.Allocate(device->GetVkDevice(), requirements.size, memoryTypeIndex);
 
-    device->BindBufferMemory(buffer, memory.GetVkMemory(), requirements.size);
+    device->BindBufferMemory(buffer, memory.GetVkMemory(), 0);
 }
-
-//void Buffer::Copy(VkDevice device, void* sourceData, uint32_t offset, uint32_t size)
-//{
-//    void* destinationData = memory.MapMemory(device, offset, size, 0);
-//    memcpy(destinationData, sourceData, size);
-//    memory.UnmapMemory(device);
-//}
 
 void* Buffer::Copy(VkDevice device, void* sourceData, uint32_t offset, uint32_t size)
 {
     void* destinationData = memory.MapMemory(device, offset, size, 0);
     memcpy(destinationData, sourceData, size);
-
-    //// #TODO Extract this to another method
-    //Vertex* vertexData = static_cast<Vertex*>(destinationData);
-    //uint32_t vertexCount = size / sizeof(Vertex);
-    //for (uint32_t i = 0; i < vertexCount; ++i)
-    //{
-    //    (vertexData + i)->x *= transform.scale.x;
-    //    (vertexData + i)->y *= transform.scale.y;
-    //    (vertexData + i)->z *= transform.scale.z;
-
-    //    (vertexData + i)->x += transform.position.x;
-    //    (vertexData + i)->y += transform.position.y;
-    //    (vertexData + i)->z += transform.position.z;
-    //}
 
     usedSize += size;
 

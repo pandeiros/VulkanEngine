@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #pragma once
@@ -137,13 +137,11 @@ void InputStorage<T>::UpdateMappings(InputCode inputCode, InputState newState, T
     }
     else if (input.state == InputState::DOWN && newState == InputState::UP)
     {
-        //VK_LOG(LogInputManager, Debug, "Input code %u: %u", (uint32_t)inputCode, (uint32_t)newState);
         BroadcastEvents(inputCode, InputEvent::ON_UP, newValue);
         BroadcastEvents(inputCode, InputEvent::ON_PRESSED, newValue);    // #TODO Refactor this using time
     }
     else if (input.state == InputState::UP && newState == InputState::DOWN)
     {
-        //VK_LOG(LogInputManager, Debug, "Input code %u: %u", (uint32_t)inputCode, (uint32_t)newState);
         BroadcastEvents(inputCode, InputEvent::ON_DOWN, newValue);
     }
 
@@ -189,11 +187,6 @@ class InputManager
 public:
     InputManager();
 
-    // #TODO Change this so that camera registers a delegate that pass view matrices to it.
-    glm::mat4 GetHeadMatrix();
-    glm::mat4 GetLeftEyeMatrix();
-    glm::mat4 GetRightEyeMatrix();
-
     template<typename T>
     void BindEvent(InputCode inputCode, InputEventDelegate<T> eventDelegate)
     {
@@ -206,10 +199,6 @@ private:
     InputStorage<float> floatData;
     InputStorage<Vector2D> vector2DData;
     InputStorage<glm::mat4> matrixData;
-
-    glm::mat4 headMatrix;
-    glm::mat4 leftEyeMatrix;
-    glm::mat4 rightEyeMatrix;
 
     std::chrono::steady_clock timer;
 

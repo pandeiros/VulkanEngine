@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #pragma once
@@ -20,14 +20,8 @@ VULKAN_NS_BEGIN
 class Memory
 {
 public:
-    /**
-     * Default constructor.
-     */
     Memory() = default;
 
-    /**
-     * Default destructor.
-     */
     ~Memory() = default;
 
     void Allocate(VkDevice device, VkDeviceSize allocationSize, uint32_t memoryTypeIndex);
@@ -39,15 +33,12 @@ public:
     VkDeviceSize GetMemoryCommitment(VkDevice device);
 
     void* MapMemory(VkDevice device, VkDeviceSize offset, VkDeviceSize size, VkMemoryMapFlags flags);
-    //void Copy(void* destination, void* source, uint32_t size);
     void UnmapMemory(VkDevice device);
 
     void FlushMappedMemoryRange(VkDevice device, VkDeviceSize offset, VkDeviceSize size);
     void InvalidateMappedMemoryRange(VkDevice device, VkDeviceSize offset, VkDeviceSize size);
 
     void BindImageMemory(VkDevice device, VkImage image, VkDeviceSize memoryOffset);
-    // #TODO This function is useless.
-    //VkSparseMemoryBind GetSparseMemoryBind(VkDeviceSize resourceOffset, VkDeviceSize size, VkDeviceSize memoryOffset, VkSparseMemoryBindFlags flags);
 
 private:
     VkDeviceMemory memory = VK_NULL_HANDLE;

@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #include "Application.h"
@@ -45,8 +45,6 @@ void Application::Init()
         "VK_LAYER_GOOGLE_threading",
         "VK_LAYER_LUNARG_object_tracker",
         "VK_LAYER_LUNARG_parameter_validation"
-        //"VK_LAYER_LUNARG_core_validation"
-        //"VK_LAYER_GOOGLE_unique_objects"
     };
 
 #ifndef __ANDROID__
@@ -74,7 +72,6 @@ void Application::Init()
 
         engine->Init(instance.get());
     }
-    //engine->LogDeviceProperties();
 }
 
 Instance* Application::GetInstance()

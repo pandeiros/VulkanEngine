@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #include "Rendering/Cube.h"
@@ -61,8 +61,8 @@ ShaderEntry Cube::GetCubeShaderEntry()
 
     shaderEntry.vertexShaders.push_back(VULKAN_VERTEX_SHADER_TEXT);
     shaderEntry.fragmentShaders.push_back(VULKAN_FRAGMENT_SHADER_TEXT);
-    shaderEntry.tesselationControlShaders.push_back(VULKAN_TESSELATION_CONTROL_SHADER_TEXT);
-    shaderEntry.tesselationEvaluationShaders.push_back(VULKAN_TESSELATION_EVALUATION_SHADER_TEXT);
+    //shaderEntry.tesselationControlShaders.push_back(VULKAN_TESSELATION_CONTROL_SHADER_TEXT);
+    //shaderEntry.tesselationEvaluationShaders.push_back(VULKAN_TESSELATION_EVALUATION_SHADER_TEXT);
 
     return shaderEntry;
 }

@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #pragma once
@@ -27,14 +27,8 @@ struct FramebufferDimensions
 class Framebuffer
 {
 public:
-    /**
-     * Default constructor.
-     */
     Framebuffer() = default;
 
-    /**
-     * Default destructor.
-     */
     ~Framebuffer() = default;
 
     void Create(VkDevice device, VkFramebufferCreateFlags flags, VkRenderPass renderPass,

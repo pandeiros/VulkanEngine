@@ -1,7 +1,7 @@
 /**
 * Vulkan Engine
 *
-* Copyright (C) 2016-2017 Pawel Kaczynski
+* Copyright (C) 2016-2018 Pawel Kaczynski
 */
 
 #include "Engine.h"
@@ -374,19 +374,6 @@ VkResult Engine::EnumerateInstanceLayers()
     VkResult result;
     uint32_t layerCount = 0;
 
-    // #TODO Edit.
-    /*
-    * It's possible, though very rare, that the number of
-    * instance layers could change. For example, installing something
-    * could include new layers that the loader would pick up
-    * between the initial query for the count and the
-    * request for VkLayerProperties. The loader indicates that
-    * by returning a VK_INCOMPLETE status and will update the
-    * the count parameter.
-    * The count parameter will be updated with the number of
-    * entries loaded into the data pointer - in case the number
-    * of layers went down or is smaller than the size given.
-    */
     do
     {
         result = vkEnumerateInstanceLayerProperties(&layerCount, nullptr);

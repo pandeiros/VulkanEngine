@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #include "Memory.h"
@@ -93,8 +93,3 @@ void Memory::FlushMappedMemoryRange(VkDevice device, VkDeviceSize offset, VkDevi
 
     VK_VERIFY(vkInvalidateMappedMemoryRanges(device, 1, &range));
 }
-
-//VkSparseMemoryBind Memory::GetSparseMemoryBind(VkDeviceSize resourceOffset, VkDeviceSize size, VkDeviceSize memoryOffset, VkSparseMemoryBindFlags flags)
-//{
-//    return { resourceOffset, size, memory, memoryOffset, flags };
-//}

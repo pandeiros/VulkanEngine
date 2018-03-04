@@ -147,10 +147,10 @@
     <ClCompile Include="source\Actor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Rendering\Shape.cpp">
+    <ClCompile Include="source\Rendering\Cube.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Rendering\Cube.cpp">
+    <ClCompile Include="source\Utils\FileManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -275,10 +275,10 @@
     <ClInclude Include="include\Actor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Rendering\Shape.h">
+    <ClInclude Include="include\Rendering\Cube.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Rendering\Cube.h">
+    <ClInclude Include="include\Utils\FileManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

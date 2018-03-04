@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #pragma once
@@ -41,14 +41,8 @@ class Camera
 public:
     static const glm::mat4 DEFAULT_CLIP_MATRIX;
 
-    /**
-     * Default constructor.
-     */
     Camera() = default;
 
-    /**
-     * Default destructor.
-     */
     ~Camera() = default;
 
     /** */

@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #pragma once
@@ -21,14 +21,8 @@ VULKAN_NS_BEGIN
 class CommandPool
 {
 public:
-    /**
-     * Default constructor.
-     */
     CommandPool() = default;
 
-    /**
-     * Default destructor.
-     */
     ~CommandPool() = default;
 
     void Create(VkDevice device, VkCommandPoolCreateFlags flags, uint32_t queueFamilyIndex);

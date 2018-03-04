@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #pragma once
@@ -42,8 +42,8 @@ public:
 
     uint32_t GetMemoryTypeForImage(const VkMemoryRequirements memoryRequirements, VkMemoryPropertyFlags preferredFlags, VkMemoryPropertyFlags requiredFlags);
 
-    void BindBufferMemory(VkBuffer buffer, VkDeviceMemory memory, VkDeviceSize size);
-    void BindImageMemory(VkImage image, VkDeviceMemory memory, VkDeviceSize size);
+    void BindBufferMemory(VkBuffer buffer, VkDeviceMemory memory, VkDeviceSize offset);
+    void BindImageMemory(VkImage image, VkDeviceMemory memory, VkDeviceSize offset);
 
     void WaitIdle();
 

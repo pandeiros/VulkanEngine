@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #pragma once
@@ -153,7 +153,7 @@ private:
     std::vector<VkVertexInputBindingDescription> vertexInputBindings;
     std::vector<VkVertexInputAttributeDescription> vertexInputAttributes;
 
-    VkPolygonMode polygonMode = VK_POLYGON_MODE_LINE;
+    VkPolygonMode polygonMode = VK_POLYGON_MODE_FILL;
     VkPrimitiveTopology primitiveTopology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 
     //////////////////////////////////////////////////////////////////////////
@@ -162,11 +162,6 @@ private:
 
 public:
     size_t CompileShader(const char* shaderText, VkShaderStageFlagBits shaderType);
-
-    // #TODO Refactor to compile all necessary shaders when initializing.
-    // Need to remember which shader was already compiled to avoid multiple compilations.
-    // Should enable to call this function multiple times to compile new shaders.
-    //void InitShaders(const char* vertexShaderText, const char* fragmentShaderText);
 
     void InitShaders(ShaderIndexData& shaderIndexData);
 
@@ -201,13 +196,6 @@ public:
 
 private:
     std::vector<std::unique_ptr<RenderComponent>> renderComponents;
-
-//    //////////////////////////////////////////////////////////////////////////
-//    // Command pool
-//    //////////////////////////////////////////////////////////////////////////
-//
-//private:
-//    CommandPool commandPool;
 };
 
 VULKAN_NS_END

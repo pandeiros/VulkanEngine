@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #include "Camera.h"
@@ -105,8 +105,6 @@ void Camera::OnUpdatePosition(InputCode inputCode, InputEvent event, Vector2D va
     transform.eye += forwardVector * value.y / 3.f;
     transform.eye += rightVector * value.x / 3.f;
 
-    //VK_LOG(LogEngine, Debug, "Camera: %f, %f", value.x, value.y);
-
     UpdateViewMatrix();
 }
 
@@ -114,7 +112,6 @@ void Camera::OnModeChange(InputCode inputCode, InputEvent event, float value)
 {
     if (event == InputEvent::ON_PRESSED)
     {
-        //bUndistortionEnabled = !bUndistortionEnabled;
         bRotationEnabled = !bRotationEnabled;
     }
 }

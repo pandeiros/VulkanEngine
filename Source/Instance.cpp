@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #include "Instance.h"
@@ -89,6 +89,8 @@ void Instance::InitDeviceAndWindow(PhysicalDevice* physicalDevice)
 #elif _WIN32
     height = 768;
     width = 1386;
+    height = 1800;
+    width = 3200;
 #endif
 
     window.reset(new Window(device, instance, { "Vulkan Engine", { (uint32_t)width, (uint32_t)height } }));
@@ -113,11 +115,6 @@ Window* Instance::GetWindow()
 {
     return window.get();
 }
-
-//Window& Instance::GetWindowRef()
-//{
-//    return window;
-//}
 
 #if VULKAN_ENABLE_DEBUG
 

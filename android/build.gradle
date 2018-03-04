@@ -10,7 +10,6 @@ buildscript {
         classpath 'com.android.tools.build:gradle-experimental:0.11.1'
 
         classpath 'com.android.tools.build:gradle:3.0.1'
-//        classpath 'com.android.tools.build:gradle:3.0.0'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -23,10 +22,6 @@ allprojects {
         google()
     }
 }
-
-//task clean(type: Delete) {
-//    delete rootProject.buildDir
-//}
 
 // The dependencies for NDK builds live inside the .aar files so they need to
 // be extracted before NDK targets can build.
@@ -45,8 +40,3 @@ task extractGvrSo(type: Copy) {
 task extractNdk { }
 extractNdk.dependsOn extractAudioSo
 extractNdk.dependsOn extractGvrSo
-
-//task deleteNdk(type: Delete) {
-//    delete "${project.rootDir}/libraries/jni"
-//}
-//clean.dependsOn(deleteNdk)

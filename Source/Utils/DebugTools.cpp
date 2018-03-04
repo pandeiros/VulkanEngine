@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #include "Utils/DebugTools.h"
@@ -185,7 +185,6 @@ VARARG_BODY(void, DebugTools::Assert, const char*,
 #endif
 
         assert(condition);
-        //fflush(stdout);
 
         // #TODO Change this to platform dependent exit.
         //std::exit(-1);
@@ -263,7 +262,7 @@ VkResult DebugTools::Verify(VkResult result)
         VK_ASSERT(0, "Vulkan runtime error.");
     }
 
-#endif // VULKAN_ENABLE_RUNTIME_DEBUG
+#endif
 
     return result;
 }
@@ -295,7 +294,7 @@ void DebugTools::EndPerformanceData(PerformanceData& data)
     }
     else
     {
-        // #TODO Error;
+        // Error;
     }
 }
 

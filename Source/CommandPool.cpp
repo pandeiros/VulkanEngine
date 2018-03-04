@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #include "CommandPool.h"
@@ -55,7 +55,6 @@ void CommandPool::AllocateCommandBuffers(VkDevice device, VkCommandBufferLevel l
         {
             commandBuffers.push_back(CommandBuffer(vkCommandBuffer));
         }
-        //VK_VERIFY(vkAllocateCommandBuffers(device, &commandBufferAllocateInfo, commandBuffer.GetVkCommandBufferPtr()));
     }
 }
 

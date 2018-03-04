@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #pragma once
@@ -57,14 +57,8 @@ private:
 class Actor : public Object
 {
 public:
-    /**
-     * Default constructor.
-     */
     Actor() = default;
 
-    /**
-     * Default destructor.
-     */
     ~Actor() = default;
 
     void SetSceneComponent(SceneComponent* sceneComponent);
@@ -77,30 +71,10 @@ public:
     void SetPosition(glm::vec3 position);
     void SetRotation(glm::vec3 rotation);
 
-    //void* GetData(uint32_t& dataSize, uint32_t& dataStride);
-
 protected:
     std::unique_ptr<SceneComponent> sceneComponent;
 
     Transform transform = Transform();
-};
-
-/**
-* @class Actor
-*/
-class TestActor : public Actor
-{
-public:
-    virtual void Tick(float deltaTime);
-
-    void OnModeChange(InputCode inputCode, InputEvent event, float value);
-
-    glm::vec3 originPos;
-    glm::vec3 destPos;
-
-    bool bAnimSwitch = false;
-
-    float timer = 0.f;
 };
 
 VULKAN_NS_END

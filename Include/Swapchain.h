@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #pragma once
@@ -30,14 +30,8 @@ struct SwapchainImageInfo
 class Swapchain
 {
 public:
-    /**
-     * Default constructor.
-     */
     Swapchain() = default;
 
-    /**
-     * Default destructor.
-     */
     ~Swapchain() = default;
 
     void Create(VkDevice device, VkSwapchainCreateFlagsKHR flags, VkSurfaceKHR surface, uint32_t desiredImageCount, SwapchainImageInfo imageinfo,

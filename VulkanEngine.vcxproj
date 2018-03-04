@@ -192,7 +192,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)android/utils;$(ProjectDir)third-party;$(ProjectDir)tests;$(VULKAN_SDK)\Include;$(VULKAN_SDK)\spirv-tools\include;$(VULKAN_SDK)\glslang;$(VULKAN_SDK)\shaderc\third_party\glslang;$(VULKAN_SDK)\Third-Party\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalOptions>/DVULKAN_ENABLE_DEBUG %(AdditionalOptions) /DVULKAN_VR_MODE</AdditionalOptions>
+      <AdditionalOptions>/DVULKAN_ENABLE_DEBUG %(AdditionalOptions) /DVULKAN_VR_MODE /DVULKAN_FIX_ANDROID_TRANSPOSE</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>vulkan-1.lib;shaderc_combined.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -205,7 +205,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)android/utils;$(ProjectDir)third-party;$(ProjectDir)tests;$(VULKAN_SDK)\Include;$(VULKAN_SDK)\spirv-tools\include;$(VULKAN_SDK)\glslang;$(VULKAN_SDK)\shaderc\third_party\glslang;$(VULKAN_SDK)\Third-Party\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/DVULKAN_DEV %(AdditionalOptions) /DVULKAN_VR_MODE</AdditionalOptions>
+      <AdditionalOptions>/DVULKAN_DEV %(AdditionalOptions) /DVULKAN_VR_MODE /DVULKAN_FIX_ANDROID_TRANSPOSE</AdditionalOptions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -219,7 +219,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)android/libraries/headers/vr/gvr/capi/include;$(ProjectDir)android/libraries/headers;$(ProjectDir)android/vulkan_wrapper;$(ANDROID_NDK_HOME)/platforms/android-24/arch-x86_64/usr/include;$(ANDROID_NDK_HOME)/sources/android/native_app_glue;$(ANDROID_NDK_HOME)/sources/third_party/shaderc/third_party/glslang;$(ANDROID_NDK_HOME)/sysroot/usr/include;$(ProjectDir)android/utils;$(ProjectDir)third-party\glm;%VULKAN_SDK%\Include;$(ProjectDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/DVULKAN_DEV /D__ANDROID__ %(AdditionalOptions) /DVULKAN_VR_MODE</AdditionalOptions>
+      <AdditionalOptions>/DVULKAN_DEV /D__ANDROID__ %(AdditionalOptions) /DVULKAN_VR_MODE /DVULKAN_FIX_ANDROID_TRANSPOSE</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -250,7 +250,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)android/utils;$(ProjectDir)third-party;$(ProjectDir)tests;$(VULKAN_SDK)\Include;$(VULKAN_SDK)\spirv-tools\include;$(VULKAN_SDK)\glslang;$(VULKAN_SDK)\shaderc\third_party\glslang;$(VULKAN_SDK)\Third-Party\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalOptions>/DVULKAN_ENABLE_RUNTIME_DEBUG %(AdditionalOptions) /DVULKAN_VR_MODE</AdditionalOptions>
+      <AdditionalOptions>/DVULKAN_ENABLE_RUNTIME_DEBUG %(AdditionalOptions) /DVULKAN_VR_MODE /DVULKAN_FIX_ANDROID_TRANSPOSE</AdditionalOptions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -343,10 +343,6 @@
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="source\Rendering\Shape.cpp">
-      <SubType>
-      </SubType>
-    </ClCompile>
     <ClCompile Include="source\RenderPass.cpp">
       <SubType>
       </SubType>
@@ -357,6 +353,10 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="source\Utils\DebugTools.cpp" />
+    <ClCompile Include="source\Utils\FileManager.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="source\Utils\Logger.cpp" />
     <ClCompile Include="source\Utils\Math.cpp" />
     <ClCompile Include="source\VulkanCore.cpp">
@@ -470,10 +470,6 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="include\Rendering\Shape.h">
-      <SubType>
-      </SubType>
-    </ClInclude>
     <ClInclude Include="include\RenderPass.h">
       <SubType>
       </SubType>
@@ -483,6 +479,10 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="include\Utils\DebugTools.h" />
+    <ClInclude Include="include\Utils\FileManager.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="include\Utils\Logger.h" />
     <ClInclude Include="Include\Utils\LogTypes.h" />
     <ClInclude Include="include\Utils\Math.h" />

@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #pragma once
@@ -64,18 +64,9 @@ class Device;
 class VulkanClass
 {
 public:
-    /**
-     * Default constructors.
-     */
     VulkanClass() = default;
 
     VulkanClass(std::shared_ptr<Device> device);
-
-    /**
-     * Default destructor.
-     */
-    //virtual ~VulkanClass()
-    //{};
 
     virtual void Init() {};
     virtual void Destroy() {};

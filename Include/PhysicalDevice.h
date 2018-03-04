@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #pragma once
@@ -24,13 +24,9 @@ class PhysicalDevice : public VulkanClass
 public:
     PhysicalDevice(VkPhysicalDevice vkPhysicalDevice);
 
-    /**
-     * Default destructor.
-     */
     ~PhysicalDevice() = default;
 
     virtual void Init() override;
-    //void Create(const VkPhysicalDevice physicalDevice);
 
     VkPhysicalDevice GetVkPhysicalDevice() const;
 

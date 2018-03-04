@@ -1,7 +1,7 @@
 /**
  * Vulkan Engine
  *
- * Copyright (C) 2016-2017 Pawel Kaczynski
+ * Copyright (C) 2016-2018 Pawel Kaczynski
  */
 
 #pragma once
@@ -67,7 +67,8 @@ static const char* VULKAN_VERTEX_SHADER_TEXT =
     "    float maxRadiusSquared = 100.0;\n"
     "    pos = myUniformValues.modelViewMatrix * pos;\n"
     "    float r2 = clamp(dot(pos.xy, pos.xy) / (pos.z * pos.z), 0, maxRadiusSquared);\n"
-    "    pos.xy *= 1 - (myUniformValues.undistortion.x + myUniformValues.undistortion.y * r2) * r2;\n"
+    "    float factor = clamp(1 + (myUniformValues.undistortion.x + myUniformValues.undistortion.y * r2) * r2, 0.75f, 1.5f);\n"
+    "    pos.xy *= factor;\n"
     "    return pos;\n"
     "}\n"
     "void main() {\n"
@@ -93,13 +94,13 @@ struct ShaderEntry
     std::vector<const char*> tesselationEvaluationShaders;
 };
 
-// #REFACTOR
 #ifdef __ANDROID__
-struct shader_type_mapping {
-    VkShaderStageFlagBits vkshader_type;
-    shaderc_shader_kind shaderc_type;
+struct ShaderTypeMapping {
+    VkShaderStageFlagBits vkShaderType;
+    shaderc_shader_kind shadercType;
 };
-static const shader_type_mapping shader_map_table[] = {
+
+static const ShaderTypeMapping shaderMapTable[] = {
     {VK_SHADER_STAGE_VERTEX_BIT, shaderc_glsl_vertex_shader},
     {VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT, shaderc_glsl_tess_control_shader},
     {VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT, shaderc_glsl_tess_evaluation_shader},
