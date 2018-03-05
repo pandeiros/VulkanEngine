@@ -36,11 +36,11 @@ public:
     Transform GetTransform() const;
 
     void ApplyTransformAndColor(void* data);
-    void UpdateData();
+    virtual void UpdateData();
 
     Vertex* vertexData = nullptr;
 
-private:
+protected:
     RenderComponent* renderComponent;
 
     Transform transform = Transform();
@@ -48,7 +48,7 @@ private:
 
     Actor* owner = nullptr;
 
-    bool bRotationSet = false; // #TODO Temp
+    bool bRotationSet = false;
 };
 
 /**

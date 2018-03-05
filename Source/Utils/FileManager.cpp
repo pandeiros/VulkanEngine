@@ -23,7 +23,7 @@ bool FileManager::LoadOBJ(const std::string filename, VertexData& vertices, std:
     std::string err;
 
 #ifdef __ANDROID__
-    std::vector<char> buffer = AndroidUtils::GetFileStream(GetAssetDirectory() + filename);
+    std::vector<char> buffer = AndroidUtils::GetFileContent(GetAssetDirectory() + filename);
     wrap_vector_as_istream databuf(buffer);
     std::istream is(&databuf);
     if (tinyobj::LoadObj(&attrib, &shapes, &materials, &err, &is))
@@ -49,6 +49,8 @@ bool FileManager::LoadOBJ(const std::string filename, VertexData& vertices, std:
                 indices.push_back((uint32_t)indices.size());
             }
         }
+
+        VK_LOG(LogFileManager, Debug, "Loaded model has %d vertices.", (uint32_t)vertices.size());
 
         return true;
     }

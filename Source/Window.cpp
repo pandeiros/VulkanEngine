@@ -7,6 +7,7 @@
 #include "Window.h"
 #include "Instance.h"
 #include "Core.h"
+#include "VulkanMisc.h"
 
 #include <array>
 #include <string>

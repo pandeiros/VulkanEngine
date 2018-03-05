@@ -49,6 +49,8 @@ void TestApplication::Init()
 
         RenderComponent* cubeRenderComponent = engine->GetRenderer()->AddRenderComponent(Cube::GetCubeVertexData(), Cube::GetCubeShaderEntry());
 
+        std::srand((unsigned)std::time(nullptr));
+
         // Floor
         {
             int32_t cubes = 10;
@@ -57,17 +59,21 @@ void TestApplication::Init()
             {
                 for (int32_t j = 0; j < cubes; ++j)
                 {
-                    float baseX = (i - cubes / 2) * 10.f;
-                    float baseZ = (j - cubes / 2) * 10.f;
+                    float baseX = (i - cubes / 2) * 20.f;
+                    float baseZ = (j - cubes / 2) * 20.f;
 
                     Actor* actor = new Actor;
                     SceneComponent* sceneComponent = new SceneComponent;
                     actor->SetSceneComponent(sceneComponent);
 
                     sceneComponent->SetRenderComponent(cubeRenderComponent);
-                    sceneComponent->SetColor({ 0.2f, 0.2f, 0.2f });
 
-                    actor->SetScale({ 5.f, 1.f, 5.f });
+                    float iMapped = Math::MapToRange((float)i, 0.f, float(cubes - 1), 0.f, 0.7f);
+                    float jMapped = Math::MapToRange((float)j, 0.f, float(cubes - 1), 0.f, 0.7f);
+                    float colorValue = (iMapped + jMapped) / 2.f;
+                    sceneComponent->SetColor({ colorValue, /*Math::MapToRange(iMapped, 0.f, 1.f, 0.5f, 0.8f)*/ colorValue, colorValue });
+
+                    actor->SetScale({ 10.f, 1.f, 10.f });
                     actor->SetPosition({ baseX, -2.f, baseZ });
                     engine->GetWorld()->AddActor(actor);
                 }
@@ -76,8 +82,7 @@ void TestApplication::Init()
 
         // Walls
         {
-            std::srand((unsigned)std::time(nullptr));
-            uint32_t horizontalCubes = 11;
+            uint32_t horizontalCubes = 13;
             uint32_t verticalCubes = 5;
             float radius = (float)(horizontalCubes + 1) / 2.f;
 
@@ -94,8 +99,6 @@ void TestApplication::Init()
 
                     for (uint32_t k = 0; k < verticalCubes; ++k)
                     {
-                        int rand = std::rand() % 100;
-
                         glm::vec3 pos(baseX + (baseZ / radius) * column, k, baseZ + (baseX / radius) * column);
                         TestActor* actor = new TestActor;
                         SceneComponent* sceneComponent = new SceneComponent;
@@ -115,8 +118,8 @@ void TestApplication::Init()
 
                         actor->SetScale({ 0.5f, 0.5f, 0.5f });
 
-                        actor->originPos = pos;
-                        actor->destPos = glm::vec3(std::rand() % 200 - 100, std::rand() % 5, std::rand() % 200 - 100);
+                        actor->originPos = glm::vec3(std::rand() % 200 - 100, std::rand() % 5, std::rand() % 200 - 100);
+                        actor->destPos = pos;
                         actor->SetPosition(actor->originPos);
                         actor->SetUpdateEnabled(true);
                         positions.push_back(pos);
@@ -138,12 +141,10 @@ void TestApplication::Init()
 
             if (FileManager::LoadOBJ("minicooper.obj", vertices, indices))
             {
-                VK_LOG(LogTestApplication, Info, "Loaded model has %d vertices.", (uint32_t)vertices.size());
-
-                RenderComponent *objRenderComponent = engine->GetRenderer()->AddRenderComponent(
+                RenderComponent* objRenderComponent = engine->GetRenderer()->AddRenderComponent(
                     vertices, Cube::GetCubeShaderEntry());
-                Actor *actor = new Actor;
-                SceneComponent *sceneComponent = new SceneComponent;
+                Actor* actor = new Actor;
+                SceneComponent* sceneComponent = new SceneComponent;
                 actor->SetSceneComponent(sceneComponent);
                 sceneComponent->SetRenderComponent(objRenderComponent);
                 actor->GetSceneComponent()->SetColor({ 1.f, 0.1f, 0.5f });
@@ -152,6 +153,35 @@ void TestApplication::Init()
                 //actor->SetTransform({ glm::vec3(0.f), glm::vec3(1.f), glm::vec3(0.f) }); // teapot.obj
                 engine->GetWorld()->AddActor(actor);
                 actor->SetUpdateEnabled(false);
+            }
+
+            // Trees
+            {
+                uint32_t treesCount = 20;
+                for (uint32_t i = 0; i < treesCount; ++i)
+                {
+                    for (uint32_t j = 0; j < 2; ++j)
+                    {
+                        std::string filename = j == 0 ? "lowpolytree1.obj" : "lowpolytree2.obj";
+                        Actor* actor = CreateActor(filename);
+                        if (actor)
+                        {
+                            float yPos = filename == "lowpolytree2.obj" ? -1.f : 1.f;
+                            glm::vec3 pos = glm::vec3(std::rand() % 100 - 50, yPos, std::rand() % 100 - 50);
+                            actor->SetPosition(pos);
+                            actor->GetSceneComponent()->SetColor({ 0.2, 0.8f, 0.1f });
+                            actor->SetUpdateEnabled(false);
+
+                            if (filename == "lowpolytree2.obj")
+                            {
+                                actor->SetScale(glm::vec3(0.015f));
+                            }
+
+                            RenderComponent* renderComponent = actor->GetSceneComponent()->GetRenderComponent();
+                            ColorTreeVertices(renderComponent, filename);
+                        }
+                    }
+                }
             }
         }
 
@@ -208,6 +238,55 @@ void TestApplication::Tick(float deltaTime)
     return;
 }
 
+Actor* TestApplication::CreateActor(std::string filename)
+{
+    VertexData vertices;
+    std::vector<uint32_t> indices;
+
+    if (FileManager::LoadOBJ(filename, vertices, indices))
+    {
+        RenderComponent* objRenderComponent = engine->GetRenderer()->AddRenderComponent(vertices, Cube::GetCubeShaderEntry());
+        Actor* actor = new Actor;
+        TestSceneComponent* sceneComponent = new TestSceneComponent;
+        actor->SetSceneComponent(sceneComponent);
+        sceneComponent->SetRenderComponent(objRenderComponent);
+
+        engine->GetWorld()->AddActor(actor);
+
+        return actor;
+    }
+
+    return nullptr;
+}
+
+void TestApplication::ColorTreeVertices(RenderComponent* renderComponent, std::string filename)
+{
+    uint32_t size, stride;
+    void* data = renderComponent->GetData(size, stride);
+    Vertex* originVertexData = static_cast<Vertex*>(data);
+    uint32_t vertexCount = size / sizeof(Vertex);
+
+    for (uint32_t i = 0; i < vertexCount; ++i)
+    {
+        Vertex vertex = *(originVertexData + i);
+        glm::vec3 brownColor = glm::vec3(0.5f, 0.25f, 0.f);
+        glm::vec3 greenColor = glm::vec3((float)(std::rand() % 50) / 400.f, 0.5f - (float)(std::rand() % 50) / 400.f, 0.f);
+
+        if ((filename == "lowpolytree1.obj" && vertex.y < -1.2f) || (filename == "lowpolytree2.obj" && vertex.y < 155.f))
+        {
+            (originVertexData + i)->r = brownColor.x;
+            (originVertexData + i)->g = brownColor.y;
+            (originVertexData + i)->b = brownColor.z;
+        }
+        else
+        {
+            (originVertexData + i)->r = greenColor.x;
+            (originVertexData + i)->g = greenColor.y;
+            (originVertexData + i)->b = greenColor.z;
+        }
+    }
+}
+
 void TestActor::Tick(float deltaTime)
 {
     if (timer == 0.f)
@@ -232,4 +311,42 @@ void TestActor::Tick(float deltaTime)
 void TestActor::OnModeChange(InputCode inputCode, InputEvent event, float value)
 {
     bAnimSwitch = !bAnimSwitch;
+}
+
+void TestSceneComponent::UpdateData()
+{
+    if (!vertexData)
+    {
+        return;
+    }
+
+    uint32_t size, stride;
+    void* data = renderComponent->GetData(size, stride);
+    Vertex* originVertexData = static_cast<Vertex*>(data);
+
+    uint32_t vertexCount = size / sizeof(Vertex);
+    Transform transform = GetTransform();
+
+    for (uint32_t i = 0; i < vertexCount; ++i)
+    {
+        (vertexData + i)->x = (originVertexData + i)->x * transform.scale.x;
+        (vertexData + i)->y = (originVertexData + i)->y * transform.scale.y;
+        (vertexData + i)->z = (originVertexData + i)->z * transform.scale.z;
+
+        if (!bRotationSet)
+        {
+            glm::quat quatRotation = glm::quat(transform.rotation);
+            glm::vec3 vertex = glm::vec3((vertexData + i)->x, (vertexData + i)->y, (vertexData + i)->z);
+            vertex = quatRotation * vertex;
+            (vertexData + i)->x = vertex.x;
+            (vertexData + i)->y = vertex.y;
+            (vertexData + i)->z = vertex.z;
+        }
+
+        (vertexData + i)->x += transform.position.x;
+        (vertexData + i)->y += transform.position.y;
+        (vertexData + i)->z += transform.position.z;
+    }
+
+    bRotationSet = true;
 }

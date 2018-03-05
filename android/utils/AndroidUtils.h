@@ -60,7 +60,7 @@ public:
 
     static void InitControllerApi();
 
-    static std::vector<char> GetFileStream(std::string fileToFind);
+    static std::vector<char> GetFileContent(std::string filename);
 
     static std::unique_ptr<Application> vulkanApplication;
     static android_app* nativeApplication;
@@ -90,9 +90,9 @@ VK_DECLARE_LOG_CATEGORY(LogAndroid);
 
 bool Android_process_command();
 ANativeWindow* AndroidGetApplicationWindow();
-FILE* AndroidFopen(const char* fname, const char* mode);
+//FILE* AndroidFopen(const char* fname, const char* mode);
 void AndroidGetWindowSize(int32_t& width, int32_t& height);
-bool AndroidLoadFile(const char* filePath, std::string *data);
+//bool AndroidLoadFile(const char* filePath, std::string *data);
 
 // Main entry point
 int vulkan_android_main(int argc, char *argv[]);

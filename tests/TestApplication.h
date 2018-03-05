@@ -49,10 +49,14 @@ private:
     float colorRotator = 0.f;
     std::chrono::steady_clock timer;
     std::chrono::steady_clock::time_point lastTime;
+
+    Actor* CreateActor(std::string filename);
+
+    void ColorTreeVertices(RenderComponent* renderComponent, std::string filename);
 };
 
 /**
- * @class Actor
+ * @class TestActor
  */
 class TestActor : public Actor
 {
@@ -67,6 +71,15 @@ public:
     bool bAnimSwitch = false;
 
     float timer = 0.f;
+};
+
+/**
+* @class TestSceneComponent
+*/
+class TestSceneComponent : public SceneComponent
+{
+public:
+    virtual void UpdateData();
 };
 
 VULKAN_NS_END

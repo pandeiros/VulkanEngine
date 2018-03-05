@@ -43,19 +43,6 @@ VULKAN_NS_BEGIN
 VK_DECLARE_LOG_CATEGORY(LogEngine);
 VK_DECLARE_LOG_CATEGORY(LogVulkan);
 
-// #TODO Move this function somewhere else.
-template<typename T>
-bool IsOfEnum(T Value, std::vector<T> Enums)
-{
-    for (auto & Enum : Enums)
-    {
-        if (Value == Enum)
-            return true;
-    }
-
-    return false;
-}
-
 class Device;
 
 /**

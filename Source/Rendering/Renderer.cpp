@@ -385,7 +385,7 @@ void Renderer::InitPipeline(VkExtent2D size, VkRenderPass renderPass)
         0,
         0,
         0,
-        5.f
+        1.f
     };
 
     pipelineColorBlendAttachmentState.push_back({

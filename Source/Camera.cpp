@@ -99,11 +99,25 @@ void Camera::OnUpdatePosition(InputCode inputCode, InputEvent event, Vector2D va
 {
     // #TODO Refactor to use engine delta time.
 
-    glm::vec3 rightVector = -1.f * glm::vec3(viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
-    glm::vec3 forwardVector = -1.f * glm::vec3(viewMatrix[0][2], viewMatrix[1][2], viewMatrix[2][2]);
+    if (bRotationEnabled)
+    {
+        float angle = glm::orientedAngle(transform.direction, glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, -1.f, 0.f));
+        //viewMatrix = glm::rotate(viewMatrix, angle, glm::vec3(0.f, 1.f, 0.f));
+        glm::vec3 forwardVector = (-1.f * glm::vec3(viewMatrix[0][2], viewMatrix[1][2], viewMatrix[2][2]));
+        forwardVector.y = 0;
+        //viewMatrix = glm::rotate(viewMatrix, -angle, glm::vec3(0.f, 1.f, 0.f));
 
-    transform.eye += forwardVector * value.y / 3.f;
-    transform.eye += rightVector * value.x / 3.f;
+        transform.eye += forwardVector * value.y / 6.f;
+        transform.direction = glm::rotate(transform.direction, value.x / 50.f, glm::vec3(0.f, 1.f, 0.f));
+    }
+    else
+    {
+        glm::vec3 rightVector = -1.f * glm::vec3(viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
+        glm::vec3 forwardVector = -1.f * glm::vec3(viewMatrix[0][2], viewMatrix[1][2], viewMatrix[2][2]);
+
+        transform.eye += forwardVector * value.y / 6.f;
+        transform.eye += rightVector * value.x / 6.f;
+    }
 
     UpdateViewMatrix();
 }
@@ -130,6 +144,10 @@ void Camera::UpdateViewMatrix()
     }
     else if (cameraMode == CameraMode::VR)
     {
+
+        float angle = glm::orientedAngle(transform.direction, glm::vec3(0.f, 0.f, 1.f), glm::vec3(0.f, -1.f, 0.f));
+        viewMatrix = glm::rotate(viewMatrix, angle, glm::vec3(0.f, 1.f, 0.f));
+
         viewMatrix = glm::translate(viewMatrix, transform.eye);
     }
 

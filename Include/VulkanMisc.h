@@ -29,4 +29,16 @@ VULKAN_NS_BEGIN
         }                                                                                               \
     }
 
+template<typename T>
+bool IsOfEnum(T Value, std::vector<T> Enums)
+{
+    for (auto & Enum : Enums)
+    {
+        if (Value == Enum)
+            return true;
+    }
+
+    return false;
+}
+
 VULKAN_NS_END

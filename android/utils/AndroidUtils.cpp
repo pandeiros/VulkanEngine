@@ -106,7 +106,6 @@ void Android_handle_cmd(android_app *app, int32_t cmd) {
             break;
 
         case APP_CMD_SAVE_STATE:
-            // #TODO Handle this.
             LOGW("APP_CMD_SAVE_STATE");
             break;
 
@@ -203,18 +202,18 @@ ANativeWindow *AndroidGetApplicationWindow() {
     return AndroidUtils::nativeApplication->window;
 }
 
-bool AndroidLoadFile(const char *filePath, std::string *data) {
-    assert(AndroidUtils::nativeApplication);
-    AAsset *file = AAssetManager_open(AndroidUtils::nativeApplication->activity->assetManager, filePath, AASSET_MODE_BUFFER);
-    size_t fileLength = AAsset_getLength(file);
-    LOGI("Loaded file:%s size:%zu", filePath, fileLength);
-    if (fileLength == 0) {
-        return false;
-    }
-    data->resize(fileLength);
-    AAsset_read(file, &(*data)[0], fileLength);
-    return true;
-}
+//bool AndroidLoadFile(const char *filePath, std::string *data) {
+//    assert(AndroidUtils::nativeApplication);
+//    AAsset *file = AAssetManager_open(AndroidUtils::nativeApplication->activity->assetManager, filePath, AASSET_MODE_BUFFER);
+//    size_t fileLength = AAsset_getLength(file);
+//    LOGI("Loaded file:%s size:%zu", filePath, fileLength);
+//    if (fileLength == 0) {
+//        return false;
+//    }
+//    data->resize(fileLength);
+//    AAsset_read(file, &(*data)[0], fileLength);
+//    return true;
+//}
 
 void AndroidGetWindowSize(int32_t& width, int32_t& height) {
     // On Android, retrieve the window size from the native window.
@@ -224,34 +223,34 @@ void AndroidGetWindowSize(int32_t& width, int32_t& height) {
     height = ANativeWindow_getHeight(AndroidUtils::nativeApplication->window);
 }
 
-// Android fopen stub described at
-// http://www.50ply.com/blog/2013/01/19/loading-compressed-android-assets-with-file-pointer/#comment-1850768990
-static int android_read(void *cookie, char *buf, int size) { return AAsset_read((AAsset *)cookie, buf, size); }
+//// Android fopen stub described at
+//// http://www.50ply.com/blog/2013/01/19/loading-compressed-android-assets-with-file-pointer/#comment-1850768990
+//static int android_read(void *cookie, char *buf, int size) { return AAsset_read((AAsset *)cookie, buf, size); }
+//
+//static int android_write(void *cookie, const char *buf, int size) {
+//    return EACCES;  // can't provide write access to the apk
+//}
 
-static int android_write(void *cookie, const char *buf, int size) {
-    return EACCES;  // can't provide write access to the apk
-}
-
-static fpos_t android_seek(void *cookie, fpos_t offset, int whence) { return AAsset_seek((AAsset *)cookie, offset, whence); }
-
-static int android_close(void *cookie) {
-    AAsset_close((AAsset *)cookie);
-    return 0;
-}
-
-FILE *AndroidFopen(const char *fname, const char *mode) {
-    if (mode[0] == 'w') {
-        return NULL;
-    }
-
-    assert(AndroidUtils::nativeApplication);
-    AAsset *asset = AAssetManager_open(AndroidUtils::nativeApplication->activity->assetManager, fname, 0);
-    if (!asset) {
-        return NULL;
-    }
-
-    return funopen(asset, android_read, android_write, android_seek, android_close);
-}
+//static fpos_t android_seek(void *cookie, fpos_t offset, int whence) { return AAsset_seek((AAsset *)cookie, offset, whence); }
+//
+//static int android_close(void *cookie) {
+//    AAsset_close((AAsset *)cookie);
+//    return 0;
+//}
+//
+//FILE *AndroidFopen(const char *fname, const char *mode) {
+//    if (mode[0] == 'w') {
+//        return NULL;
+//    }
+//
+//    assert(AndroidUtils::nativeApplication);
+//    AAsset *asset = AAssetManager_open(AndroidUtils::nativeApplication->activity->assetManager, fname, 0);
+//    if (!asset) {
+//        return NULL;
+//    }
+//
+//    return funopen(asset, android_read, android_write, android_seek, android_close);
+//}
 
 #endif
 
@@ -365,26 +364,24 @@ void AndroidUtils::InitControllerApi()
     VK_LOG(LogAndroid, Debug, "GVR CONTROLLER INITIALIZED");
 }
 
-// #TODO Refactor variable names
-std::vector<char> AndroidUtils::GetFileStream(std::string fileToFind)
+std::vector<char> AndroidUtils::GetFileContent(std::string filename)
 {
-    AAssetManager * asset_manager = nativeApplication->activity->assetManager;
-    AAssetDir* assetDir = AAssetManager_openDir(asset_manager, "");
-    const char* filename;
+    AAssetManager * assetManager = nativeApplication->activity->assetManager;
+    AAssetDir* assetDir = AAssetManager_openDir(assetManager, "");
+    const char* currentFile;
     std::vector<char> buffer;
 
-    while ((filename = AAssetDir_getNextFileName(assetDir)) != NULL)
+    while ((currentFile = AAssetDir_getNextFileName(assetDir)) != NULL)
     {
-        if(!strcmp(filename, fileToFind.c_str()))
+        if(!strcmp(currentFile, filename.c_str()))
         {
-            AAsset *asset = AAssetManager_open(asset_manager, filename, AASSET_MODE_STREAMING);
+            AAsset* asset = AAssetManager_open(assetManager, currentFile, AASSET_MODE_STREAMING);
 
-            //holds size of searched file
             off64_t length = AAsset_getLength64(asset);
-            //keeps track of remaining bytes to read
             off64_t remaining = AAsset_getRemainingLength64(asset);
-            size_t Mb = 1000 *1024; // 1Mb is maximum chunk size for compressed assets
-            size_t currChunk;
+
+            size_t Mb = 1000 * 1024; // 1Mb is maximum chunk size for compressed assets.
+            size_t currentChunk;
             buffer.reserve(length);
 
             //while we have still some data to read
@@ -393,26 +390,23 @@ std::vector<char> AndroidUtils::GetFileStream(std::string fileToFind)
                 //set proper size for our next chunk
                 if(remaining >= Mb)
                 {
-                    currChunk = Mb;
+                    currentChunk = Mb;
                 }
                 else
                 {
-                    currChunk = remaining;
+                    currentChunk = remaining;
                 }
-                char chunk[currChunk];
+                char chunk[currentChunk];
 
                 //read data chunk
-                if(AAsset_read(asset, chunk, currChunk) > 0) // returns less than 0 on error
+                if(AAsset_read(asset, chunk, currentChunk) > 0) // returns less than 0 on error
                 {
                     //and append it to our vector
-                    buffer.insert(buffer.end(),chunk, chunk + currChunk);
+                    buffer.insert(buffer.end(), chunk, chunk + currentChunk);
                     remaining = AAsset_getRemainingLength64(asset);
                 }
             }
             AAsset_close(asset);
-
-//            std::istream is(&databuf);
-//            filestream(&databuf);
         }
     }
 
