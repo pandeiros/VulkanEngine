@@ -53,12 +53,14 @@ private:
     Actor* CreateActor(std::string filename);
 
     void ColorTreeVertices(RenderComponent* renderComponent, std::string filename);
+    void ColorSun(RenderComponent* renderComponent, std::vector<glm::vec3>& normals);
+    void ShadeFaces(RenderComponent* renderComponent, std::vector<glm::vec3>& normals, float factor = 4.f);
 };
 
 /**
- * @class TestActor
+ * @class TestCube
  */
-class TestActor : public Actor
+class TestCube : public Actor
 {
 public:
     virtual void Tick(float deltaTime);
@@ -80,6 +82,21 @@ class TestSceneComponent : public SceneComponent
 {
 public:
     virtual void UpdateData();
+
+    virtual void SetColor(const glm::vec3 color);
 };
+
+/**
+ * @class Cloud
+ */
+class TestCloud : public Actor
+{
+public:
+    virtual void Tick(float deltaTime);
+
+private:
+    float speed = 0.f;
+};
+
 
 VULKAN_NS_END

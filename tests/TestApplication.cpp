@@ -82,8 +82,8 @@ void TestApplication::Init()
 
         // Walls
         {
-            uint32_t horizontalCubes = 13;
-            uint32_t verticalCubes = 5;
+            uint32_t horizontalCubes = 5;
+            uint32_t verticalCubes = 3;
             float radius = (float)(horizontalCubes + 1) / 2.f;
 
             std::vector<glm::vec3> positions;
@@ -100,7 +100,7 @@ void TestApplication::Init()
                     for (uint32_t k = 0; k < verticalCubes; ++k)
                     {
                         glm::vec3 pos(baseX + (baseZ / radius) * column, k, baseZ + (baseX / radius) * column);
-                        TestActor* actor = new TestActor;
+                        TestCube* actor = new TestCube;
                         SceneComponent* sceneComponent = new SceneComponent;
                         actor->SetSceneComponent(sceneComponent);
 
@@ -126,7 +126,7 @@ void TestApplication::Init()
 
                         using namespace std::placeholders;
                         engine->GetInputManager()->BindEvent<float>(InputCode::GVR_BUTTON_CLICK,
-                            InputEventDelegate<float>(InputEvent::ON_PRESSED, std::bind(&TestActor::OnModeChange, actor, _1, _2, _3)));
+                            InputEventDelegate<float>(InputEvent::ON_PRESSED, std::bind(&TestCube::OnModeChange, actor, _1, _2, _3)));
 
                         engine->GetWorld()->AddActor(actor);
                     }
@@ -138,36 +138,113 @@ void TestApplication::Init()
         {
             VertexData vertices;
             std::vector<uint32_t> indices;
+            std::vector<glm::vec3> normals;
 
-            if (FileManager::LoadOBJ("minicooper.obj", vertices, indices))
+            if (FileManager::LoadOBJWithNormals("teapot.obj", vertices, indices, normals))
             {
                 RenderComponent* objRenderComponent = engine->GetRenderer()->AddRenderComponent(
                     vertices, Cube::GetCubeShaderEntry());
                 Actor* actor = new Actor;
-                SceneComponent* sceneComponent = new SceneComponent;
+                TestSceneComponent* sceneComponent = new TestSceneComponent;
                 actor->SetSceneComponent(sceneComponent);
                 sceneComponent->SetRenderComponent(objRenderComponent);
-                actor->GetSceneComponent()->SetColor({ 1.f, 0.1f, 0.5f });
-                //actor->SetTransform({glm::vec3(0.f), glm::vec3(5.f), glm::vec3(glm::radians(-90.f), glm::radians(90.f), 0.f)}); // chalet.obj
-                actor->SetTransform({glm::vec3(0.f, -1.f, 0.f), glm::vec3(0.05f), glm::vec3(glm::radians(-90.f), glm::radians(-75.f), 0.f)}); // minicooper.obj
-                //actor->SetTransform({ glm::vec3(0.f), glm::vec3(1.f), glm::vec3(0.f) }); // teapot.obj
+
                 engine->GetWorld()->AddActor(actor);
+
+                actor->GetSceneComponent()->SetColor({ 1.f, 0.1f, 0.1f });
+                //actor->SetTransform({glm::vec3(0.f), glm::vec3(5.f), glm::vec3(glm::radians(-90.f), glm::radians(90.f), 0.f)}); // chalet.obj
+                //actor->SetTransform({glm::vec3(0.f, -1.f, 0.f), glm::vec3(0.05f), glm::vec3(glm::radians(-90.f), glm::radians(-75.f), 0.f)}); // minicooper.obj
+                actor->SetTransform({ glm::vec3(0.f), glm::vec3(0.02f), glm::vec3(0.f) }); // teapot.obj
                 actor->SetUpdateEnabled(false);
+                //sceneComponent->UpdateData();
+
+                RenderComponent* renderComponent = actor->GetSceneComponent()->GetRenderComponent();
+                ShadeFaces(renderComponent, normals);
             }
+
+            // Sun
+            {
+                if (FileManager::LoadOBJWithNormals("sphere.obj", vertices, indices, normals))
+                {
+                    RenderComponent* objRenderComponent = engine->GetRenderer()->AddRenderComponent(vertices, Cube::GetCubeShaderEntry());
+                    Actor* actor = new Actor;
+                    TestSceneComponent* sceneComponent = new TestSceneComponent;
+                    actor->SetSceneComponent(sceneComponent);
+                    sceneComponent->SetRenderComponent(objRenderComponent);
+
+                    engine->GetWorld()->AddActor(actor);
+
+                    actor->SetTransform({ glm::vec3(50.f, 50.f, -50.f), glm::vec3(10.f), glm::vec3(0.f) });
+                    actor->GetSceneComponent()->SetColor({ 1.f, 1.f, 1.f });
+                    actor->SetUpdateEnabled(false);
+
+                    RenderComponent* renderComponent = actor->GetSceneComponent()->GetRenderComponent();
+                    ColorSun(renderComponent, normals);
+                }
+            }
+
+            // Clouds
+            {
+                uint32_t cloudCount = 5;
+                std::string names[4] = {"cloud1.obj", "cloud2.obj", "cloud3.obj", "cloud4.obj"};
+                for (uint32_t i = 0; i < cloudCount; ++i)
+                {
+                    for (uint32_t j = 0; j < 4; ++j)
+                    {
+                        std::string filename = names[j];
+                        if (FileManager::LoadOBJWithNormals(filename, vertices, indices, normals))
+                        {
+                            RenderComponent* objRenderComponent = engine->GetRenderer()->AddRenderComponent(vertices, Cube::GetCubeShaderEntry());
+                            TestCloud* actor = new TestCloud;
+                            TestSceneComponent* sceneComponent = new TestSceneComponent;
+                            actor->SetSceneComponent(sceneComponent);
+                            sceneComponent->SetRenderComponent(objRenderComponent);
+
+                            engine->GetWorld()->AddActor(actor);
+
+                            glm::vec3 pos = glm::vec3(std::rand() % 200 - 100, 30.f, std::rand() % 200 - 100);
+                            actor->SetPosition(pos);
+                            actor->SetScale(glm::vec3(5.f));
+                            actor->GetSceneComponent()->SetColor({ 1.f, 1.f, 1.f });
+                            actor->SetUpdateEnabled(true);
+
+                            RenderComponent* renderComponent = actor->GetSceneComponent()->GetRenderComponent();
+                            ShadeFaces(renderComponent, normals);
+                        }
+                    }
+                }
+            }
+
 
             // Trees
             {
-                uint32_t treesCount = 20;
+                uint32_t treesCount = 100;
                 for (uint32_t i = 0; i < treesCount; ++i)
                 {
                     for (uint32_t j = 0; j < 2; ++j)
                     {
                         std::string filename = j == 0 ? "lowpolytree1.obj" : "lowpolytree2.obj";
-                        Actor* actor = CreateActor(filename);
-                        if (actor)
+                        if (FileManager::LoadOBJWithNormals(filename, vertices, indices, normals))
                         {
+                            RenderComponent* objRenderComponent = engine->GetRenderer()->AddRenderComponent(vertices, Cube::GetCubeShaderEntry());
+                            Actor* actor = new Actor;
+                            TestSceneComponent* sceneComponent = new TestSceneComponent;
+                            actor->SetSceneComponent(sceneComponent);
+                            sceneComponent->SetRenderComponent(objRenderComponent);
+
+                            engine->GetWorld()->AddActor(actor);
+
                             float yPos = filename == "lowpolytree2.obj" ? -1.f : 1.f;
-                            glm::vec3 pos = glm::vec3(std::rand() % 100 - 50, yPos, std::rand() % 100 - 50);
+                            glm::vec3 pos = glm::vec3(std::rand() % 200 - 100, yPos, std::rand() % 200 - 100);
+                            if (std::abs(pos.x) < 5.f)
+                            {
+                                pos.x += 5.f * (pos.x < 0.f ? -1.f : 1.f);
+                            }
+                            if (std::abs(pos.z) < 5.f)
+                            {
+                                pos.z += 5.f * (pos.z < 0.f ? -1.f : 1.f);
+                            }
+
                             actor->SetPosition(pos);
                             actor->GetSceneComponent()->SetColor({ 0.2, 0.8f, 0.1f });
                             actor->SetUpdateEnabled(false);
@@ -179,6 +256,7 @@ void TestApplication::Init()
 
                             RenderComponent* renderComponent = actor->GetSceneComponent()->GetRenderComponent();
                             ColorTreeVertices(renderComponent, filename);
+                            ShadeFaces(renderComponent, normals);
                         }
                     }
                 }
@@ -231,7 +309,7 @@ void TestApplication::Tick(float deltaTime)
     if (diff.count() >= 1.0)
     {
         lastTime = timer.now();
-        //VK_LOG(LogTestApplication, Debug, "FPS: %.0f", GetEngine()->GetFPS());
+        VK_LOG(LogTestApplication, Debug, "FPS: %.0f", GetEngine()->GetFPS());
         //GetEngine()->RequestPerformanceDataLog();
     }
 
@@ -287,7 +365,47 @@ void TestApplication::ColorTreeVertices(RenderComponent* renderComponent, std::s
     }
 }
 
-void TestActor::Tick(float deltaTime)
+void TestApplication::ColorSun(RenderComponent* renderComponent, std::vector<glm::vec3>& normals)
+{
+    uint32_t size, stride;
+    void* data = renderComponent->GetData(size, stride);
+    Vertex* originVertexData = static_cast<Vertex*>(data);
+    uint32_t vertexCount = size / sizeof(Vertex);
+
+    for (uint32_t i = 0; i < vertexCount; ++i)
+    {
+        float angle = glm::orientedAngle(normals[i], glm::vec3(-1.f, -1.f, 1.f), glm::vec3(-1.f, 1.f, 1.f));
+        float angleParam = 1.f - std::abs(angle) / PI / 8.f;
+        glm::vec3 yellowColor = glm::vec3(0.98f, 0.98f, 0.50f);
+
+        (originVertexData + i)->r = yellowColor.x * angleParam;
+        (originVertexData + i)->g = yellowColor.y * angleParam;
+        (originVertexData + i)->b = yellowColor.z * angleParam;
+    }
+}
+
+void TestApplication::ShadeFaces(RenderComponent* renderComponent, std::vector<glm::vec3>& normals, float factor)
+{
+    uint32_t size, stride;
+    void* data = renderComponent->GetData(size, stride);
+    Vertex* originVertexData = static_cast<Vertex*>(data);
+    uint32_t vertexCount = size / sizeof(Vertex);
+
+    for (uint32_t i = 0; i < vertexCount; ++i)
+    {
+        glm::vec3 pos = glm::vec3((originVertexData + i)->x, (originVertexData + i)->y, (originVertexData + i)->z);
+        glm::vec3 sunPos = glm::vec3(50.f, 50.f, -50.f);
+
+        float angle = glm::orientedAngle(normals[i], pos - sunPos, glm::vec3(-1.f, 1.f, 1.f));
+        float angleParam = 1.f - std::abs(angle) / PI / factor;
+
+        (originVertexData + i)->r = (originVertexData + i)->r * angleParam;
+        (originVertexData + i)->g = (originVertexData + i)->g * angleParam;
+        (originVertexData + i)->b = (originVertexData + i)->b * angleParam;
+    }
+}
+
+void TestCube::Tick(float deltaTime)
 {
     if (timer == 0.f)
     {
@@ -308,7 +426,7 @@ void TestActor::Tick(float deltaTime)
     sceneComponent->UpdateData();
 }
 
-void TestActor::OnModeChange(InputCode inputCode, InputEvent event, float value)
+void TestCube::OnModeChange(InputCode inputCode, InputEvent event, float value)
 {
     bAnimSwitch = !bAnimSwitch;
 }
@@ -349,4 +467,43 @@ void TestSceneComponent::UpdateData()
     }
 
     bRotationSet = true;
+}
+
+void TestSceneComponent::SetColor(const glm::vec3 color)
+{
+    uint32_t size, stride;
+    void* data = renderComponent->GetData(size, stride);
+    Vertex* originVertexData = static_cast<Vertex*>(data);
+    uint32_t vertexCount = size / sizeof(Vertex);
+
+    for (uint32_t i = 0; i < vertexCount; ++i)
+    {
+        (originVertexData + i)->r = color.x;
+        (originVertexData + i)->g = color.y;
+        (originVertexData + i)->b = color.z;
+    }
+
+}
+
+void TestCloud::Tick(float deltaTime)
+{
+    if (speed == 0.f)
+    {
+        speed = 0.5f + float(std::rand() % 100) / 300.f;
+    }
+
+    glm::vec3 deltaPos = glm::vec3(1.f, 0.f, 0.3f) * speed * deltaTime;
+    transform.position += deltaPos;
+
+    if (transform.position.x > 100)
+    {
+        transform.position.x = -100;
+    }
+    else if (transform.position.z > 100)
+    {
+        transform.position.z = -100;
+    }
+
+
+    sceneComponent->UpdateData();
 }

@@ -27,7 +27,7 @@ class FileManager
 {
 public:
     static bool LoadOBJ(const std::string filename, VertexData& vertices, std::vector<uint32_t>& indices);
-
+    static bool LoadOBJWithNormals(const std::string filename, VertexData& vertices, std::vector<uint32_t>& indices, std::vector<glm::vec3>& normals);
     static std::string GetAssetDirectory();
 };
 

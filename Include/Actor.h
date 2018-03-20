@@ -29,7 +29,7 @@ public:
     void SetOwner(Actor* actor);
 
     void SetRenderComponent(RenderComponent* renderComponent);
-    void SetColor(const glm::vec3 color);
+    virtual void SetColor(const glm::vec3 color);
 
     RenderComponent* GetRenderComponent() const;
 
